@@ -1287,8 +1287,7 @@ static HoverOutput_t hover_step(float z, float v, float turns_actual,
                 }
                 if ((s_hover.id_airborne_latch == 0U) && (airborne_now == 0U))
                 {
-                    float probe_turns = r16_u_to_turns(s_hover.id_probe_u);
-                    if (tfl_absf(turns_safe - probe_turns) <= R16_PREPOSITION_TURN_TOL)
+                    if (tfl_absf(u_actual - s_hover.id_probe_u) <= 0.05f)
                     {
                         if (s_hover.id_step_wait_count < R16_ID_STEP_WAIT_N)
                             s_hover.id_step_wait_count++;
@@ -1305,7 +1304,7 @@ static HoverOutput_t hover_step(float z, float v, float turns_actual,
             }
             else if (s_hover.id_airborne_latch != 0U)
             {
-                if (s_hover.id_settle_count < R16_ID_SETTLE_N)
+                if (s_hover.id_settle_count < (R16_ID_SETTLE_N + 2U))
                     s_hover.id_settle_count++;
                 else if (s_hover.id_sample_count < R16_ID_SAMPLE_N)
                 {
