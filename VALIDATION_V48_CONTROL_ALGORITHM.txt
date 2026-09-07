@@ -1,0 +1,37 @@
+V48 CONTROL ALGORITHM INTEGRATION VALIDATION
+============================================
+
+SOURCE ARCHIVE SHA256
+b093e12b58b7f6654b9a9ada1060ce7d36f0b2b0f8243b279262937767f630c6
+
+SOURCE MODEL
+- Name: Ucus_Bilgisayari
+- Version: 1.214
+- Generator: Simulink Coder 25.2 / R2025b
+- Original target: grt.tlc, Intel x86-64 Windows
+- Base sample time: 0.01 s (100 Hz)
+
+COMPLETED CHECKS
+- Uploaded ZIP integrity: PASS
+- Generated C strict host compile (-Wall -Wextra -Werror): PASS
+- 1000-step / 10-second continuous execution: PASS
+- Original 7-second desktop stop removed: PASS
+- Output finite and main command in [0,1]: PASS
+- Non-zero main-command scenario (z=2 m, vz=-1 m/s): PASS (0.848115)
+- 200 Hz to 100 Hz divider adapter test: PASS
+- Invalid-input safe-zero test: PASS
+- Validity recovery / model state reset test: PASS
+- CubeIDE generated-source make dependency dry run: PASS
+- Host syntax check for adapter + app_tasks integration: PASS
+
+NOT EXECUTED IN THIS ENVIRONMENT
+- ARM Cortex-M4 compile/link (arm-none-eabi toolchain not installed)
+- On-target CPU deadline/DWT profiling
+- HIL trajectory validation
+- Physical needle or RCS actuation (intentionally disconnected)
+
+SAFETY STATE
+- Generated controller physical output: DISABLED + compile-time guarded
+- Generated RCS validity: FALSE until horizontal absolute aiding is valid
+- Main pressure source: fixed initial/model value, 300 bar
+- Thrust feedback source: ESKF vertical-acceleration estimate

@@ -1,0 +1,3 @@
+P77 IS BENCH-ONLY / DO-NOT-FLY.
+No gas or pressure during characterization.
+P71 remains the flight/safety baseline.

@@ -1,0 +1,27 @@
+P79 INPUT EVIDENCE - uart_p78_breakaway_timing.txt
+
+Parsed decoded telemetry rows: 179
+Time span: 127369..148780 ms (~21.411 s)
+All 179 rows during this capture report:
+  needle_enabled = 0
+  needle_rpwm = 0
+  needle_lpwm = 0
+
+Observed needle_adc overall: min 12, max 1023.
+
+Representative transition while bridge stayed off:
+  139367 ms: 631
+  139469 ms: 1023
+  139577 ms: 197
+  139687 ms: 421
+  139807 ms: 862
+  139909 ms: 1023
+  140297 ms: 354
+  140401 ms: 92
+  ...
+  141942 ms: 12
+  ...
+  144409 ms: 114
+  144527 ms: 573
+
+If the potentiometer/shaft was not intentionally moved during that interval, this full-scale wandering is incompatible with ordinary small ADC noise and justifies a motor-off PC1 diagnostic. It does not by itself identify whether the source is the pot/wiper, wiring/GND/reference, PCB connection, or MCU ADC path. P79 is designed to separate those possibilities together with a multimeter measurement.

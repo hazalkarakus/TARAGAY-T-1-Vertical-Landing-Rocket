@@ -1,0 +1,30 @@
+P60 VALIDATION
+[PASS] version P60
+[PASS] central authorization API declared
+[PASS] central authorization implemented
+[PASS] authorization revokes on STOP
+[PASS] authorization requires flight/no preflight fault
+[PASS] authorization includes actuator fault
+[PASS] authorization includes ESKF inhibit
+[PASS] 1k RCS uses central authorization
+[PASS] 200Hz RCS uses central authorization
+[PASS] needle physical output uses central authorization
+[PASS] generated physical path uses central authorization
+[PASS] UART actuator_authorized uses central authorization
+[PASS] receiver address TGY01
+[PASS] receiver channel 76
+[PASS] receiver payload 4
+[PASS] receiver 1Mbps 0dBm
+[PASS] receiver protocol magic/checksum
+[PASS] vent physical enabled
+[PASS] vent ground only
+[PASS] vent hold confirm
+[PASS] vent RF freshness
+[PASS] STOP latch remains one-way
+[PASS] STOP final output guards remain
+[PASS] LED mapping preserved
+[PASS] P59 unchanged files byte-identical (552 files)
+[PASS] TX vent PA1 unchanged
+[PASS] TX estop PA0 unchanged
+[PASS] TX semantic mapping unchanged
+PASS=28 SKIP=0 FAIL=0

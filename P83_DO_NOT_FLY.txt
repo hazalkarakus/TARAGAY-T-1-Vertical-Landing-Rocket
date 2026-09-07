@@ -1,0 +1,8 @@
+P83 DO-NOT-FLY / BENCH ONLY
+===========================
+- NO GAS / NO PRESSURE.
+- Prefer motor and RCS power physically disconnected.
+- Needle motor output is compile-time locked OFF in this diagnostic image.
+- P83 bench-only far re-acquisition is allowed only because motor output is
+  guaranteed OFF. Do not use this unconditional re-anchor policy in flight or
+  motor-enabled control firmware.

@@ -1,0 +1,3 @@
+DO NOT FLY.
+R8R35R1 is a pressureless diagnostic-closure integration candidate.
+It adds read-only P83 and SD runtime telemetry; it does not close remaining flight-readiness items by itself.

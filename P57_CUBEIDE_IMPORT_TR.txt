@@ -1,0 +1,11 @@
+P57 CubeIDE
+============
+1) ZIP'i ayrı klasöre çıkar.
+2) STM32CubeIDE > File > Import > Existing Projects into Workspace.
+3) TGY_V8_19M_P57_IMU_STALE_STATUS_WARMUP klasörünü seç.
+4) Project > Clean.
+5) Build Project.
+6) Hata yoksa flash et ve kartı power-cycle et.
+
+UART P57: $TGY68 / V68 / 329 alan + CRC16.
+SD formatı değişmedi: V14 / 384 byte.

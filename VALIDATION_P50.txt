@@ -1,0 +1,39 @@
+P50 validation summary
+======================
+
+Basis: P49R1 bench evidence (365.035 s SD log, 3000 UART frames).
+Observed deterministic timing relationship:
+  zupt_joseph_updates = 4020
+  miss_imu             = 1340
+  4020 / 3             = 1340
+Therefore every 3-axis stationary ZUPT event caused one 1 kHz IMU release miss.
+
+P50 change:
+- Exact P49 masked Joseph semantics retained.
+- BGX/BGY/BGZ gains remain zero.
+- BGxBG 3x3 covariance block remains untouched.
+- Full software-double Joseph expression replaced by its exact rank-one form
+  P_ij <- P_ij - (P_ik/S)*P_jk for retained-gain rows.
+- Hardware float is used on Cortex-M4F.
+- Existing covariance clamp, integrity guard and state-preserving rollback remain.
+
+Host/static validation:
+- tools/validate_p50.py: PASS
+- numerical max difference vs P49 masked Joseph reference: 3.31e-08
+- BGxBG preservation: PASS
+- V50 vertical sensor policy host test: PASS
+- V50 generated vertical fallback host test: PASS
+- P44 scheduler host regression: PASS
+- full_state_eskf.c host syntax: PASS (only expected CMSIS host pointer-size warnings)
+- Python syntax: PASS
+- UART TGY61 field contract: 258/258 PASS
+- SD format remains V14 / 384 bytes
+
+Hardware acceptance target:
+- 0 compile/link errors in CubeIDE.
+- eskf_cov_faults = 0
+- zupt_joseph_faults = 0
+- grav_joseph_faults = 0
+- sd_dropped = 0
+- sd_fifo_order_faults = 0
+- while zupt_joseph_updates increases, miss_imu should remain zero or be reduced to rare unrelated events.

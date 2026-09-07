@@ -1,0 +1,2313 @@
+function [V1,V3,V5,V7,Upitch,Uyaw] = RCS_Denge_Kontrol_V3_TekBlok( ...
+    hedef_pitch,hedef_yaw,pitch,yaw,z_cg,vz,pitch_rate,yaw_rate,Hover_Durum)
+%#codegen
+%
+% TARAGAY RCS V7.13.4 + HOVER_DURUM TOUCHDOWN KILL
+% GEVAX 1401-KDNC040-060-G24DC icin konservatif zamanlama
+% 40 ms ACILMA / 40 ms KAPANMA
+% YON TERSLEME UFUKU YAKLASIK 80 ms
+% + 5 DERECE ALTI KRITIK KURTARMA
+% + 5-10 DERECE REACTION PREDICTION (GEVAX valf ufku)
+% + SAFE_WAIT'TE YENI TEHLIKEDE ERKEN RE-ARM
+%
+% MANTIK:
+%
+% |aci| < 5 deg
+%   -> normalde RCS calismaz
+%   -> fakat roket tehlikeli yone kaciyorsa ve
+%      valf tepki suresi sonunda / temas aninda
+%      10 dereceyi gececegi tahmin ediliyorsa erken mudahale eder
+%
+% 5...10 deg
+%   -> tahmini temas acisi 10 dereceyi gececekse duzeltir
+%
+% |aci| >= 10 deg
+%   -> hard correction
+%
+% SOLENOID / AKTUATOR:
+% Bu surum GEVAX 1401-KDNC040-060-G24DC icin ayarlanmistir.
+% Simulink plantinde normalize valf acikligi 0...1 ise,
+% 40 ms acilma/kapanma modellemek icin Rate Limiter yaklasik
+% +25 / -25 [1/s] olmalidir.
+% Plant hala +13.3333/-13.3333 ise 75 ms davranir ve kodla uyusmaz.
+% z^-20 gibi ilave elektronik transport delay bu baseline testinde yoktur.
+% Gercek tezgah olcumu yapildiginda VALVE_OPEN_S ve VALVE_CLOSE_S
+% olculen degerlerle degistirilmelidir.
+%
+% X/Pitch : V1 / V3
+% Y/Yaw   : V5 / V7
+%
+% TOUCHDOWN KILL:
+% Hover_Durum >= 4 oldugu anda V1/V3/V5/V7 ve Upitch/Uyaw kalici olarak 0 olur.
+% z_cg + vz tabanli mevcut landed_latch yedek koruma olarak aynen korunur.
+%
+% NOT:
+% pitch_rate ve yaw_rate tercihen dogrudan IMU/model gyro sinyallerinden gelir.
+% Mevcut model eslesmesi:
+%   pitch_rate <- Wx = q  [rad/s]
+%   yaw_rate   <- Wy = r  [rad/s]
+% Gyro hatti 0'a takilirsa kontrol tamamen kor kalmasin diye
+% aci trendinden otomatik rate fallback kullanilir.
+
+%% ========================================================================
+%% DOGRUDAN IMU ACISAL HIZ GIRISLERI
+%% ========================================================================
+%
+% pitch_rate : Wx = q [rad/s]
+% yaw_rate   : Wy = r [rad/s]
+%
+% Bu sinyaller Ucus_Bilgisayari girislerinden dogrudan gelir.
+% pitch_rate/yaw_rate IMU hatlari KALMALIDIR.
+% Ancak gyro 0'a takilirsa updateRates icindeki aci trendi
+% gecici yedek acisal hiz olarak kullanilir.
+
+[V1,V3,V5,V7,Upitch,Uyaw,~,~,~,~,~,~] = ...
+    RCS_Core_V3(hedef_pitch,hedef_yaw, ...
+                pitch,yaw,pitch_rate,yaw_rate,z_cg,vz,Hover_Durum,0);
+
+end
+
+
+%% ========================================================================
+function [V1,V3,V5,V7,Upitch,Uyaw,mode_pitch,mode_yaw,fault, ...
+          pred_pitch_deg,pred_yaw_deg,time_to_ground_s] = ...
+    RCS_Core_V3(hedef_pitch,hedef_yaw, ...
+                pitch,yaw,pitch_rate,yaw_rate,z_cg,vz,Hover_Durum,reset)
+%#codegen
+
+%% ========================================================================
+%% SABITLER
+%% ========================================================================
+
+Ts = 0.01;
+RAD2DEG = 180.0/pi;
+
+%% ROKET GEOMETRISI
+
+Z_TOUCH = 0.4013;
+
+%% ISARET DUZELTMELERI
+
+PITCH_ANGLE_SIGN = -1.0;
+PITCH_RATE_SIGN  = -1.0;
+
+YAW_ANGLE_SIGN   = -1.0;
+YAW_RATE_SIGN    = -1.0;
+
+%% ========================================================================
+%% ANA GUVENLIK SINIRLARI
+%% ========================================================================
+
+% 5 derece artik MUTLAK no-fire degil.
+% Normalde sessiz bolgedir.
+NO_FIRE_DEG = 0.75;  % TRACK_STOP_DEG=0.80 altinda; hedef takibini artik 5 deg'de kesmez
+
+% Kritik aci siniri
+LIMIT_DEG = 10.0;
+
+% Normal / hard olayda guvenli hedef
+SAFE_TARGET_DEG = 7.0;
+
+% Simulasyon ve gercek RCS moment hesabiyla
+% daha sonra kesin dogrulanacak.
+ANG_ACCEL_DPS2 = 221.0;
+
+BRAKE_MARGIN_DEG = 0.3;
+
+%% ========================================================================
+%% 5 DERECE ALTI KRITIK KURTARMA
+%% ========================================================================
+
+% Kucuk sensor titresimleri nedeniyle olay baslatmamak icin
+% minimum tehlikeli acisal hiz.
+SUB5_MIN_OUTWARD_DPS = 3.0;
+
+% Tahmin edilen acinin mevcut aciya gore en az
+% bu kadar buyumesini ister.
+SUB5_GROWTH_MARGIN_DEG = 0.25;
+
+%% ========================================================================
+%% AKTUATOR ZAMANLAMASI - GEVAX 1401
+%% ========================================================================
+%
+% GEVAX direkt etkili aile icin katalog yanit araligi 10...35 ms.
+% Tam bu varyant icin ayri opening/closing degeri olmadigindan
+% simde kotu durum 35 ms + 5 ms marj = 40 ms kullaniliyor.
+%
+% NOT:
+% Simulink plantindeki normalize valf Rate Limiter'i de 40 ms ile
+% uyumlu olmali: 0->1 icin +25 1/s, 1->0 icin -25 1/s.
+%
+% Tezgah testinde gercek degerler cikinca sadece bu iki sabiti degistir.
+
+VALVE_OPEN_S  = 0.040;
+VALVE_CLOSE_S = 0.040;
+
+% Kapali valften correction baslarken, mevcut mekanik modelin
+% tahmini etki baslangic ufku.
+SUB5_REACTION_S = VALVE_OPEN_S;
+
+% Karsi valfe geciste mevcut baseline mekanik model icin:
+% eski valfin kapanmasi + yeni valfin acilmasi.
+VALVE_REVERSAL_RESPONSE_S = ...
+    VALVE_OPEN_S + VALVE_CLOSE_S;
+
+%% ========================================================================
+%% NORMAL REFERANS TAKIP
+%% ========================================================================
+
+REF_LIMIT_DEG = 5.5;
+% Normal takip 10 deg guvenlik sinirina kadar calisabilsin.
+% 10 deg ve ustunde selectAxis safety/hard event zaten onceliklidir.
+TRACK_MAX_ABS_DEG = 9.80;
+
+% 0 derece hedefi icin histerezis:
+% |hata| >= 1.50 deg -> yeni pulse dusun
+% |hata| <= 0.80 deg ve prediction da sakin -> valfleri kapat
+TRACK_START_DEG = 1.50;
+TRACK_STOP_DEG  = 0.80;
+
+TRACK_LOOKAHEAD_S = 0.30;  % hedefe daha erken karsi-fren
+
+TRACK_RATE_FAR_DPS  = 1.00;
+TRACK_RATE_MID_DPS  = 0.70;
+% Hedefe yakin fazla hiz varsa yeni correction pulse verme;
+% once mevcut hareketin oturmasini bekle.
+TRACK_RATE_NEAR_DPS = 0.40;
+
+%% COAST SURELERI
+
+% GEVAX icin daha kisa ama chatter'i onleyen coast pencereleri.
+% Buyuk hatada daha erken tekrar mudahale, hedefe yakin daha uzun bekleme.
+TRACK_COOLDOWN_FAR_N = ...
+    uint16(ceil(0.160/Ts));
+
+TRACK_COOLDOWN_MID_N = ...
+    uint16(ceil(0.200/Ts));
+
+TRACK_COOLDOWN_NEAR_N = ...
+    uint16(ceil(0.250/Ts));
+
+%% DARBE SURELERI
+
+% Dinamik elektriksel ON sureleri.
+% 100 Hz'de bunlar sirasiyla 4 / 5 / 6 kontrol ornegidir.
+TRACK_PULSE_SMALL_N = ...
+    uint16(ceil(0.040/Ts));
+
+TRACK_PULSE_MED_N = ...
+    uint16(ceil(0.040/Ts));
+
+TRACK_PULSE_LARGE_N = ...
+    uint16(ceil(0.040/Ts));
+
+%% ========================================================================
+%% TEMAS TAHMINI
+%% ========================================================================
+
+MIN_DESCENT_MPS = 0.10;
+
+MIN_PRED_H_M = 0.10;
+MAX_PRED_H_M = 20.0;
+
+MAX_TGO_S = 8.0;
+
+PRED_HYST_DEG = 0.5;
+
+TREND_DB_DPS = 1.5;
+
+PRED_CONFIRM_N = uint8(3);
+
+%% ========================================================================
+%% ACISAL HIZ
+%% ========================================================================
+
+RATE_DB_DPS = 7.0;
+
+BRAKE_DONE_DPS = 2.0;
+
+RATE_ALPHA  = 1.0;
+TREND_ALPHA = 0.25;
+
+% GYRO FALLBACK:
+% Gyro neredeyse sifirken aci gercekte hareket ediyorsa,
+% aci trendinden elde edilen hiz kontrol icin kullanilir.
+RATE_FALLBACK_GYRO_DB_DPS  = 0.50;
+RATE_FALLBACK_TREND_DB_DPS = 0.80;
+
+%% ========================================================================
+%% EVENT ZAMANLAMALARI
+%% ========================================================================
+
+MIN_CORR_N = ...
+    uint16(ceil(VALVE_OPEN_S/Ts));
+
+BRAKE_DELAY_S = ...
+    VALVE_REVERSAL_RESPONSE_S;
+
+% Hard-event freninde ust guvenlik limiti.
+% Ilk testte 300 ms korunuyor; normal tracking darbeleri 40-60 ms'dir.
+MAX_BRAKE_N = ...
+    uint16(ceil(0.300/Ts));
+
+REV_DEAD_N = ...
+    uint16(ceil(VALVE_CLOSE_S/Ts));
+
+% GLOBAL VALF KORUMASI
+% Normal tracking, safety ve hard correction dahil hicbir mod
+% bir valfi 40 ms'den uzun kesintisiz acik tutamaz.
+MAX_ON_N = ...
+    uint16(ceil(0.040/Ts));
+
+% Bir pulse bittikten sonra en az 120 ms yeniden atesleme yok.
+MIN_OFF_N = ...
+    uint16(ceil(0.120/Ts));
+
+REARM_STABLE_N = ...
+    uint16(ceil(0.300/Ts));
+
+HARD_REARM_N = ...
+    uint16(ceil(0.400/Ts));
+
+WINDOW_N = ...
+    uint16(ceil(1.000/Ts));
+
+MAX_REVERSALS = uint8(8);
+MAX_EVENTS    = uint8(4);
+
+%% STARTUP
+
+STARTUP_N = uint16(0);
+
+%% ========================================================================
+%% KALICI DURUMLAR
+%% ========================================================================
+
+persistent P Y initialized sample_count hard_fault fault_code landed_latch
+
+if isempty(initialized)
+
+    P = initAxis(MIN_OFF_N);
+    Y = initAxis(MIN_OFF_N);
+
+    initialized = true;
+
+    sample_count = uint32(0);
+
+    hard_fault = false;
+    fault_code = uint8(0);
+
+    landed_latch = false;
+
+end
+
+if reset ~= 0
+
+    P = initAxis(MIN_OFF_N);
+    Y = initAxis(MIN_OFF_N);
+
+    sample_count = uint32(0);
+
+    hard_fault = false;
+    fault_code = uint8(0);
+
+    landed_latch = false;
+
+end
+
+sample_count = ...
+    sample_count + uint32(1);
+
+%% ========================================================================
+%% GIRIS DOGRULAMA
+%% ========================================================================
+
+valid_inputs = ...
+    isfinite(hedef_pitch) && ...
+    isfinite(hedef_yaw) && ...
+    isfinite(pitch) && ...
+    isfinite(yaw) && ...
+    isfinite(pitch_rate) && ...
+    isfinite(yaw_rate) && ...
+    isfinite(z_cg) && ...
+    isfinite(vz) && ...
+    isfinite(Hover_Durum);
+
+if ~valid_inputs
+
+    hard_fault = true;
+    fault_code = uint8(1);
+
+end
+
+if hard_fault
+
+    P = forceSafeAxis(P);
+    Y = forceSafeAxis(Y);
+
+    [V1,V3,V5,V7,Upitch,Uyaw] = ...
+        mapValves(P.applied,Y.applied);
+
+    mode_pitch = P.mode;
+    mode_yaw   = Y.mode;
+
+    fault = fault_code;
+
+    pred_pitch_deg = 0.0;
+    pred_yaw_deg   = 0.0;
+
+    time_to_ground_s = 0.0;
+
+    return;
+
+end
+
+%% ========================================================================
+%% YERE TEMAS SONRASI RCS KAPATMA
+%% ========================================================================
+
+TOUCH_MARGIN = 0.03;
+
+% Mission state 4 = DOGRULANMIS touchdown / gorev bitti.
+%
+% Touchdown karari artik Hover_Kontrol V19.6 tarafinda
+% z + dikey hiz + sure ile dogrulaniyor.
+%
+% Bu nedenle RCS kendi basina z/vz ile erken kapanmaz.
+% Tek otorite Hover_Durum = 4 sinyalidir.
+if Hover_Durum >= 4.0
+
+    landed_latch = true;
+
+end
+
+if landed_latch
+
+    P = forceSafeAxis(P);
+    Y = forceSafeAxis(Y);
+
+    [V1,V3,V5,V7,Upitch,Uyaw] = ...
+        mapValves(P.applied,Y.applied);
+
+    mode_pitch = uint8(0);
+    mode_yaw   = uint8(0);
+
+    fault = fault_code;
+
+    pred_pitch_deg = 0.0;
+    pred_yaw_deg   = 0.0;
+
+    time_to_ground_s = 0.0;
+
+    return;
+
+end
+
+%% ========================================================================
+%% ACILAR
+%% ========================================================================
+
+pitch_deg = ...
+    PITCH_ANGLE_SIGN * ...
+    pitch * RAD2DEG;
+
+yaw_deg = ...
+    YAW_ANGLE_SIGN * ...
+    yaw * RAD2DEG;
+
+%% ========================================================================
+%% REFERANSLAR
+%% ========================================================================
+
+% XY KONUM TUTMA:
+% YPOS hatasini duzelten dis kontrolcuden gelen hedef_pitch tekrar aktif.
+% Ancak roketi fazla yatirmamak icin hedef aci ±3 derece ile sinirli.
+PITCH_REF_LIMIT_DEG = 4.8;
+
+pitch_ref_deg = ...
+    clampValue( ...
+        PITCH_ANGLE_SIGN * hedef_pitch * RAD2DEG, ...
+        -PITCH_REF_LIMIT_DEG, ...
+        PITCH_REF_LIMIT_DEG);
+
+yaw_ref_deg = ...
+    clampValue( ...
+        YAW_ANGLE_SIGN * hedef_yaw * RAD2DEG, ...
+        -REF_LIMIT_DEG, ...
+        REF_LIMIT_DEG);
+
+%% ========================================================================
+%% ACISAL HIZLAR
+%% ========================================================================
+
+pitch_rate_dps_raw = ...
+    PITCH_RATE_SIGN * ...
+    pitch_rate * RAD2DEG;
+
+yaw_rate_dps_raw = ...
+    YAW_RATE_SIGN * ...
+    yaw_rate * RAD2DEG;
+
+[P,pitch_rate_dps,pitch_trend_dps] = ...
+    updateRates( ...
+        P, ...
+        pitch_deg, ...
+        pitch_rate_dps_raw, ...
+        Ts, ...
+        RATE_ALPHA, ...
+        TREND_ALPHA);
+
+[Y,yaw_rate_dps,yaw_trend_dps] = ...
+    updateRates( ...
+        Y, ...
+        yaw_deg, ...
+        yaw_rate_dps_raw, ...
+        Ts, ...
+        RATE_ALPHA, ...
+        TREND_ALPHA);
+
+%% ========================================================================
+%% GYRO RATE FALLBACK
+%% ========================================================================
+% Gyro hatti sifira takilirsa aktif frenleme ve prediction kaybolmasin.
+% Aci degisiminden hesaplanan filtreli trend yalniz gerekli oldugunda devreye girer.
+
+if abs(pitch_rate_dps) < RATE_FALLBACK_GYRO_DB_DPS && ...
+   abs(pitch_trend_dps) >= RATE_FALLBACK_TREND_DB_DPS
+
+    pitch_rate_dps = pitch_trend_dps;
+
+end
+
+if abs(yaw_rate_dps) < RATE_FALLBACK_GYRO_DB_DPS && ...
+   abs(yaw_trend_dps) >= RATE_FALLBACK_TREND_DB_DPS
+
+    yaw_rate_dps = yaw_trend_dps;
+
+end
+
+%% ========================================================================
+%% TEMASA KALAN SURE
+%% ========================================================================
+
+height_m = ...
+    max(z_cg-Z_TOUCH,0.0);
+
+pred_valid = ...
+    (height_m >= MIN_PRED_H_M) && ...
+    (height_m <= MAX_PRED_H_M) && ...
+    (vz < -MIN_DESCENT_MPS);
+
+if pred_valid
+
+    time_to_ground_s = ...
+        min( ...
+            height_m/(-vz), ...
+            MAX_TGO_S);
+
+else
+
+    time_to_ground_s = 0.0;
+
+end
+
+%% ========================================================================
+%% TAHMIN HIZI
+%% ========================================================================
+
+pitch_pred_rate = ...
+    selectPredictionRate( ...
+        pitch_rate_dps, ...
+        pitch_trend_dps, ...
+        RATE_DB_DPS, ...
+        TREND_DB_DPS);
+
+yaw_pred_rate = ...
+    selectPredictionRate( ...
+        yaw_rate_dps, ...
+        yaw_trend_dps, ...
+        RATE_DB_DPS, ...
+        TREND_DB_DPS);
+
+if pred_valid
+
+    pred_pitch_deg = ...
+        clampValue( ...
+            pitch_deg + ...
+            pitch_pred_rate*time_to_ground_s, ...
+            -180.0, ...
+            180.0);
+
+    pred_yaw_deg = ...
+        clampValue( ...
+            yaw_deg + ...
+            yaw_pred_rate*time_to_ground_s, ...
+            -180.0, ...
+            180.0);
+
+else
+
+    pred_pitch_deg = pitch_deg;
+    pred_yaw_deg   = yaw_deg;
+
+end
+
+%% ========================================================================
+%% EVENT COUNTER
+%% ========================================================================
+
+P = ageAxisCounters(P,WINDOW_N);
+Y = ageAxisCounters(Y,WINDOW_N);
+
+%% ========================================================================
+%% PITCH GUVENLIK KONTROLU
+%% ========================================================================
+
+[P,event_fault_P] = ...
+    selectAxis( ...
+        P, ...
+        pitch_deg, ...
+        pitch_rate_dps, ...
+        pred_pitch_deg, ...
+        pred_valid, ...
+        NO_FIRE_DEG, ...
+        LIMIT_DEG, ...
+        SAFE_TARGET_DEG, ...
+        ANG_ACCEL_DPS2, ...
+        BRAKE_MARGIN_DEG, ...
+        BRAKE_DELAY_S, ...
+        BRAKE_DONE_DPS, ...
+        PRED_HYST_DEG, ...
+        PRED_CONFIRM_N, ...
+        SUB5_REACTION_S, ...
+        SUB5_MIN_OUTWARD_DPS, ...
+        SUB5_GROWTH_MARGIN_DEG, ...
+        MIN_CORR_N, ...
+        MAX_BRAKE_N, ...
+        REARM_STABLE_N, ...
+        HARD_REARM_N, ...
+        MAX_EVENTS, ...
+        MIN_OFF_N);
+
+%% ========================================================================
+%% YAW GUVENLIK KONTROLU
+%% ========================================================================
+
+[Y,event_fault_Y] = ...
+    selectAxis( ...
+        Y, ...
+        yaw_deg, ...
+        yaw_rate_dps, ...
+        pred_yaw_deg, ...
+        pred_valid, ...
+        NO_FIRE_DEG, ...
+        LIMIT_DEG, ...
+        SAFE_TARGET_DEG, ...
+        ANG_ACCEL_DPS2, ...
+        BRAKE_MARGIN_DEG, ...
+        BRAKE_DELAY_S, ...
+        BRAKE_DONE_DPS, ...
+        PRED_HYST_DEG, ...
+        PRED_CONFIRM_N, ...
+        SUB5_REACTION_S, ...
+        SUB5_MIN_OUTWARD_DPS, ...
+        SUB5_GROWTH_MARGIN_DEG, ...
+        MIN_CORR_N, ...
+        MAX_BRAKE_N, ...
+        REARM_STABLE_N, ...
+        HARD_REARM_N, ...
+        MAX_EVENTS, ...
+        MIN_OFF_N);
+
+if event_fault_P || event_fault_Y
+
+    hard_fault = true;
+    fault_code = uint8(3);
+
+    P = forceSafeAxis(P);
+    Y = forceSafeAxis(Y);
+
+end
+
+%% ========================================================================
+%% NORMAL HEDEF TAKIBI
+%% ========================================================================
+%
+% 5 derece altinda normal hedef takibi YOK.
+%
+% Ancak selectAxis kritik durum gorurse
+% guvenlik eventi yine calisabilir.
+
+if ~hard_fault
+
+    P = applyReferenceTracking( ...
+        P, ...
+        pitch_deg, ...
+        pitch_rate_dps, ...
+        pitch_ref_deg, ...
+        NO_FIRE_DEG, ...
+        TRACK_MAX_ABS_DEG, ...
+        TRACK_START_DEG, ...
+        TRACK_STOP_DEG, ...
+        TRACK_LOOKAHEAD_S, ...
+        TRACK_RATE_FAR_DPS, ...
+        TRACK_RATE_MID_DPS, ...
+        TRACK_RATE_NEAR_DPS, ...
+        TRACK_COOLDOWN_FAR_N, ...
+        TRACK_COOLDOWN_MID_N, ...
+        TRACK_COOLDOWN_NEAR_N, ...
+        TRACK_PULSE_SMALL_N, ...
+        TRACK_PULSE_MED_N, ...
+        TRACK_PULSE_LARGE_N);
+
+    Y = applyReferenceTracking( ...
+        Y, ...
+        yaw_deg, ...
+        yaw_rate_dps, ...
+        yaw_ref_deg, ...
+        NO_FIRE_DEG, ...
+        TRACK_MAX_ABS_DEG, ...
+        TRACK_START_DEG, ...
+        TRACK_STOP_DEG, ...
+        TRACK_LOOKAHEAD_S, ...
+        TRACK_RATE_FAR_DPS, ...
+        TRACK_RATE_MID_DPS, ...
+        TRACK_RATE_NEAR_DPS, ...
+        TRACK_COOLDOWN_FAR_N, ...
+        TRACK_COOLDOWN_MID_N, ...
+        TRACK_COOLDOWN_NEAR_N, ...
+        TRACK_PULSE_SMALL_N, ...
+        TRACK_PULSE_MED_N, ...
+        TRACK_PULSE_LARGE_N);
+
+end
+
+%% ========================================================================
+%% STARTUP
+%% ========================================================================
+
+if sample_count <= uint32(STARTUP_N)
+
+    P.desired = int8(0);
+    Y.desired = int8(0);
+
+end
+
+%% ========================================================================
+%% BREAK BEFORE MAKE
+%% ========================================================================
+
+[P,chatter_fault_P] = ...
+    processAxisOutput( ...
+        P, ...
+        REV_DEAD_N, ...
+        MIN_OFF_N, ...
+        MAX_REVERSALS, ...
+        MAX_ON_N);
+
+[Y,chatter_fault_Y] = ...
+    processAxisOutput( ...
+        Y, ...
+        REV_DEAD_N, ...
+        MIN_OFF_N, ...
+        MAX_REVERSALS, ...
+        MAX_ON_N);
+
+if chatter_fault_P || chatter_fault_Y
+
+    hard_fault = true;
+    fault_code = uint8(2);
+
+    P = forceSafeAxis(P);
+    Y = forceSafeAxis(Y);
+
+end
+
+%% ========================================================================
+%% CIKISLAR
+%% ========================================================================
+
+[V1,V3,V5,V7,Upitch,Uyaw] = ...
+    mapValves( ...
+        P.applied, ...
+        Y.applied);
+
+mode_pitch = P.mode;
+mode_yaw   = Y.mode;
+
+fault = fault_code;
+
+end
+
+
+%% ========================================================================
+%% AXIS INITIALIZATION
+%% ========================================================================
+
+function A = initAxis(minOffN)
+
+A.prev_angle = 0.0;
+
+A.filtered_rate  = 0.0;
+A.filtered_trend = 0.0;
+
+A.rate_initialized  = false;
+A.trend_initialized = false;
+
+A.mode  = uint8(0);
+A.phase = uint8(0);
+
+A.desired = int8(0);
+A.applied = int8(0);
+A.pending = int8(0);
+
+A.event_active = false;
+A.event_armed  = true;
+
+A.hard_latched = false;
+A.brake_used   = false;
+
+A.hazard_sign = int8(0);
+
+A.dead_active = false;
+A.dead_age    = uint16(0);
+
+A.off_age = minOffN;
+A.on_age  = uint16(0);
+
+A.event_age     = uint16(0);
+A.event_end_age = uint16(65535);
+
+A.safe_age  = uint16(0);
+A.brake_age = uint16(0);
+
+A.window_age = uint16(0);
+
+A.reversal_count = uint8(0);
+
+A.event_window_age = uint16(0);
+A.event_count      = uint8(0);
+
+A.pred_count = uint8(0);
+
+A.target           = 0.0;
+A.stopping         = 0.0;
+A.braking_distance = 0.0;
+A.switch_error     = 0.0;
+
+A.track_active = false;
+A.track_sign   = int8(0);
+
+A.track_age      = uint16(0);
+A.track_pulse_n  = uint16(0);
+A.track_cooldown = uint16(0);
+
+end
+
+
+%% ========================================================================
+function A = forceSafeAxis(A)
+
+A.desired = int8(0);
+A.applied = int8(0);
+A.pending = int8(0);
+
+A.dead_active = false;
+A.on_age = uint16(0);
+
+A.mode = uint8(0);
+
+A.track_active = false;
+A.track_sign   = int8(0);
+
+A.track_age      = uint16(0);
+A.track_pulse_n  = uint16(0);
+A.track_cooldown = uint16(0);
+
+end
+
+
+%% ========================================================================
+function [A,rate_dps,trend_dps] = ...
+    updateRates(A,angle_deg,gyro_rate_dps,Ts,rateAlpha,trendAlpha)
+
+if ~A.rate_initialized
+
+    A.filtered_rate = gyro_rate_dps;
+    A.rate_initialized = true;
+
+else
+
+    A.filtered_rate = ...
+        A.filtered_rate + ...
+        rateAlpha*(gyro_rate_dps-A.filtered_rate);
+
+end
+
+if ~A.trend_initialized
+
+    A.prev_angle = angle_deg;
+
+    A.filtered_trend = 0.0;
+
+    A.trend_initialized = true;
+
+else
+
+    delta = ...
+        angle_deg-A.prev_angle;
+
+    if delta > 180.0
+
+        delta = delta-360.0;
+
+    elseif delta < -180.0
+
+        delta = delta+360.0;
+
+    end
+
+    raw_trend = delta/Ts;
+
+    A.filtered_trend = ...
+        A.filtered_trend + ...
+        trendAlpha*(raw_trend-A.filtered_trend);
+
+    A.prev_angle = angle_deg;
+
+end
+
+rate_dps  = A.filtered_rate;
+trend_dps = A.filtered_trend;
+
+end
+
+
+%% ========================================================================
+function rate = selectPredictionRate(gyro,trend,gyroDb,trendDb)
+
+if abs(gyro) >= gyroDb
+
+    rate = gyro;
+
+elseif abs(trend) >= trendDb
+
+    rate = trend;
+
+else
+
+    rate = 0.0;
+
+end
+
+end
+
+
+%% ========================================================================
+function A = ageAxisCounters(A,windowN)
+
+A.event_end_age = ...
+    satInc16(A.event_end_age);
+
+if A.event_active
+
+    A.event_age = ...
+        satInc16(A.event_age);
+
+end
+
+if A.phase == uint8(2)
+
+    A.brake_age = ...
+        satInc16(A.brake_age);
+
+end
+
+if A.phase == uint8(4)
+
+    A.safe_age = ...
+        satInc16(A.safe_age);
+
+end
+
+if A.applied == int8(0) && ...
+   ~A.dead_active
+
+    A.off_age = ...
+        satInc16(A.off_age);
+
+else
+
+    A.off_age = uint16(0);
+
+end
+
+A.window_age = ...
+    satInc16(A.window_age);
+
+if A.window_age >= windowN
+
+    A.window_age = uint16(0);
+    A.reversal_count = uint8(0);
+
+end
+
+A.event_window_age = ...
+    satInc16(A.event_window_age);
+
+if A.event_window_age >= windowN
+
+    A.event_window_age = uint16(0);
+    A.event_count = uint8(0);
+
+end
+
+end
+
+
+%% ========================================================================
+%% ANA EKSEN GUVENLIK KONTROLCUSU
+%% ========================================================================
+
+function [A,eventFault] = ...
+    selectAxis(A,angle,rate,pred,predValid, ...
+    noFire,limitDeg,safeTarget,alpha,brakeMargin,brakeDelayS, ...
+    brakeDone,predHyst,predConfirmN, ...
+    sub5ReactionS,sub5MinOutwardDps,sub5GrowthMarginDeg, ...
+    minCorrN,maxBrakeN,rearmN,hardRearmN,maxEvents,minOffN)
+
+eventFault = false;
+
+absAngle = abs(angle);
+absRate  = abs(rate);
+
+hardBoundary = ...
+    limitDeg-0.05;
+
+%% ========================================================================
+%% HARD TEHLIKE
+%% ========================================================================
+
+hardThreat = ...
+    absAngle >= hardBoundary;
+
+%% ========================================================================
+%% 5 DERECE ALTI: VALF ACILANA KADAR TAHMIN
+%% ========================================================================
+
+reactionPred = ...
+    angle + rate*sub5ReactionS;
+
+reactionPred = ...
+    clampValue( ...
+        reactionPred, ...
+        -180.0, ...
+        180.0);
+
+% Aci gercekten disariya dogru buyuyor mu?
+reactionGrowing = ...
+    abs(reactionPred) >= ...
+    (absAngle + sub5GrowthMarginDeg);
+
+% Mevcut mekanik reaction ufku sonunda 10 dereceye gidiyorsa:
+sub5ReactionThreat = ...
+    (absAngle < noFire) && ...
+    (absRate >= sub5MinOutwardDps) && ...
+    reactionGrowing && ...
+    (abs(reactionPred) >= limitDeg);
+
+%% ========================================================================
+%% 5 DERECE ALTI: TEMAS TAHMINI
+%% ========================================================================
+
+touchGrowing = ...
+    predValid && ...
+    (abs(pred) >= ...
+     (absAngle + predHyst));
+
+sub5TouchThreat = ...
+    (absAngle < noFire) && ...
+    predValid && ...
+    (absRate >= sub5MinOutwardDps) && ...
+    touchGrowing && ...
+    (abs(pred) >= limitDeg);
+
+sub5Threat = ...
+    sub5ReactionThreat || ...
+    sub5TouchThreat;
+
+%% ========================================================================
+%% 5-10 DERECE: VALF ACILANA KADAR TAHMIN
+%% ========================================================================
+%
+% Bu kisim iniş/temas tahmininden BAGIMSIZ calisir.
+%
+% Ornek:
+% aci = 7 deg, rate disariya dogru ve
+% mevcut mekanik reaction ufku sonunda 10 deg siniri asilacaksa,
+% gercekten 10 deg olmasini beklemeden event baslatilir.
+
+midReactionThreat = ...
+    (absAngle >= noFire) && ...
+    (absAngle < hardBoundary) && ...
+    (absRate >= sub5MinOutwardDps) && ...
+    reactionGrowing && ...
+    (abs(reactionPred) >= limitDeg);
+
+%% ========================================================================
+%% 5-10 DERECE: TEMAS TAHMINI
+%% ========================================================================
+
+midPredThreat = ...
+    predValid && ...
+    (absAngle >= noFire) && ...
+    (absAngle < hardBoundary) && ...
+    (abs(pred) >= limitDeg);
+
+%% TUM TAHMINI TEHLIKELER
+
+predThreat = ...
+    sub5Threat || ...
+    midReactionThreat || ...
+    midPredThreat;
+
+%% ========================================================================
+%% GUVENLI DURUM
+%% ========================================================================
+
+predSafe = ...
+    (~hardThreat) && ...
+    (~predThreat) && ...
+    ((~predValid) || ...
+     abs(pred) <= ...
+     (limitDeg-predHyst));
+
+%% ========================================================================
+%% FREN MESAFESI
+%% ========================================================================
+
+speedAfterDelay = ...
+    absRate + ...
+    alpha*brakeDelayS;
+
+travelDuringDelay = ...
+    absRate*brakeDelayS + ...
+    0.5*alpha* ...
+    brakeDelayS*brakeDelayS;
+
+A.stopping = ...
+    (rate*rate)/(2.0*alpha);
+
+A.braking_distance = ...
+    travelDuringDelay + ...
+    (speedAfterDelay*speedAfterDelay)/ ...
+    (2.0*alpha) + ...
+    brakeMargin;
+
+A.target = 0.0;
+A.switch_error = 0.0;
+
+%% ========================================================================
+%% PREDICTION CONFIRM
+%% ========================================================================
+
+if ~A.event_active
+
+    if predThreat
+
+        if A.pred_count < uint8(255)
+
+            A.pred_count = ...
+                A.pred_count + uint8(1);
+
+        end
+
+    else
+
+        A.pred_count = uint8(0);
+
+    end
+
+end
+
+predConfirmed = ...
+    A.pred_count >= predConfirmN;
+
+%% ========================================================================
+%% 5 DERECE ALTI NORMALDE SESSIZ
+%% ========================================================================
+%
+% Kritik degilse:
+% tamamen kapat.
+%
+% Kritikse:
+% selectAxis event baslatmaya devam eder.
+
+if absAngle < noFire && ...
+   ~sub5Threat
+
+    % Kritik bir safety eventi GERCEKTEN aktif/yarim kalmis ise kapat.
+    % Fakat eksen zaten normal, armed ve phase=0 durumundaysa
+    % finishEvent'i HER ORNEKTE cagirma.
+    %
+    % Eski davranis finishEvent icinde:
+    %   track_active = false
+    %   track_cooldown = 0
+    %   off_age = 0
+    % yaptigi icin normal hedef takibi her 10 ms'de sifirlaniyordu.
+    % Bu nedenle hedef_pitch = +4.8 deg olsa bile yeni tracking pulse
+    % MIN_OFF_N suresini asla dolduramiyor ve valfler susuyordu.
+
+    if A.event_active || ...
+       A.phase ~= uint8(0) || ...
+       ~A.event_armed
+
+        A = ...
+            finishEvent( ...
+                A, ...
+                true, ...
+                minOffN);
+
+    else
+
+        % Safety acisindan sakin durum.
+        % Tracking state/cooldown/off_age korunur;
+        % applyReferenceTracking bir sonraki adimda normal hedefi izler.
+        A.mode = uint8(0);
+        A.desired = int8(0);
+
+    end
+
+    return;
+
+end
+
+%% ========================================================================
+%% SAFE WAIT
+%% ========================================================================
+
+if A.phase == uint8(4)
+
+    % Yeni ve gercek bir tehlike olustuysa,
+    % valfin minimum kapanma suresi dolduktan sonra
+    % 10 dereceyi gercekten gecmesini beklemeden yeniden event'e izin ver.
+    %
+    % Bu sayede:
+    % 5...10 deg + hizla disariya kacis
+    % -> reaction prediction ile erken kurtarma yapabilir.
+    if (hardThreat || predThreat) && ...
+       A.event_end_age >= minOffN
+
+        A.event_armed = true;
+
+        A.phase = uint8(0);
+        A.mode  = uint8(0);
+
+    elseif predSafe
+
+        % Yeni tehlike yoksa normal sakin re-arm.
+        if A.safe_age >= rearmN
+
+            A.event_armed = true;
+
+            A.phase = uint8(0);
+            A.mode  = uint8(0);
+
+        end
+
+    else
+
+        A.safe_age = uint16(0);
+
+    end
+
+    % Eski hard re-arm korumasi yedek olarak kalsin.
+    if hardThreat && ...
+       A.event_end_age >= hardRearmN
+
+        A.event_armed = true;
+
+        A.phase = uint8(0);
+        A.mode  = uint8(0);
+
+    end
+
+end
+
+%% ========================================================================
+%% YENI EVENT BASLAT
+%% ========================================================================
+
+if ~A.event_active
+
+    if ~A.event_armed
+
+        A.mode = uint8(4);
+        A.desired = int8(0);
+
+        return;
+
+    end
+
+    if ~hardThreat && ...
+       ~predConfirmed
+
+        A.mode = uint8(0);
+        A.desired = int8(0);
+
+        return;
+
+    end
+
+    %% TEHLIKE YONU
+
+    if hardThreat
+
+        threatSign = ...
+            sign8(angle);
+
+    elseif sub5ReactionThreat || ...
+           midReactionThreat
+
+        % Reaction prediction ile baslayan eventte
+        % tehlikenin reaction prediction sonundaki yonunu kullan.
+        threatSign = ...
+            sign8(reactionPred);
+
+    else
+
+        threatSign = ...
+            sign8(pred);
+
+    end
+
+    if threatSign == int8(0)
+
+        threatSign = ...
+            sign8(rate);
+
+    end
+
+    [A,started,eventFault] = ...
+        startEvent( ...
+            A, ...
+            threatSign, ...
+            hardThreat, ...
+            maxEvents);
+
+    if ~started || eventFault
+
+        A.desired = int8(0);
+
+        return;
+
+    end
+
+end
+
+%% ========================================================================
+%% HARD KILIT
+%% ========================================================================
+
+if hardThreat
+
+    A.hard_latched = true;
+
+end
+
+%% ========================================================================
+%% CORRECT
+%% ========================================================================
+
+if A.phase == uint8(1)
+
+    correction = ...
+        correctionTorque( ...
+            A.hazard_sign);
+
+    %% ====================================================================
+    %% 5 DERECE ALTI KRITIK KURTARMA
+    %% ====================================================================
+    %
+    % Burada hedef 6 derece DEGIL.
+    %
+    % Ornegin:
+    %
+    % aci = 4 derece
+    % hizli sekilde 10 dereceye kaciyor.
+    %
+    % Amac 4 dereceyi 6 dereceye tasimak degil,
+    % tehlikeli acisal hizi durdurmak.
+
+    if absAngle < noFire && ...
+       sub5Threat
+
+        A.target = 0.0;
+        A.switch_error = 0.0;
+
+        A.mode = uint8(1);
+        A.desired = correction;
+
+        return;
+
+    end
+
+    %% ====================================================================
+    %% NORMAL 5-10 / HARD CORRECTION
+    %% ====================================================================
+
+    signedAngle = ...
+        double(A.hazard_sign)*angle;
+
+    remaining = ...
+        signedAngle-safeTarget;
+
+    towardRate = ...
+        -double(A.hazard_sign)*rate;
+
+    A.target = ...
+        double(A.hazard_sign)* ...
+        safeTarget;
+
+    A.switch_error = ...
+        remaining- ...
+        A.braking_distance;
+    %% ====================================================================
+%% HARD EVENTTE TEK FREN SONRASI CIKIS
+%% ====================================================================
+%
+% Bu event icinde karsi-fren zaten bir kez kullanildiysa
+% ve roket artik 10 derece altindaysa tekrar correction yapma.
+%
+% Iki valfi de kapat ve SAFE_WAIT'e gec.
+
+if A.hard_latched && ...
+   A.brake_used && ...
+   ~hardThreat
+
+    A = ...
+        finishEvent( ...
+            A, ...
+            false, ...
+            minOffN);
+
+    return;
+
+end
+
+    %% Tahmini olay guvenli hale geldi
+
+    if ~A.hard_latched && ...
+       predValid && ...
+       A.event_age >= minCorrN && ...
+       abs(pred) <= ...
+       (limitDeg-predHyst)
+
+        A = ...
+            finishEvent( ...
+                A, ...
+                false, ...
+                minOffN);
+
+        return;
+
+    end
+
+    %% Tehlike kalmadi ve hiz dusuk
+
+    if ~A.hard_latched && ...
+       ~hardThreat && ...
+       absRate <= brakeDone && ...
+       ((~predValid) || ...
+        abs(pred) <= ...
+        (limitDeg-predHyst))
+
+        A = ...
+            finishEvent( ...
+                A, ...
+                false, ...
+                minOffN);
+
+        return;
+
+    end
+
+    %% Henuz duzeltme yonune donmedi
+
+    if towardRate <= 0.0
+
+        A.mode = uint8(1);
+        A.desired = correction;
+
+        return;
+
+    end
+
+    %% Yumusak erken cikis
+
+    if ~A.hard_latched && ...
+       ~hardThreat && ...
+       towardRate <= brakeDone && ...
+       remaining <= brakeMargin
+
+        A = ...
+            finishEvent( ...
+                A, ...
+                false, ...
+                minOffN);
+
+        return;
+
+    end
+
+    %% ====================================================================
+    %% FREN NOKTASI
+    %% ====================================================================
+
+    if remaining <= ...
+       A.braking_distance
+
+        if ~A.brake_used && ...
+           towardRate > brakeDone
+
+            A.phase = uint8(2);
+
+            A.brake_used = true;
+            A.brake_age = uint16(0);
+
+            A.mode = uint8(2);
+
+            A.desired = ...
+                brakingTorque( ...
+                    A.hazard_sign);
+
+            return;
+
+        else
+
+            if A.hard_latched
+
+                A.mode = uint8(1);
+                A.desired = correction;
+
+                return;
+
+            else
+
+                A = ...
+                    finishEvent( ...
+                        A, ...
+                        false, ...
+                        minOffN);
+
+                return;
+
+            end
+
+        end
+
+    end
+
+    A.mode = uint8(1);
+    A.desired = correction;
+
+    return;
+
+end
+
+%% ========================================================================
+%% BRAKE
+%% ========================================================================
+
+if A.phase == uint8(2)
+
+    towardRate = ...
+        -double(A.hazard_sign)*rate;
+
+    A.mode = uint8(2);
+
+    % Fren tamamlandi mi?
+    if towardRate <= brakeDone || ...
+       A.brake_age >= maxBrakeN
+
+        %% HARD EVENT
+        if A.hard_latched
+
+            % Tek fren tamamlandi.
+            %
+            % Hala 10 derece ustundeysek correction'a geri don.
+            % Ancak brake_used TRUE kalir; ayni eventte ikinci fren yok.
+            if hardThreat
+
+                A.phase = uint8(1);
+                A.mode  = uint8(1);
+
+                A.brake_age = uint16(0);
+
+                A.desired = ...
+                    correctionTorque( ...
+                        A.hazard_sign);
+
+                return;
+
+            else
+
+                % 10 derece altindayiz:
+                % tekrar correction/fren dongusune girme.
+                % Iki valfi de kapat ve SAFE_WAIT'e gec.
+                A = ...
+                    finishEvent( ...
+                        A, ...
+                        false, ...
+                        minOffN);
+
+                return;
+
+            end
+
+        end
+
+        %% HARD OLMAYAN TAHMINI EVENT
+        if hardThreat
+
+            % Tahmini event sirasinda 10 derece asildiysa
+            % hard event olarak devam et.
+            A.hard_latched = true;
+
+            A.phase = uint8(1);
+            A.mode  = uint8(1);
+
+            A.brake_age = uint16(0);
+
+            A.desired = ...
+                correctionTorque( ...
+                    A.hazard_sign);
+
+            return;
+
+        else
+
+            % Tahmini eventte fren tamamlandi ve
+            % 10 derece ustu tehlike yok.
+            A = ...
+                finishEvent( ...
+                    A, ...
+                    false, ...
+                    minOffN);
+
+            return;
+
+        end
+
+    end
+
+    % Fren devam ediyor.
+    A.desired = ...
+        brakingTorque( ...
+            A.hazard_sign);
+
+    return;
+
+end
+
+%% ========================================================================
+%% COAST
+%% ========================================================================
+
+if A.phase == uint8(3)
+
+    outwardRate = ...
+        double(A.hazard_sign)*rate;
+
+    A.mode = uint8(5);
+
+    A.desired = int8(0);
+
+    if ~hardThreat && ...
+       ~sub5Threat
+
+        A = ...
+            finishEvent( ...
+                A, ...
+                false, ...
+                minOffN);
+
+        return;
+
+    end
+
+    if outwardRate >= 0.0
+
+        A = ...
+            finishEvent( ...
+                A, ...
+                true, ...
+                minOffN);
+
+        return;
+
+    end
+
+    return;
+
+end
+
+A.mode = uint8(4);
+A.desired = int8(0);
+
+end
+
+
+%% ========================================================================
+function [A,started,eventFault] = ...
+    startEvent(A,hazardSign,hardLimit,maxEvents)
+
+started = false;
+eventFault = false;
+
+if hazardSign == int8(0)
+    return;
+end
+
+A.event_count = ...
+    A.event_count + uint8(1);
+
+if A.event_count > maxEvents
+
+    eventFault = true;
+
+    return;
+
+end
+
+A.event_active = true;
+A.event_armed  = false;
+
+A.hard_latched = hardLimit;
+A.brake_used   = false;
+
+A.hazard_sign = hazardSign;
+
+A.phase = uint8(1);
+A.mode  = uint8(1);
+
+A.event_age = uint16(0);
+A.pred_count = uint8(0);
+
+A.desired = ...
+    correctionTorque( ...
+        hazardSign);
+
+started = true;
+
+end
+
+
+%% ========================================================================
+function A = ...
+    finishEvent(A,immediateRearm,minOffN)
+
+A.event_active = false;
+
+A.hard_latched = false;
+A.brake_used   = false;
+
+A.hazard_sign = int8(0);
+
+A.desired = int8(0);
+
+A.pred_count = uint8(0);
+
+A.event_end_age = uint16(0);
+
+A.safe_age = uint16(0);
+A.event_age = uint16(0);
+A.brake_age = uint16(0);
+
+A.target = 0.0;
+A.switch_error = 0.0;
+
+A.track_active = false;
+A.track_sign   = int8(0);
+
+A.track_age = uint16(0);
+A.track_pulse_n = uint16(0);
+A.track_cooldown = uint16(0);
+
+if immediateRearm
+
+    A.phase = uint8(0);
+    A.event_armed = true;
+    A.mode = uint8(0);
+
+else
+
+    A.phase = uint8(4);
+    A.event_armed = false;
+    A.mode = uint8(4);
+
+end
+
+if A.applied == int8(0)
+
+    % Yeni event/pulse icin minimum OFF suresi yeniden sayilsin.
+    A.off_age = uint16(0);
+    A.on_age  = uint16(0);
+
+end
+
+end
+
+
+%% ========================================================================
+%% NORMAL REFERANS TAKIBI
+%% ========================================================================
+
+function A = applyReferenceTracking( ...
+    A,angle,rate,refAngle,noFireDeg, ...
+    maxAbsAngle,startDb,stopDb,lookahead, ...
+    rateFar,rateMid,rateNear, ...
+    cooldownFarN,cooldownMidN,cooldownNearN, ...
+    pulseSmallN,pulseMedN,pulseLargeN)
+
+% Hedefi gecme ongorusu varsa tek bir karsi-fren darbesi icin esik.
+TRACK_BRAKE_TRIGGER_DPS = 1.5;
+
+%% ========================================================================
+%% SIFIR REFERANS TAKIBI AKTIF
+%% ========================================================================
+%
+% V7.8:
+% Hedef 0 dereceye yakin olsa bile normal reference tracking KAPATILMAZ.
+% Boylece safety eventi roketi 10 deg altina getirdikten sonra kontrol
+% -9 deg civarinda birakmaz; 40 ms minimum darbelerle 0 deg hedefine devam eder.
+%
+% Safety/hard event her zaman onceliklidir. Event aktifken asagidaki
+% normal tracking bolumu komuta karismaz.
+%
+% Hedefe yaklasinca TRACK_STOP_DEG / TRACK_START_DEG histerezisi ve
+% rate-lookahead sayesinde gereksiz sag-sol chatter engellenir.
+
+%% ========================================================================
+%% GUVENLIK EVENTI USTUN
+%% ========================================================================
+% Event AKTIFSE normal takip kesinlikle devreye girmez.
+% Ancak phase=SAFE_WAIT (4) tek basina normal XY hedef takibini artik kilitlemez.
+% Boylece hedef_pitch 4.8 deg isterken gercek pitch 0 deg civarinda donup kalmaz.
+% 9.8...10 deg arasi safety sinirina cok yakin koruma bandidir.
+
+if A.event_active || ...
+   abs(angle) >= maxAbsAngle
+
+    A.track_active = false;
+    A.track_sign   = int8(0);
+
+    A.track_age = uint16(0);
+    A.track_pulse_n = uint16(0);
+    A.track_cooldown = uint16(0);
+
+    return;
+
+end
+
+%% ========================================================================
+%% HATA
+%% ========================================================================
+
+errorNow = ...
+    angle-refAngle;
+
+errorPred = ...
+    errorNow + ...
+    rate*lookahead;
+
+errorMag = ...
+    abs(errorPred);
+
+%% ========================================================================
+%% DINAMIK HIZ / COAST
+%% ========================================================================
+
+if errorMag >= 4.0
+
+    rateHold = rateFar;
+    nextCooldownN = cooldownFarN;
+
+elseif errorMag >= 2.0
+
+    rateHold = rateMid;
+    nextCooldownN = cooldownMidN;
+
+else
+
+    rateHold = rateNear;
+    nextCooldownN = cooldownNearN;
+
+end
+
+%% ========================================================================
+%% AKTIF DARBE
+%% ========================================================================
+
+if A.track_active
+
+    A.mode = uint8(6);
+
+    A.desired = ...
+        correctionTorque( ...
+            A.track_sign);
+
+    A.track_age = ...
+        satInc16(A.track_age);
+
+    if A.track_age >= ...
+       A.track_pulse_n
+
+        A.track_active = false;
+        A.track_sign = int8(0);
+
+        A.track_age = uint16(0);
+        A.track_pulse_n = uint16(0);
+
+        A.track_cooldown = ...
+            nextCooldownN;
+
+        A.desired = int8(0);
+
+    end
+
+    return;
+
+end
+
+%% ========================================================================
+%% COAST
+%% ========================================================================
+
+if A.track_cooldown > uint16(0)
+
+    A.track_cooldown = ...
+        A.track_cooldown-uint16(1);
+
+    A.desired = int8(0);
+    A.mode = uint8(6);
+
+    return;
+
+end
+
+%% ========================================================================
+%% HEDEF CEVRESI
+%% ========================================================================
+
+if abs(errorNow) <= stopDb && ...
+   abs(errorPred) <= startDb
+
+    A.desired = int8(0);
+    A.mode = uint8(0);
+
+    return;
+
+end
+
+errorSign = ...
+    sign8(errorNow);
+
+if errorSign ~= int8(0)
+
+    movingTowardRate = ...
+        -double(errorSign)*rate;
+
+else
+
+    movingTowardRate = 0.0;
+
+end
+
+crossingTarget = ...
+    (errorSign ~= int8(0)) && ...
+    (sign8(errorPred) ~= int8(0)) && ...
+    (sign8(errorPred) ~= errorSign);
+
+%% ========================================================================
+%% ZATEN HEDEFE GIDIYOR
+%% ========================================================================
+
+if crossingTarget
+
+    % Hedefi gececegimiz ongoruluyorsa sadece gaz kesmek yerine,
+    % acisal hiz hala yuksekse bir adet minimum karsi-fren darbesi uygula.
+    if movingTowardRate >= TRACK_BRAKE_TRIGGER_DPS
+
+        A.track_active = true;
+        A.track_sign = -errorSign;
+        A.track_age = uint16(0);
+        A.track_pulse_n = pulseSmallN;
+
+        A.desired = ...
+            correctionTorque( ...
+                A.track_sign);
+
+        A.mode = uint8(6);
+
+        return;
+
+    else
+
+        A.desired = int8(0);
+        A.mode = uint8(6);
+
+        return;
+
+    end
+
+end
+
+% Zaten hedefe yeterince hizli gidiyorsak yeni correction pulse verme.
+if movingTowardRate >= rateHold
+
+    A.desired = int8(0);
+    A.mode = uint8(6);
+
+    return;
+
+end
+
+%% ========================================================================
+%% HATA YETERLI DEGIL
+%% ========================================================================
+
+if errorMag < startDb
+
+    A.desired = int8(0);
+    A.mode = uint8(0);
+
+    return;
+
+end
+
+%% ========================================================================
+%% YENI DARBE
+%% ========================================================================
+
+controlSign = ...
+    sign8(errorPred);
+
+if controlSign == int8(0)
+
+    controlSign = errorSign;
+
+end
+
+if controlSign == int8(0)
+
+    A.desired = int8(0);
+    A.mode = uint8(0);
+
+    return;
+
+end
+
+if errorMag >= 4.0
+
+    pulseN = pulseLargeN;
+
+elseif errorMag >= 2.0
+
+    pulseN = pulseMedN;
+
+else
+
+    pulseN = pulseSmallN;
+
+end
+
+A.track_active = true;
+
+A.track_sign = controlSign;
+
+A.track_age = uint16(0);
+
+A.track_pulse_n = pulseN;
+
+A.desired = ...
+    correctionTorque( ...
+        controlSign);
+
+A.mode = uint8(6);
+
+end
+
+
+%% ========================================================================
+%% BREAK BEFORE MAKE
+%% ========================================================================
+
+function [A,chatterFault] = ...
+    processAxisOutput(A,deadN,minOffN,maxReversals,maxOnN)
+
+chatterFault = false;
+
+%% ========================================================================
+%% GLOBAL MAXIMUM ON-TIME
+%% ========================================================================
+% Safety/hard correction dahil tum modlar icin son katman korumasidir.
+% applied komutu maxOnN kadar kesintisiz acik kaldiginda valfi kapatir.
+% desired komutu korunur; MIN_OFF_N dolarsa gerekiyorsa yeni pulse baslar.
+
+if A.applied ~= int8(0)
+
+    A.on_age = satInc16(A.on_age);
+
+else
+
+    A.on_age = uint16(0);
+
+end
+
+if A.applied ~= int8(0) && ...
+   A.on_age >= maxOnN
+
+    A.applied = int8(0);
+    A.on_age  = uint16(0);
+    A.off_age = uint16(0);
+
+    return;
+
+end
+
+%% DEADTIME
+
+if A.dead_active
+
+    A.applied = int8(0);
+
+    A.mode = uint8(3);
+
+    A.dead_age = ...
+        satInc16(A.dead_age);
+
+    if A.desired == int8(0)
+
+        A.pending = int8(0);
+
+        A.dead_active = false;
+
+        A.dead_age = uint16(0);
+
+        A.off_age = uint16(0);
+
+        return;
+
+    end
+
+    if A.desired ~= A.pending
+
+        A.pending = A.desired;
+
+        A.dead_age = uint16(0);
+
+    end
+
+    if A.dead_age >= deadN
+
+        A.applied = A.pending;
+        A.on_age = uint16(0);
+
+        A.pending = int8(0);
+
+        A.dead_active = false;
+
+        A.dead_age = uint16(0);
+
+        A.off_age = uint16(0);
+
+    end
+
+    return;
+
+end
+
+%% AYNI KOMUT
+
+if A.desired == A.applied
+
+    return;
+
+end
+
+%% KARSI VALFE GECIS
+
+if A.applied ~= int8(0) && ...
+   A.desired == -A.applied
+
+    A.applied = int8(0);
+
+    A.pending = A.desired;
+
+    A.dead_active = true;
+
+    A.dead_age = uint16(0);
+
+    A.off_age = uint16(0);
+
+    A.reversal_count = ...
+        A.reversal_count + uint8(1);
+
+    if A.reversal_count > maxReversals
+
+        chatterFault = true;
+
+    end
+
+    return;
+
+end
+
+%% KAPAT
+
+if A.desired == int8(0)
+
+    A.applied = int8(0);
+    A.on_age = uint16(0);
+
+    A.off_age = uint16(0);
+
+    return;
+
+end
+
+%% YENIDEN AC
+
+if A.off_age >= minOffN
+
+    A.applied = A.desired;
+    A.on_age = uint16(0);
+
+    A.off_age = uint16(0);
+
+end
+
+end
+
+
+%% ========================================================================
+function cmd = correctionTorque(hazardSign)
+
+if hazardSign > int8(0)
+
+    cmd = int8(-1);
+
+elseif hazardSign < int8(0)
+
+    cmd = int8(1);
+
+else
+
+    cmd = int8(0);
+
+end
+
+end
+
+
+%% ========================================================================
+function cmd = brakingTorque(hazardSign)
+
+if hazardSign > int8(0)
+
+    cmd = int8(1);
+
+elseif hazardSign < int8(0)
+
+    cmd = int8(-1);
+
+else
+
+    cmd = int8(0);
+
+end
+
+end
+
+
+%% ========================================================================
+function s = sign8(x)
+
+if x > 0.0
+
+    s = int8(1);
+
+elseif x < 0.0
+
+    s = int8(-1);
+
+else
+
+    s = int8(0);
+
+end
+
+end
+
+
+%% ========================================================================
+function y = clampValue(x,lo,hi)
+
+if x < lo
+
+    y = lo;
+
+elseif x > hi
+
+    y = hi;
+
+else
+
+    y = x;
+
+end
+
+end
+
+
+%% ========================================================================
+function x = satInc16(x)
+
+if x < uint16(65535)
+
+    x = x + uint16(1);
+
+end
+
+end
+
+
+%% ========================================================================
+function [V1,V3,V5,V7,Upitch,Uyaw] = ...
+    mapValves(pitchCmd,yawCmd)
+
+% PITCH:
+% -1 -> V1
+% +1 -> V3
+%
+% YAW:
+% -1 -> V5
+% +1 -> V7
+
+V1 = ...
+    double(pitchCmd == int8(-1));
+
+V3 = ...
+    double(pitchCmd == int8(1));
+
+V5 = ...
+    double(yawCmd == int8(-1));
+
+V7 = ...
+    double(yawCmd == int8(1));
+
+Upitch = double(pitchCmd);
+Uyaw   = double(yawCmd);
+
+end

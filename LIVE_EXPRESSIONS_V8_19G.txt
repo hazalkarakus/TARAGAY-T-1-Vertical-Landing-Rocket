@@ -1,0 +1,43 @@
+V8.19G classic RCS physical relay bench
+========================================
+
+gnc_v816_armed
+gnc_v816_button_stage
+gnc_v816_button_press_count
+gnc_v816_fault_latched
+gnc_v816_fault_code
+
+gnc_v816_attitude_state_ok
+gnc_v816_estimator_ok
+gnc_v816_roll_deg
+gnc_v816_pitch_deg
+gnc_v816_yaw_deg
+gnc_v816_roll_rate_dps
+gnc_v816_pitch_rate_dps
+
+gnc_v816_rcs_requested_mask
+gnc_v816_rcs_applied_mask
+gnc_v816_rcs_dry_run
+
+attitude_initialized
+attitude_healthy
+attitude_roll_deg
+attitude_pitch_deg
+attitude_yaw_deg
+attitude_euler_update_count
+attitude_reset_count
+attitude_numerical_error_count
+
+BEKLENEN
+--------
+- Baslangicta armed=0, requested_mask=0, applied_mask=0.
+- V8.19G'de rcs_dry_run=0; fiziksel role GPIO yolu aktiftir.
+- PA0 ilk basma: armed=1, button_stage=1.
+- Duz konum: requested_mask=0, applied_mask=0.
+- +roll >10 derece: IN1/PE7, maske 0x01.
+- -roll >10 derece: IN2/PE11, maske 0x02.
+- +pitch >10 derece: IN3/PE15, maske 0x04.
+- -pitch >10 derece: IN4/PB15, maske 0x08.
+- PA0 ikinci basma: armed=0, applied_mask=0.
+
+RCS armed veya applied_mask sifirdan farkliyken debugger Suspend yapma.

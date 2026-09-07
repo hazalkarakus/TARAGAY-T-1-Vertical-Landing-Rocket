@@ -1,0 +1,11 @@
+/mnt/data/P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_DRYRUN_INERT/App/Modules/Control/GNCActiveControl/gnc_active_control.c: In function 'GNCActiveControl_Update200Hz':
+/mnt/data/P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_DRYRUN_INERT/App/Modules/Control/GNCActiveControl/gnc_active_control.c:594:14: warning: unused variable 'now_ms' [-Wunused-variable]
+  594 |     uint32_t now_ms = HAL_GetTick();
+      |              ^~~~~~
+/mnt/data/P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_DRYRUN_INERT/App/Services/UARTTelemetry/uart_telemetry.c: In function 'UARTTelemetry_Update10Hz':
+/mnt/data/P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_DRYRUN_INERT/App/Services/UARTTelemetry/uart_telemetry.c:1700:23: warning: unused variable 'header' [-Wunused-variable]
+ 1700 |     static const char header[] =
+      |                       ^~~~~~
+/mnt/data/P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_DRYRUN_INERT/App/Services/UARTTelemetry/uart_telemetry.c:1697:23: warning: unused variable 'banner' [-Wunused-variable]
+ 1697 |     static const char banner[] =
+      |                       ^~~~~~

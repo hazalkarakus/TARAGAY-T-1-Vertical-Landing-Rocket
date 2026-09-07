@@ -1,0 +1,6 @@
+after upright phase=2 valid=0 upright=200
+after tilt phase=4 valid=1 fault=0 tilt=16.00 err=0.00000
+R= 0.95398 -0.29546 0.05132 / 0.29166 0.95393 0.07042 / -0.06976 -0.05221 0.99620
+roll test corrected A/B=10.00/-0.00 events=0/57/0/99
+pitch test corrected A/B=-0.00/-11.00
+PASS R8R26 mount calibration + rocket-frame tilt transform

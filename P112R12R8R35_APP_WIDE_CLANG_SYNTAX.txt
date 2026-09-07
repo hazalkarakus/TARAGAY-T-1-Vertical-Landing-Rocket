@@ -1,0 +1,146 @@
+R8R35 CLANG ARM APP-WIDE SYNTAX CHECK
+PASS=26 FAIL=19
+
+FAIL App/Common/Filters/butterworth_filter.c
+/mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Common/Filters/butterworth_filter.c:3:10: fatal error: 'math.h' file not found
+    3 | #include <math.h>
+      |          ^~~~~~~~
+1 error generated.
+
+FAIL App/Common/math_utils.c
+/mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Common/math_utils.c:3:10: fatal error: 'math.h' file not found
+    3 | #include <math.h>
+      |          ^~~~~~~~
+1 error generated.
+
+PASS App/Core/Scheduler/scheduler.c
+FAIL App/Core/Tasks/app_tasks.c
+/mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Core/Tasks/app_tasks.c:40:10: fatal error: 'math.h' file not found
+   40 | #include <math.h>
+      |          ^~~~~~~~
+1 error generated.
+
+PASS App/Modules/Control/AttitudeControl/attitude_control.c
+FAIL App/Modules/Control/ControlInputProvider/control_input_provider.c
+/mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Modules/Control/ControlInputProvider/control_input_provider.c:5:10: fatal error: 'math.h' file not found
+    5 | #include <math.h>
+      |          ^~~~~~~~
+1 error generated.
+
+FAIL App/Modules/Control/GNCActiveControl/gnc_active_control.c
+/mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Modules/Control/GNCActiveControl/gnc_active_control.c:22:10: fatal error: 'math.h' file not found
+   22 | #include <math.h>
+      |          ^~~~~~~~
+1 error generated.
+
+FAIL App/Modules/Control/GeneratedFlightControl/Generated/Ucus_Bilgisayari.c
+In file included from /mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Modules/Control/GeneratedFlightControl/Generated/Ucus_Bilgisayari.c:17:
+/mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Modules/Control/GeneratedFlightControl/Generated/Ucus_Bilgisayari.h:110:10: fatal error: 'string.h' file not found
+  110 | #include <string.h>
+      |          ^~~~~~~~~~
+1 error generated.
+
+FAIL App/Modules/Control/GeneratedFlightControl/Generated/Ucus_Bilgisayari_data.c
+In file included from /mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Modules/Control/GeneratedFlightControl/Generated/Ucus_Bilgisayari_data.c:17:
+/mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Modules/Control/GeneratedFlightControl/Generated/Ucus_Bilgisayari.h:110:10: fatal error: 'string.h' file not found
+  110 | #include <string.h>
+      |          ^~~~~~~~~~
+1 error generated.
+
+PASS App/Modules/Control/GeneratedFlightControl/Generated/rtGetInf.c
+PASS App/Modules/Control/GeneratedFlightControl/Generated/rtGetNaN.c
+PASS App/Modules/Control/GeneratedFlightControl/Generated/rt_nonfinite.c
+FAIL App/Modules/Control/GeneratedFlightControl/generated_flight_control.c
+In file included from /mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Modules/Control/GeneratedFlightControl/generated_flight_control.c:8:
+/mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Modules/Control/GeneratedFlightControl/Generated/Ucus_Bilgisayari.h:110:10: fatal error: 'string.h' file not found
+  110 | #include <string.h>
+      |          ^~~~~~~~~~
+1 error generated.
+
+FAIL App/Modules/Control/MatlabValveController/matlab_valve_controller.c
+/mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Modules/Control/MatlabValveController/matlab_valve_controller.c:3:10: fatal error: 'math.h' file not found
+    3 | #include <math.h>
+      |          ^~~~~~~~
+1 error generated.
+
+PASS App/Modules/Control/NeedleValve/needle_valve_controller.c
+FAIL App/Modules/Control/TaragayFlightLogic/taragay_flight_logic.c
+/mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Modules/Control/TaragayFlightLogic/taragay_flight_logic.c:9:10: fatal error: 'math.h' file not found
+    9 | #include <math.h>
+      |          ^~~~~~~~
+1 error generated.
+
+FAIL App/Modules/Control/VerticalLandingControl/vertical_landing_control.c
+/mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Modules/Control/VerticalLandingControl/vertical_landing_control.c:5:10: fatal error: 'math.h' file not found
+    5 | #include <math.h>
+      |          ^~~~~~~~
+1 error generated.
+
+FAIL App/Modules/Estimation/AttitudeEstimator/attitude_estimator.c
+/mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Modules/Estimation/AttitudeEstimator/attitude_estimator.c:7:10: fatal error: 'math.h' file not found
+    7 | #include <math.h>
+      |          ^~~~~~~~
+1 error generated.
+
+FAIL App/Modules/Estimation/FullStateESKF/full_state_eskf.c
+/mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Modules/Estimation/FullStateESKF/full_state_eskf.c:12:10: fatal error: 'math.h' file not found
+   12 | #include <math.h>
+      |          ^~~~~~~~
+1 error generated.
+
+PASS App/Modules/Estimation/VerticalEKF/vertical_ekf.c
+FAIL App/Modules/NRF24/nrf24.c
+/mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Modules/NRF24/nrf24.c:9:10: fatal error: 'string.h' file not found
+    9 | #include <string.h>
+      |          ^~~~~~~~~~
+1 error generated.
+
+PASS App/Modules/RemoteControl/remote_control.c
+PASS App/Modules/Sensors/Barometer/barometer.c
+PASS App/Modules/Sensors/Barometer/ms5611_spi.c
+PASS App/Modules/Sensors/IMU/imu.c
+PASS App/Modules/Sensors/Lidar/Lidar.c
+PASS App/Modules/Sensors/SensorManager/sensor_manager.c
+PASS App/Platform/board.c
+PASS App/Services/BusManager/bus_manager.c
+FAIL App/Services/CDCTelemetry/cdc_telemetry.c
+/mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Services/CDCTelemetry/cdc_telemetry.c:3:10: fatal error: 'usbd_cdc_if.h' file not found
+    3 | #include "usbd_cdc_if.h"
+      |          ^~~~~~~~~~~~~~~
+1 error generated.
+
+PASS App/Services/DebugDashboard/debug_dashboard.c
+FAIL App/Services/NRFTelemetry/nrf_telemetry.c
+/mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Services/NRFTelemetry/nrf_telemetry.c:19:10: fatal error: 'string.h' file not found
+   19 | #include <string.h>
+      |          ^~~~~~~~~~
+1 error generated.
+
+PASS App/Services/NeedleValveAutoControl/needle_valve_auto_control.c
+PASS App/Services/NeedleValveAutonomousControl/needle_valve_autonomous_control.c
+PASS App/Services/NeedleValveHardware/needle_valve_hw.c
+PASS App/Services/NeedleValveIntegrationTest/needle_valve_integration_test.c
+PASS App/Services/PreflightTrigger/preflight_trigger.c
+FAIL App/Services/SDLogger/sd_logger.c
+/mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Services/SDLogger/sd_logger.c:19:10: fatal error: 'fatfs.h' file not found
+   19 | #include "fatfs.h"
+      |          ^~~~~~~~~
+1 error generated.
+
+FAIL App/Services/SensorQualification/sensor_qualification.c
+/mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Services/SensorQualification/sensor_qualification.c:12:10: fatal error: 'math.h' file not found
+   12 | #include <math.h>
+      |          ^~~~~~~~
+1 error generated.
+
+PASS App/Services/ServoOutput/servo_output.c
+PASS App/Services/SolenoidOutput/solenoid_output.c
+FAIL App/Services/SystemMonitor/system_monitor.c
+/mnt/data/r8r35src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Services/SystemMonitor/system_monitor.c:3:10: fatal error: 'string.h' file not found
+    3 | #include <string.h>
+      |          ^~~~~~~~~~
+1 error generated.
+
+PASS App/Services/Timebase/timebase.c
+PASS App/Services/UARTTelemetry/uart_telemetry.c
+PASS App/app.c

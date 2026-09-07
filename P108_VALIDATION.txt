@@ -1,0 +1,17 @@
+P108 validation intent
+
+Behavioral limits:
+- one automatic test per MCU boot
+- start gate: 850..1023 ADC
+- final reference target: start - 50 ADC
+- pre-brake threshold: start - 30 ADC (20 ADC early)
+- boost: PWM144/255 for exactly 20 ms
+- seamless sustain: PWM128/255, maximum 60 ms
+- maximum total powered OPEN time: 80 ms
+- active dynamic brake: 500 ms
+- filtered ADC captures at brake entry, +100, +250, +500 ms
+- no automatic return
+- feedback invalid / wrong direction / sequence timeout / hard overshoot stops bridge
+- RCS remains forced safe by integration-test path
+
+Full STM32CubeIDE Clean -> Build -> Link is still required before flashing.

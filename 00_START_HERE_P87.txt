@@ -1,0 +1,76 @@
+TARAGAY-T1 P87 ADC SWEEP DIAGNOSTIC
+===================================
+Firmware: 8.19M-P87-ADC-SWEEP-DIAGNOSTIC
+
+AMAC
+----
+Belirli ADC araliklarinin gercek analog/raw ADC tarafinda mi kayboldugunu,
+yoksa P83 median/rate/quarantine/filtered katmaninda mi gorunmez hale geldigini
+ayirmak.
+
+P87 MOTOR TESTI DEGILDIR.
+- Needle motor cikisi firmware tarafinda compile-time kilitlidir.
+- DriveOpen / DriveClose diagnostic modda no-op kalir.
+- Integration service Stop + SetEnabled(0) uygular.
+- TIM7 1 kHz ISR motoru surekli Stop'ta tutar.
+- RCS SolenoidOutput_ForceSafe() ile guvenli tutulur.
+- NRF kapali, UART RX komutlari kapali.
+
+BENCH GUVENLIGI
+---------------
+1) GAZ / BASINC YOK.
+2) Needle motor beslemesini FIZIKSEL OLARAK KAPAT.
+3) RCS/solenoid fiziksel gucunu kapat.
+4) Potu / feedback milini ELLE ve YAVAS hareket ettir.
+5) Bu firmware ile motoru hareket ettirmeye calisma.
+
+FLASH
+-----
+CubeIDE:
+  Clean Project -> Build Project -> Flash
+
+UART banner mutlaka:
+  8.19M-P87-ADC-SWEEP-DIAGNOSTIC
+
+MONITOR
+-------
+PowerShell / CMD:
+  python -u monitor_uart_p87_adc_sweep.py --port COM21 --log uart_p87_adc_sweep.txt
+
+TEST PROTOKOLU
+-------------
+A) 0-10 s: Hic dokunma.
+B) 10-30 s: Potu/mili COK YAVAS tek yone cevir. Ozellikle sorunlu ADC bolgesinden gec.
+C) 30-40 s: Sabit tut.
+D) 40-60 s: Ayni hizda geri dondur.
+E) 60-70 s: Sabit tut ve Ctrl+C ile bitir.
+
+MONITORDE ONEMLI ALANLAR
+------------------------
+A1/A2     : ADC1 ve ADC2'nin ayni PC1 analog node raw olcumleri.
+CAND      : ADC1/ADC2 ortalamasi.
+MED       : P83 7-sample median.
+FILT      : P83 yayinlanan filtreli ADC.
+MAXSTEP   : P87'nin 500 Hz ic sample'larda gordugu en buyuk atlama ve from->to.
+GAP raw   : candidate'ta ardışık sample farki >8 ADC olan olay sayisi.
+GAP filt  : filtered outputta >6 ADC atlama; normal P83 cap nedeniyle genelde 0 olmali.
+pairDmax  : ADC1/ADC2 arasinda test boyunca gorulen maksimum fark.
+rej P/R/Q : pair reject / rate reject / quarantine sayaclari.
+
+YORUM
+-----
+1) A1/A2/CAND max-step buyuk ve sorunlu araligi atliyorsa:
+   analog kaynak/pot/wiper/kablo/PC1 yolu supheli.
+
+2) A1/A2/CAND yavas ve surekli ilerliyor ama FILT eski degerde kaliyor,
+   pair/rate/quarantine artiyorsa:
+   P83 filtre/guard esikleri gercek mekanik harekete fazla sert geliyor olabilir.
+
+3) ADC1 ve ADC2 birlikte ayni anda sicrarsa:
+   iki bagimsiz sensor degildir; ayni PC1 common-mode analog olayidir.
+
+4) ADC1/ADC2 birbirinden ayrisiyorsa ve pairDmax/pair reject artiyorsa:
+   source impedance, ADC sequential timing veya analog node stabilitesi incelenmeli.
+
+Logu test sonunda gonder; P87 cumulative MAXSTEP/GAP sayaçlari sayesinde UART 10 Hz olsa
+bile 500 Hz raw sample katmanindaki en buyuk atlamalari kaybetmiyoruz.

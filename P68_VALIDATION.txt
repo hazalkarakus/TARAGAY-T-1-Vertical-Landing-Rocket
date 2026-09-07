@@ -1,0 +1,18 @@
+P68 VALIDATION
+==============
+Rocket basis: P67
+Ground basis: V10/P67
+
+PASS 25/25 critical rocket flight/control source files byte-identical vs P67
+PASS Rocket changed logical source only: app_version.h + UARTTelemetry diagnostics
+PASS NRFTelemetry state machine unchanged
+PASS RemoteControl/E-Stop/Tahliye parser unchanged
+PASS NRF24 rocket driver unchanged
+PASS IMU/SensorManager/Baro/Lidar/ESKF unchanged
+PASS SDLogger/Needle/SolenoidOutput unchanged
+PASS Ground RF protocol/address/channel/payload unchanged
+PASS Ground main.c clang Cortex-M3 -Wall -Wextra -Werror syntax
+PASS Rocket uart_telemetry.c clang Cortex-M4 -Wall -Wextra -Werror syntax
+PASS Python monitors py_compile
+
+NOTE: Final ELF/link/build must be done in STM32CubeIDE on the user's machine.

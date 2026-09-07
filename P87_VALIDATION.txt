@@ -1,0 +1,55 @@
+TARAGAY-T1 P87 ADC SWEEP DIAGNOSTIC VALIDATION
+==============================================
+Firmware: 8.19M-P87-ADC-SWEEP-DIAGNOSTIC
+Patch   : 72
+
+PURPOSE
+-------
+Determine whether observed missing ADC ranges originate in raw PC1 conversion
+or are created/held by the P83 robust-feedback filtering and guard path.
+
+SAFETY
+------
+PASS - APP_NEEDLE_ADC_DIAGNOSTIC_MODE = 1.
+PASS - APP_NEEDLE_P87_ADC_SWEEP_DIAGNOSTIC_MODE = 1.
+PASS - NeedleValveHW_SetEnabled() forces enable=0 in diagnostic mode.
+PASS - DriveOpen()/DriveClose() are no-ops in diagnostic mode.
+PASS - Integration service continuously ForceSafe + motor Stop/Disable.
+PASS - TIM7 ISR remains a hard motor Stop.
+PASS - NRF disabled and UART RX commands disabled by compile-time isolation guard.
+PASS - P87 is DO-NOT-FLY and intended for manual pot/shaft motion only.
+
+P87 INTERNAL SWEEP TELEMETRY
+----------------------------
+PASS - Native ADC path remains ~500 Hz (2 ms sample period).
+PASS - Tracks cumulative ADC1/ADC2/candidate min/max.
+PASS - Tracks maximum consecutive raw steps with exact from->to endpoints.
+PASS - Tracks filtered maximum step with from->to endpoints.
+PASS - Counts candidate raw-gap events >8 ADC/sample.
+PASS - Counts filtered discontinuities >6 ADC/sample.
+PASS - Tracks maximum ADC1/ADC2 pair difference.
+PASS - Existing P83 pair/rate/quarantine/reacquire telemetry remains intact.
+
+UART
+----
+PASS - P83 356-field stream extended by 22 P87 fields = 378 fields total.
+PASS - monitor_uart_p87_adc_sweep.py FIELDS = 378.
+PASS - Python py_compile successful.
+
+STATIC C CHECKS
+---------------
+Tool: clang, target arm-none-eabi, Cortex-M4, USE_HAL_DRIVER, STM32F407xx.
+PASS - NeedleValveIntegrationTest (-Wall -Wextra -Werror).
+PASS - NeedleValveHardware (-Wall -Wextra -Werror).
+PASS - UARTTelemetry (-Wall -Wextra -Werror).
+NOTE - Final STM32CubeIDE Clean + Build + link is still required before flash.
+
+REQUIRED BENCH RUN
+------------------
+NO GAS / NO PRESSURE. Motor and RCS electrical power physically OFF.
+Slow manual sweep through the suspected missing ADC region, then reverse.
+Run:
+  python -u monitor_uart_p87_adc_sweep.py --port COM21 --log uart_p87_adc_sweep.txt
+
+OFFLINE VALIDATION: PASS
+HARDWARE RESULT   : PENDING USER BENCH RUN

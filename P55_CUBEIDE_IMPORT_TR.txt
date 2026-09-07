@@ -1,0 +1,17 @@
+P55 CubeIDE import:
+
+1) ZIP'i yeni bos bir klasore cikarin.
+2) STM32CubeIDE -> File -> Import -> Existing Projects into Workspace.
+3) TGY_V8_19M_P55_IMU_FAST_CONFIG_REPAIR projesini secin.
+4) Project -> Clean...
+5) Build Project.
+
+Beklenen firmware kimligi:
+  FW 8.19M-P55-IMU-FAST-CONFIG-REPAIR
+  TGY UART FLIGHT DIAGNOSTICS V66
+  $TGY66
+
+Bench monitor:
+  python -u monitor_uart_p55.py --port COM8
+
+Target build kullanicinin CubeIDE ortaminda yapilmalidir.

@@ -1,0 +1,54 @@
+P112R12 PRODUCTION AUTONOMOUS 950+ INERT VALIDATION
+
+PASS: R10 virtual GNC stimulus disabled
+PASS: R11 PA0 commissioning owner disabled
+PASS: GeneratedFlightControl -> authorization -> P111 -> P110/P112 -> motor route retained
+PASS: CLOSED reference floor = 950 ADC
+PASS: R10R2 adaptive correction guard retained
+PASS: R10R3 settled same-target hold retained
+PASS: RCS physical output hard-locked safe in this inert profile
+PASS: ground-vent output hard-locked safe in this inert profile
+PASS: vent-servo output hard-locked CLOSED in this inert profile
+PASS: UART actuator RX command path remains disabled
+PASS: P110 / needle HW / P111 / app_tasks / GFC / TIM7 / SD core hashes unchanged from validated R11R2 base
+PASS: autonomous supervisor host regression
+PASS: same-target settled-hold host regression
+PASS: generated Ucus_Bilgisayari_private.h packaged
+PASS: monitor Python syntax check
+
+NOT RUN: STM32/Cortex-M4 target compile (arm-none-eabi-gcc unavailable in this environment)
+DO NOT FLY: inert/depressurized bench validation only.
+P112R5 autonomous supervisor host test: PASS
+P112R10R3 same-target settled hold host test: PASS
+requests=3 retargets=0 force_safe=1 moves=2
+PASS: version
+PASS: project name
+PASS: R12 production rev
+PASS: R12 inert output isolation
+PASS: R10 virtual stimulus disabled
+PASS: R11 PA0 commissioning disabled
+PASS: autonomous actuator owner enabled
+PASS: UART RX actuator commands off guard
+PASS: 950 closed-reference floor
+PASS: 950 host floor
+PASS: production GNC submit route
+PASS: commissioning branch compile-time off
+PASS: real ESKF GNC branch retained
+PASS: RCS hard lock includes R12
+PASS: ground vent hard lock includes R12
+PASS: vent servo hard lock includes R12
+PASS: R10R3 settled same-target hold retained
+PASS: R10R2 correction guard retained
+PASS: generated private header packaged
+PASS: do-not-fly marker
+PASS: validated core unchanged: App/Services/NeedleValveIntegrationTest/needle_valve_integration_test.c
+PASS: validated core unchanged: App/Services/NeedleValveHardware/needle_valve_hw.c
+PASS: validated core unchanged: App/Services/NeedleValveAutonomousControl/needle_valve_autonomous_control.c
+PASS: validated core unchanged: App/Core/Tasks/app_tasks.c
+PASS: validated core unchanged: App/Modules/Control/GeneratedFlightControl/generated_flight_control.c
+PASS: validated core unchanged: App/app.c
+PASS: validated core unchanged: Core/Src/stm32f4xx_it.c
+PASS: validated core unchanged: App/Services/SDLogger/sd_logger.c
+PASS: validated core unchanged: App/Services/UARTTelemetry/uart_telemetry.c
+PASS: RCS macro is conditioned by inert isolation
+P112R12 production autonomous 950+ inert static/host validation: PASS

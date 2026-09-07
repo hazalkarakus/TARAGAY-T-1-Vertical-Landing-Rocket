@@ -1,0 +1,64 @@
+TARAGAY-T1 P83 - BOOT ACQUISITION + SAFE RE-ACQUISITION FEEDBACK
+================================================================
+
+FIRMWARE BANNER
+---------------
+8.19M-P83-BOOT-SAFE-REACQUIRE-FEEDBACK
+
+PURPOSE
+-------
+P82 showed a startup-anchor failure: the filtered position could be initialized
+from an early transient and then quarantine recovery could never return near the
+bad anchor. P83 removes that failure mode.
+
+P83 DOES NOT MOVE THE VALVE.
+- needle enable is forced LOW in hardware service
+- OPEN/CLOSE drive functions are no-ops in diagnostic mode
+- RPWM/LPWM remain zero
+- RCS is forced safe
+- UART RX commands are disabled
+
+P83 ALGORITHM
+-------------
+1. ADC1 + ADC2 read PC1 at ~500 Hz.
+2. 7-sample median robust path retained.
+3. Boot position is NOT accepted immediately.
+4. The median must remain in a <=24 ADC cluster for ~200 ms before the first
+   filtered position is created.
+5. Impossible raw/median motion still triggers reject/quarantine.
+6. Quarantine first tries to recover near last-good.
+7. Because this P83 image is compile-time motor-locked, a NEW stable cluster
+   lasting ~500 ms may safely re-anchor the diagnostic feedback.
+8. That far re-anchor is bench-only and must NOT be copied unconditionally into
+   future motor-enabled/flight firmware.
+
+TEST
+----
+NO GAS / NO PRESSURE.
+Prefer motor and RCS electrical power physically OFF.
+
+CubeIDE:
+  Clean Project
+  Build Project
+  Flash
+
+Verify the startup banner says P83.
+
+Then run:
+  python -u monitor_uart_p83_boot_safe_reacquire.py --port COM21 --log uart_p83_boot_safe_reacquire.txt
+
+Run 60-120 seconds without touching the pot, shaft or cable.
+
+SUCCESS BEHAVIOR
+----------------
+Startup:
+  mode=BOOT_ACQ -> progress reaches 100% -> mode=NORMAL -> VALID=1
+
+Large glitch:
+  rate/pair reject increases -> mode=QUAR -> VALID=0 -> filtered holds
+
+If the old last-good was wrong but the new signal is truly stable in this
+motor-locked bench image:
+  reacquire_count increases -> filtered re-anchors -> NORMAL -> VALID=1
+
+Send uart_p83_boot_safe_reacquire.txt for analysis.

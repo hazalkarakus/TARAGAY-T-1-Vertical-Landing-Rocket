@@ -1,0 +1,31 @@
+P59 CHANGE / INTEGRITY AUDIT
+============================
+Receiver NRF driver hash:
+  old working V26: da98995959d0a83cb50fa243e98722bbad4da2a15c5e48cfe47d3e1eb0522ff0
+  P57 base: da98995959d0a83cb50fa243e98722bbad4da2a15c5e48cfe47d3e1eb0522ff0
+  P59 output: da98995959d0a83cb50fa243e98722bbad4da2a15c5e48cfe47d3e1eb0522ff0
+=> All three receiver NRF24 drivers are byte-identical.
+
+TX NRF driver hash:
+  TX V3 base: eb0ad8bcca7b15b09dacbcc5b16ba7acd09f037505976bf6f056e2508204660c
+  TX V4 output: eb0ad8bcca7b15b09dacbcc5b16ba7acd09f037505976bf6f056e2508204660c
+=> TX radio driver is byte-identical; only switch semantic/pin integration was revised.
+
+P57 files changed in P59 (metadata/docs not filtered here):
+  tgy.ioc
+  .project
+  .cproject
+  .mxproject
+  App/app.c
+  App/Common/app_version.h
+  App/Common/app_config.h
+  App/Platform/board_pins.h
+  App/Modules/RemoteControl/remote_control.c
+  App/Modules/RemoteControl/remote_control.h
+  App/Core/Tasks/app_tasks.c
+  App/Services/SolenoidOutput/solenoid_output.h
+  App/Services/SolenoidOutput/solenoid_output.c
+  Core/Inc/main.h
+  Core/Src/gpio.c
+
+Critical unchanged subsystems verified by tools/validate_p59.py: IMU, FullStateESKF, Barometer, Lidar, SDLogger, NeedleValve internals.

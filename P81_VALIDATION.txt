@@ -1,0 +1,95 @@
+TARAGAY-T1 P81 DUAL-ADC ROBUST FEEDBACK VALIDATION
+===================================================
+Firmware: 8.19M-P81-DUAL-ADC-ROBUST-FEEDBACK
+Purpose : DO-NOT-FLY bench validation of robust needle position feedback
+
+1) INPUT FROM P80
+-----------------
+P80 showed ADC1 and ADC2 observing the same unstable PC1 signal, while ADC
+conversion timeouts remained zero and VREFINT was comparatively stable. P81
+therefore treats the main risk as an external/common analog feedback problem,
+not a single ADC peripheral fault.
+
+2) MOTOR / RCS SAFETY
+---------------------
+PASS - APP_NEEDLE_ADC_DIAGNOSTIC_MODE remains 1.
+PASS - NeedleValveHW_SetEnabled() compile-time forces enable=0.
+PASS - NeedleValveHW_DriveOpen()/DriveClose() remain no-ops.
+PASS - NeedleValveIntegrationTest continuously Stop()+SetEnabled(0).
+PASS - RCS SolenoidOutput_ForceSafe() remains continuous.
+PASS - USER/PA0 has no motion command in the P81 integration service.
+PASS - NRF remains disabled by existing compile-time bench guard.
+PASS - UART RX commands remain disabled by existing compile-time bench guard.
+
+3) ROBUST FEEDBACK DESIGN
+-------------------------
+PASS - ADC1 + ADC2 long-sample PC1 pair at ~500 Hz.
+PASS - Pair hard reject when |ADC1-ADC2| > 30 ADC10.
+PASS - Accepted pair candidate = average(ADC1,ADC2).
+PASS - 7 accepted-sample median; minimum 5 samples before valid feedback.
+PASS - Large median jump threshold = 35 ADC.
+PASS - Large level change requires 3 persistent median samples within +/-20 ADC.
+PASS - Confirmation delay is nominally ~6 ms at 500 Hz.
+PASS - Pending large jump makes feedback INVALID; last-good is held.
+PASS - Normal path uses 3 ADC deadband + 1/4 IIR.
+PASS - Separate confidence score; valid threshold = 60%.
+PASS - 1 s raw-vs-filtered p-p and max-step diagnostics.
+PASS - VREFINT 1 s p-p retained.
+PASS - Combined ADC timeout count retained.
+
+4) UART / PYTHON
+----------------
+PASS - Exactly 20 P81 tail fields replace the P80 20-field tail.
+PASS - monitor_uart_p81_robust_feedback.py FIELDS = 356.
+PASS - Python py_compile.
+PASS - Synthetic compact-status rendering.
+
+P81 tail fields:
+p81_diag_flags,p81_samples_total,p81_adc1_raw,p81_adc2_raw,
+p81_pair_diff,p81_pair_candidate,p81_median7,p81_filtered_adc,
+p81_feedback_valid,p81_confidence_pct,p81_pair_reject_count,
+p81_spike_reject_count,p81_confirmed_jump_count,p81_hold_count,
+p81_adc_timeout_count,p81_win_raw_pp,p81_win_filtered_pp,
+p81_win_raw_max_step,p81_win_filtered_max_step,p81_vref_win_pp_raw12
+
+5) STATIC C CHECKS
+------------------
+Tool: clang, target arm-none-eabi, Cortex-M4, USE_HAL_DRIVER, STM32F407xx.
+PASS - App/Services/NeedleValveHardware/needle_valve_hw.c (-Wall -Wextra -Werror).
+PASS - App/Services/NeedleValveIntegrationTest/needle_valve_integration_test.c (-Wall -Wextra -Werror).
+PASS - App/Services/UARTTelemetry/uart_telemetry.c (-Wall -Wextra -Werror).
+NOTE - arm-none-eabi-gcc / STM32CubeIDE linker is not installed in this sandbox;
+       final CubeIDE Clean + Build + link is required before flash.
+
+6) CRITICAL REGRESSION AUDIT
+----------------------------
+PASS - Scheduler source byte-identical P80 -> P81.
+PASS - IMU source byte-identical P80 -> P81.
+PASS - Barometer source byte-identical P80 -> P81.
+PASS - Lidar source byte-identical P80 -> P81.
+PASS - FullStateESKF source byte-identical P80 -> P81.
+PASS - SDLogger source byte-identical P80 -> P81.
+PASS - PreflightTrigger source byte-identical P80 -> P81.
+PASS - SystemMonitor source byte-identical P80 -> P81.
+PASS - SolenoidOutput source byte-identical P80 -> P81.
+PASS - AttitudeControl source byte-identical P80 -> P81.
+PASS - GeneratedFlightControl source byte-identical P80 -> P81.
+PASS - Native NeedleValveController source byte-identical P80 -> P81.
+NOTE - NeedleValveHardware changes from P80 are comments only; motor lock and ADC logic are unchanged.
+NOTE - app.c change is comment only around the existing fast diagnostic service call.
+
+7) REQUIRED BENCH RUN
+---------------------
+- NO GAS / NO PRESSURE.
+- Prefer motor and RCS electrical power physically OFF as a second layer.
+- CubeIDE Clean -> Build -> Flash.
+- Run monitor_uart_p81_robust_feedback.py.
+- Do not touch pot/shaft/cables for 20-30 seconds.
+- Send uart_p81_robust_feedback.txt.
+
+Primary success criterion:
+  filtered p-p << raw p-p, feedback_valid mostly 1, confidence >=60,
+  timeout=0, needle_enabled/rpwm/lpwm=0/0/0.
+
+VALIDATION RESULT: OFFLINE STATIC VALIDATION PASS
+HARDWARE RESULT   : PENDING USER CUBEIDE BUILD + BENCH RUN

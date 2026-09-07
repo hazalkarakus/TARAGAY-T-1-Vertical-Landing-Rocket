@@ -1,0 +1,52 @@
+TARAGAY-T1 P54 VALIDATION
+=========================
+Identity
+--------
+Project : TGY_V8_19M_P54_BARO_RATE_GUARD_IMU_REG_DIAG
+FW      : 8.19M-P54-BARO-RATE-GUARD-IMU-REG-DIAG
+UART    : $TGY65 / V65 / 297 fields
+SD      : V14 / 384 bytes per state frame / format unchanged
+
+Automated/static validation
+---------------------------
+P54 validator: PASS
+- P53 preflight barometer reference tracking retained
+- one-way PE9/flight reference freeze retained
+- P52 observability-aware covariance protections retained
+- P51 staggered stationary corrections / flight stationary gate retained
+- P49 chronological SD FIFO protections retained
+- P54 time/rate-aware barometer raw-pressure guard present
+- P54 IMU pattern-time register snapshot diagnostic present
+- UART C/header/Python contract: 297/297 PASS
+- synthetic UART CRC decode: PASS
+
+Python syntax
+-------------
+monitor_uart_p54.py: PASS
+decode_flight_v14_p54.py: PASS
+validate_p54.py: PASS
+
+Host regression tests
+---------------------
+P44 scheduler host tests: PASS
+V50 vertical sensor policy host tests: PASS
+V50 generated vertical fallback host tests: PASS
+
+Host C syntax checks of P54-modified modules
+--------------------------------------------
+barometer.c: PASS
+imu.c: PASS
+uart_telemetry.c: PASS
+
+Important limitation
+--------------------
+The assistant environment does not have the STM32 ARM target compiler/toolchain
+available for a final Cortex-M4 CubeIDE compile/link. A clean STM32CubeIDE target
+build on the real project is required before flashing.
+
+P54 test intent
+---------------
+1. Keep PE9 CLOSED for the full 10-minute stationary warm-up test.
+2. Verify barometer datum tracking stays active and height stays near zero.
+3. Inspect P54 IMU register snapshot if a repeated-word event occurs.
+4. Only after 10 minutes, open PE9 and verify the barometer datum freezes.

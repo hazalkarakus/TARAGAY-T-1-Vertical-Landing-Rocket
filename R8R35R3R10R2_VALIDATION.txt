@@ -1,0 +1,31 @@
+R8R35R3R10R2 ESTOP + FLIGHT FEEDBACK RECOVERY — STATIC VALIDATION
+
+Base: R8R35R3R10R1 60S ENDURANCE.
+- RAM-first flight logging architecture retained.
+- 7.5 Hz flight RAM storage, 512 x 96 B (~68.27 s) retained.
+- Flight SDIO launch prohibition retained.
+- E-STOP feedback reacquire: motor OFF while invalid; timeout 1200 ms; stable-valid gate 120 ms.
+- One CLOSED-only E-STOP override may clear stale FEEDBACK/ADC_INVALID after live feedback revalidation.
+- Flight feedback recovery: motor must be stopped; P83 NORMAL stable 250 ms; max 2 clears; GNC must re-authorize normally.
+- No reference bypass, no blind motion, no STOP-latch clear.
+
+ARM/CubeIDE target build: NOT RUN in this environment.
+
+Host GCC syntax-only checks:
+- needle_valve_autonomous_control.c: PASS
+- uart_telemetry.c: PASS
+- app.c: PASS
+- app_tasks.c: PASS
+- monitor py_compile: PASS
+- TGY73 schema remains 341 fields.
+
+Critical-source comparison vs R3R10R1:
+- TaragayFlightLogic: SAME
+- FullStateESKF: SAME
+- SolenoidOutput: SAME
+- SDLogger: SAME
+- Scheduler: SAME
+- app_tasks: SAME
+- app.c: SAME
+- NeedleValveIntegrationTest low-level: SAME
+- Intentional runtime logic change: NeedleValveAutonomousControl only.

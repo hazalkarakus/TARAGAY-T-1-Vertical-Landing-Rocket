@@ -1,0 +1,40 @@
+V49 RCS LIVE EXPRESSIONS
+========================
+
+preflight_trigger_status.state
+preflight_trigger_status.flight_active
+preflight_trigger_status.fault_latched
+
+v23_rcs_estimator_healthy
+v23_rcs_requested_mask
+v23_rcs_applied_mask
+v23_rcs_fault
+v23_rcs_control_update_count
+v23_rcs_output_update_count
+
+Suggested AttitudeControlStatus_t fields through AttitudeControl_GetStatus():
+  eskf_source_active
+  roll_deg
+  pitch_deg
+  roll_rate_dps
+  pitch_rate_dps
+  roll_pd_time_signed_ms
+  pitch_pd_time_signed_ms
+  roll_commanded_pulse_ms
+  pitch_commanded_pulse_ms
+  roll_pulse_remaining_ms
+  pitch_pulse_remaining_ms
+  roll_cooldown_remaining_ms
+  pitch_cooldown_remaining_ms
+  roll_auto_damping
+  pitch_auto_damping
+  valve_demand_mask
+  valve_applied_mask
+  state
+  fault
+
+Mask bits:
+  0x01 = PE7  / roll positive-error valve
+  0x02 = PE11 / roll negative-error valve
+  0x04 = PE15 / pitch positive-error valve
+  0x08 = PB15 / pitch negative-error valve

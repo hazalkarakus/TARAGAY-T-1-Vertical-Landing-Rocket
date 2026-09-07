@@ -1,0 +1,35 @@
+P112R12R8R27 VALIDATION
+========================
+
+Purpose:
+- Replace the R8R26 two-pose mount calibration with a three-pose bench calibration: upright, +X tilt, +Y tilt.
+- Reject wrong +Y sign / inconsistent geometry before any physical relay authorization.
+- Preserve real ESKF input, RCS V7.13.4, single flight authority retirement guards, needle 3-turn=585 ADC limit and E-STOP semantics.
+
+Host three-pose regression:
+- Upright 200 samples -> phase 2 PASS
+- +X 120 samples -> phase 4, still invalid PASS
+- Deliberate -Y pose -> remains phase 4, ySamples=0, agreement=-1.000 PASS
+- Correct +Y 120 samples -> phase 6, valid=1, fault=0 PASS
+- X/Y measured angle=90.00 deg PASS
+- axis agreement=1.0000 PASS
+- determinant=1.00000 PASS
+- orthogonality error=0.000000 PASS
+- recovered matrix max error=0.00000 in synthetic mounting test PASS
+- corrected +10 deg lateral-A and -11 deg lateral-B attitude tests PASS
+
+Changed-source host syntax:
+- taragay_flight_logic.c: PASS with -Wall -Wextra -Werror host regression compile
+- app_tasks.c: PASS host syntax
+- solenoid_output.c: PASS host syntax
+- uart_telemetry.c: PASS host syntax; only pre-existing unused legacy banner/header warnings
+- monitor Python py_compile: PASS
+
+Safety:
+- Physical RCS relay authorization still requires calibration valid + real input valid + preflight ready + system_ok + no E-STOP.
+- Calibration-in-progress/fault keeps flight-logic commands safe.
+- Needle authorization remains revoked in this bench branch; no needle test was enabled.
+- APP_P112R12R8R27_THREE_POSE_FRAME_CAL_REV is compile-guarded at 1.
+
+No ARM/CubeIDE target compiler is installed in assistant environment.
+Required user-side target check: Clean -> Build -> Flash.

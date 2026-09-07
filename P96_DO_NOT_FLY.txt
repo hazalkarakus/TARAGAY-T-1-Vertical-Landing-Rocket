@@ -1,0 +1,11 @@
+P96 IS A BENCH-ONLY MOTOR/ADC COMMISSIONING BUILD. DO NOT FLY.
+
+- NO GAS / NO PRESSURE.
+- RCS is forced safe by the diagnostic profile.
+- One automatic relative 100-ADC OPEN test runs per MCU reset after the 5 s gate.
+- Motor drive uses bounded 50.2% PWM chunks with hard cutoff.
+- After every chunk, both bridge enables remain HIGH with 0/0 PWM for a 100 ms dynamic-brake hold.
+- Keep hands, tools, clothing and cables clear of motor, gearbox, coupling and valve shaft.
+- Have a physical motor-power cutoff available.
+- Unexpected reverse/large motion, hard impact or binding: physically cut motor power and do not repeat.
+- This build is not flight-qualified control software.

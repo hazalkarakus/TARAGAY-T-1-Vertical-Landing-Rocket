@@ -1,0 +1,33 @@
+R8R35R3R10R4R1 POSTFLIGHT SD SAFE REPLAY - STATIC VALIDATION
+[PASS] R4R1 version string
+[PASS] CubeIDE project name
+[PASS] postflight quiet = 3000 ms
+[PASS] E-stop CLOSE complete gate
+[PASS] E-stop close failure blocks replay
+[PASS] actual motor/RCS OFF gate
+[PASS] quiet timestamp starts after gates
+[PASS] postflight command-path soft recovery
+[PASS] no full card reinit in R10 postflight
+[PASS] historical PE9/tail SD fault no longer hard-blocks replay
+[PASS] fresh post-recovery SD fault blocks further replay
+[PASS] R10 RAM decimation retained
+[PASS] runtime HAL_Delay guard retained
+[PASS] R4/frozen unchanged: App/Modules/NRF24/nrf24.c
+[PASS] R4/frozen unchanged: App/Services/NRFTelemetry/nrf_telemetry.c
+[PASS] R4/frozen unchanged: App/Modules/RemoteControl/remote_control.c
+[PASS] R4/frozen unchanged: App/app.c
+[PASS] R4/frozen unchanged: App/Core/Tasks/app_tasks.c
+[PASS] R4/frozen unchanged: App/Core/Scheduler/scheduler.c
+[PASS] R4/frozen unchanged: App/Modules/Control/TaragayFlightLogic/taragay_flight_logic.c
+[PASS] R4/frozen unchanged: App/Modules/Estimation/FullStateESKF/full_state_eskf.c
+[PASS] R4/frozen unchanged: App/Services/SolenoidOutput/solenoid_output.c
+[PASS] R4/frozen unchanged: App/Services/NeedleValveAutonomousControl/needle_valve_autonomous_control.c
+[PASS] R4/frozen unchanged: App/Services/NeedleValveIntegrationTest/needle_valve_integration_test.c
+[PASS] R4/frozen unchanged: App/Modules/Control/NeedleValve/needle_valve_controller.c
+[PASS] R4/frozen unchanged: FATFS/Target/bsp_driver_sd.c
+[PASS] R4R1 monitor present
+[PASS] monitor py_compile
+[PASS] TGY73 schema remains 341 fields
+[PASS] modified SDLogger host GCC syntax-only
+PASS=30 FAIL=0
+NOTE: ARM/CubeIDE target build and hardware inert test are NOT run here.

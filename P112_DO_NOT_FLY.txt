@@ -1,0 +1,2 @@
+P112 BENCH ONLY / DO NOT FLY / NO GAS / NO PRESSURE.
+Physical motor cutoff required. Stop immediately on hard stall, coupling slip, binding, or hard-stop contact.

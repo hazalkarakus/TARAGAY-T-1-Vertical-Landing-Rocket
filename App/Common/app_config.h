@@ -1,0 +1,1286 @@
+#ifndef APP_CONFIG_H
+#define APP_CONFIG_H
+
+/* -------------------------------------------------------------------------- */
+/* System                                                                     */
+/* -------------------------------------------------------------------------- */
+
+#define APP_SYSTEM_NAME                         "TARAGAY-T1_AVIONICS"
+#define APP_SYSTEM_LOOP_ENABLED                 1
+
+/* -------------------------------------------------------------------------- */
+/* Scheduler                                                                  */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * IMU artık SPI1 + DMA.
+ *
+ * IMU  = ISM330DLC, 1000 Hz task, sensor ODR = 1.66 kHz
+ * BARO = BMP585, 218.5 Hz sensor ODR, direct fresh samples at 200 Hz
+ * LIDAR = Garmin LIDAR-Lite v3 default sensitivity, nominal real 200 Hz
+ * SYSMON = 10 Hz
+ */
+
+#define APP_TASK_IMU_PERIOD_US                  1000UL
+#define APP_TASK_BAROMETER_PERIOD_US            5000UL
+#define APP_TASK_LIDAR_PERIOD_US                1000UL
+#define APP_TASK_NRF_PERIOD_US                  5000UL
+#define APP_TASK_FULL_ESKF_CORRECTION_PERIOD_US 5000UL
+#define APP_TASK_FULL_ESKF_COVARIANCE_PERIOD_US 40000UL
+#define APP_TASK_SYSMON_PERIOD_US               100000UL
+
+#define APP_TASK_IMU_BUDGET_US                  950UL
+#define APP_TASK_BAROMETER_BUDGET_US            5000UL
+/* Garmin v3 balanced profile: 1 kHz service, target <=250 Hz samples. */
+/* Completion-driven measurement may be slower on weak/long-range returns. */
+#define APP_TASK_LIDAR_BUDGET_US                400UL
+/* NRF monitor is polling/IRQ assisted and never drives actuators in V8.9. */
+#define APP_TASK_NRF_BUDGET_US                  1000UL
+/* 200 Hz correction task; covariance propagation is internally 25 Hz. */
+#define APP_TASK_FULL_ESKF_CORRECTION_BUDGET_US 2500UL
+#define APP_TASK_FULL_ESKF_COVARIANCE_BUDGET_US 650UL
+#define APP_TASK_SYSMON_BUDGET_US               1000UL
+
+/* P34 cooperative-slot guards. IMU owns the hard 1 ms cadence; slower work
+ * is deferred rather than allowed to start too close to the next IMU release. */
+#define APP_P34_IMU_GUARD_US                     40UL
+/* P112R12R8R7: R8R6 proved that 650 us BARO/LiDAR reserves starve the
+ * cooperative sensor services even though their measured steady-state task
+ * costs are far lower. Restore the proven R8R5 admission window while keeping
+ * the R8R6 compact-UART and ESKF timing reductions that produced miss_imu=0. */
+#define APP_P34_ESKF_SLOT_RESERVE_US             620UL
+#define APP_P34_BARO_SLOT_RESERVE_US             360UL
+#define APP_P34_LIDAR_SLOT_RESERVE_US            360UL
+#define APP_P34_NRF_SLOT_RESERVE_US              80UL
+#define APP_P34_SYSMON_SLOT_RESERVE_US           450UL
+#define APP_P34_COVARIANCE_MIN_SLACK_US          600UL
+/* P112R12R8R6: full 15x15 integrity scanning is sliced out of the 25 Hz
+ * propagation call.  The remaining propagation service is expected to fit
+ * below this reserve; R8R6 qualification rejects any measured violation. */
+#define APP_P44_COVARIANCE_SLOT_RESERVE_US        650UL
+#define APP_P34_SD_MIN_SLACK_US                  220UL
+#define APP_P34_CONTROL_MIN_SLACK_US             250UL
+/* P112R12R8R7: compact TGY69 formatting measured <=379 us in the physical
+ * R8R6 log. 450 us + the existing IMU guard preserves margin and avoids the
+ * R8R6 diagnostic starvation caused by a 650 us admission threshold. */
+#define APP_P34_UART_MIN_SLACK_US                600UL
+#define APP_P112R12R8R8_ESKF_TIMING_MODE         1U
+#define APP_P112R12R8R9_COV_TIMING_OPT            1U
+#define APP_P112R12R8R11_BOUNDED_BACKGROUND_TIMING 1U
+#define APP_P112R12R8R12_NRF_COEXISTENCE_QUAL_REV  1U
+#define APP_P112R12R8R13_P73_FAST_REDUNDANT_NRF_REV 1U
+#define APP_P112R12R8R15_ESTOP_SAFE_CLOSE_REV          1U
+#define APP_P112R12R8R16_ESTOP_EMERGENCY_CLOSE_OVERRIDE_REV 1U
+#define APP_P112R12R8R17_ESTOP_FEEDBACK_REACQUIRE_REV       1U
+#define APP_P112R12R8R18_FLIGHT_FEEDBACK_RECOVERY_REV       1U
+
+/* R8R35R3R10R3: feedback-loss policy.
+ * E-STOP never drives blind: motor output is forced OFF while P83 is not
+ * robust/normal. When live feedback returns and stays valid continuously for
+ * a short validation window, one stale FEEDBACK/ADC_INVALID latch may be
+ * cleared only for the one-shot CLOSED move. A second close-path fault aborts.
+ *
+ * In normal flight, a transient P83 quarantine while the needle is already
+ * stationary inside the last confirmed SAME-target HOLD region no longer
+ * creates a permanent actuator fault. The motor remains OFF and the controller
+ * waits for feedback to reacquire. Any genuine target change clears that HOLD
+ * protection; if feedback then remains invalid, the existing bounded fault
+ * path is retained. A true P110 feedback-invalid motion abort still uses the
+ * bounded recovery below. No blind motion is permitted. */
+#define APP_ESTOP_SAFE_CLOSE_REACQUIRE_TIMEOUT_MS          1200UL
+#define APP_ESTOP_SAFE_CLOSE_VALID_STABLE_MS                120UL
+#define APP_FLIGHT_NEEDLE_FB_RECOVERY_STABLE_MS             250UL
+#define APP_FLIGHT_NEEDLE_FB_RECOVERY_MAX                     2U
+
+/* R8R16 emergency STOP needle policy.
+ * STOP remains a one-way latch and immediately forces all RCS/vent outputs safe.
+ * The ONLY permitted post-STOP actuator action is a one-shot adaptive move to
+ * the already-learned CLOSED reference. If the valve is already inside the
+ * CLOSED tolerance, E-STOP completes even when a prior transient actuator fault
+ * is latched. If the valve is open and robust feedback/reference remain valid,
+ * one prior transient STALL/LOW_LEVEL fault may be cleared exactly once so the
+ * emergency close gets one bounded retry. Feedback/reference faults are never
+ * bypassed. A repeated low-level fault aborts and de-energizes the motor. */
+#define APP_ESTOP_SAFE_CLOSE_TIMEOUT_MS              6000UL
+#define APP_ESTOP_SAFE_CLOSE_TOLERANCE_ADC             12U
+#define APP_P36_FRESH_MIN_SLACK_US               100UL
+#define APP_P36_REMOTE_MIN_SLACK_US              240UL
+
+/* -------------------------------------------------------------------------- */
+/* nRF24 remote ON/OFF link                                                   */
+/* -------------------------------------------------------------------------- */
+
+#define APP_NRF24_CHANNEL                       76U
+#define APP_NRF24_PAYLOAD_SIZE                  4U
+#define APP_NRF24_TX_TIMEOUT_MS                 30UL
+/* P31 full-system profile: nRF24 is enabled.
+ * Remote RX stays isolated on SPI3 and the 200 Hz scheduler task only snapshots
+ * diagnostics; continuous receiver service remains in App_Run(). */
+#define APP_OPTIONAL_NRF24_ENABLED               1U
+#define APP_NRF24_ENABLED                        APP_OPTIONAL_NRF24_ENABLED
+
+#define APP_REMOTE_POLL_PERIOD_MS               5UL
+#define APP_REMOTE_LINK_TIMEOUT_MS              500UL
+/* TX-ONLY GROUND LINK / RX-ONLY ROCKET POLICY.
+ * RF direction is intentionally ONE WAY: ground station -> rocket only.
+ * The rocket never schedules nRF telemetry/downlink packets in any phase.
+ * Remote command reception stays at 5 ms polling (200 Hz), while the ground
+ * transmitter may send its 4-byte command heartbeat at 100 Hz.
+ * Hardware Auto-ACK remains disabled, so the rocket emits no RF acknowledgement.
+ */
+#define APP_NRF_ROCKET_DOWNLINK_ENABLED                 0U
+#define APP_NRF_FLIGHT_COMMAND_PRIORITY_RX_ONLY         1U
+#define APP_NRF_FLIGHT_MINIMAL_FAST_TDD                 0U
+#define APP_NRF_FLIGHT_RX_REARM_PERIOD_MS            1000UL
+/* Reject brief 0/1 command chatter without weakening RF link timeout. */
+#define APP_REMOTE_COMMAND_DEGLITCH_MS           40UL
+#define APP_REMOTE_LED_BLINK_PERIOD_MS          250UL
+
+/* P59 remote safety policy.
+ * Switch-1 is a maintained GROUND VENT request using the four existing RCS
+ * solenoids sequentially. Only one valve is energized at a time, preserving
+ * the opposing-valve interlock and adding a break-before-make deadtime.
+ * Switch-2 is a one-way emergency STOP latch. STOP always has priority. */
+#define APP_REMOTE_VENT_PHYSICAL_ENABLED          1U
+#define APP_REMOTE_VENT_GROUND_ONLY                1U
+#define APP_REMOTE_VENT_HOLD_CONFIRM_MS          250UL
+#define APP_REMOTE_VENT_MAX_PACKET_AGE_MS       250UL
+#define APP_REMOTE_VENT_SOLENOID_ON_MS           100UL
+#define APP_REMOTE_VENT_DEADTIME_MS               50UL
+
+/* P70: PE9 separation latches flight_active, therefore the old GROUND_ONLY
+ * check also blocked a legitimate post-separation depressurization on the
+ * pad/bench.  Do NOT turn the remote vent into an in-flight override.  It is
+ * re-enabled after PE9 only when LIDAR + ESKF independently indicate that the
+ * vehicle is close to the ground and vertically slow for a continuous dwell. */
+#define APP_REMOTE_VENT_POSTSEP_GROUNDED_ENABLE          1U
+#define APP_REMOTE_VENT_POSTSEP_MIN_LIDAR_M             0.05f
+#define APP_REMOTE_VENT_POSTSEP_MAX_LIDAR_M             0.50f
+#define APP_REMOTE_VENT_POSTSEP_MAX_ABS_VZ_MPS          0.50f
+#define APP_REMOTE_VENT_POSTSEP_GROUND_STABLE_MS       500UL
+#define APP_REMOTE_VENT_POSTSEP_MAX_LIDAR_AGE_US     50000UL
+
+#if ((APP_REMOTE_VENT_PHYSICAL_ENABLED != 1U) || \
+     (APP_REMOTE_VENT_GROUND_ONLY != 1U) || \
+     (APP_REMOTE_VENT_POSTSEP_GROUNDED_ENABLE != 1U) || \
+     (APP_REMOTE_VENT_POSTSEP_GROUND_STABLE_MS < 250UL) || \
+     (APP_REMOTE_VENT_POSTSEP_MAX_LIDAR_AGE_US > 100000UL) || \
+     (APP_REMOTE_VENT_SOLENOID_ON_MS < 20UL) || \
+     (APP_REMOTE_VENT_DEADTIME_MS < 20UL) || \
+     (APP_REMOTE_VENT_MAX_PACKET_AGE_MS >= APP_REMOTE_LINK_TIMEOUT_MS))
+#error "P70 remote vent safety policy must remain enabled and bounded."
+#endif
+
+/* -------------------------------------------------------------------------- */
+/* Tahliye servosu - nRF 0/1 ile kontrol                                      */
+/* -------------------------------------------------------------------------- */
+
+#define APP_VENT_SERVO_ENABLED                  0U
+#define APP_VENT_SERVO_PWM_PERIOD_US            20000UL  /* 50 Hz */
+#define APP_VENT_SERVO_MIN_PULSE_US             500U
+#define APP_VENT_SERVO_MAX_PULSE_US             2500U
+
+/*
+ * ILK TEZGAH TESTI ICIN GUVENLI BASLANGIC DEGERLERI:
+ * - 1500 us: servo orta konumu. Vana KAPALI iken hornu bu konuma mekanik olarak tak.
+ * - 1600 us: sadece kucuk bir ilk hareket. Vana 90 derece acilmiyorsa, basincli
+ *   sistemden tamamen ayri halde 50 us adimlarla artirip gercek OPEN degerini bul.
+ *
+ * Servonun 180/270 derece varyanti fotografla kesin ayirt edilemedigi icin
+ * OPEN degeri burada bilerek 90 dereceye zorlanmamistir.
+ */
+#define APP_VENT_SERVO_CLOSED_PULSE_US          1500U
+#define APP_VENT_SERVO_OPEN_PULSE_US            2500U
+/* Extra anti-chatter grace after the 500 ms RF link timeout. */
+/* Total hard-close on genuine link loss: about 600 ms. */
+#define APP_VENT_SERVO_LINK_LOSS_GRACE_MS       100UL
+
+#if (APP_VENT_SERVO_ENABLED != 0U)
+#error "P59 RCS-solenoid vent owns Switch-1; legacy vent servo must stay disabled."
+#endif
+
+/* -------------------------------------------------------------------------- */
+/* IMU                                                                        */
+/* -------------------------------------------------------------------------- */
+
+#define APP_IMU_ENABLED                         1
+#define APP_IMU_UPDATE_RATE_HZ                  1000U
+
+/* ISM330DLC full-scale configuration: ±1000 dps / ±8 g */
+#define APP_IMU_GYRO_SCALE_DPS                  0.035f
+#define APP_IMU_ACCEL_SCALE_G                   0.000244f
+
+/*
+ * Startup calibration runs in the 1 kHz task context, never in the SPI DMA
+ * interrupt. Keep the vehicle motionless while it is still on the connector.
+ * Gyro bias is removed per axis. Because the connector pose is known
+ * (body +Z = +1 g), accelerometer offsets are also removed per axis. This is
+ * an offset calibration; scale-factor calibration still requires multiple poses.
+ */
+#define APP_IMU_STARTUP_CALIBRATION_ENABLED       1U
+#define APP_IMU_CALIBRATION_SAMPLE_COUNT          1200UL
+#define APP_IMU_CALIBRATION_GYRO_HARD_LIMIT_DPS   25.0f
+#define APP_IMU_CALIBRATION_GYRO_STDDEV_MAX_DPS    0.50f
+#define APP_IMU_CALIBRATION_ACCEL_STDDEV_MAX_G      0.030f
+#define APP_IMU_CALIBRATION_ACCEL_AXIS_STDDEV_MAX_G 0.030f
+#define APP_IMU_CALIBRATION_ACCEL_MIN_G             0.85f
+#define APP_IMU_CALIBRATION_ACCEL_MAX_G             1.15f
+#define APP_IMU_CALIBRATION_ACCEL_BIAS_MAX_G        0.25f
+#define APP_IMU_CALIBRATION_MAX_CONSECUTIVE_REJECTS  25U
+
+/* Connector üzerindeki dikey bekleme pozu: body +Z yukarı ve yaklaşık +1 g. */
+#define APP_IMU_CALIBRATION_EXPECTED_ACCEL_X_G      0.0f
+#define APP_IMU_CALIBRATION_EXPECTED_ACCEL_Y_G      0.0f
+#define APP_IMU_CALIBRATION_EXPECTED_ACCEL_Z_G      1.0f
+
+/* -------------------------------------------------------------------------- */
+/* IMU Butterworth low-pass filters                                           */
+/* -------------------------------------------------------------------------- */
+
+/* SensorManager receives accepted IMU samples at approximately 1000 Hz. */
+#define APP_IMU_BUTTERWORTH_ENABLED             1U
+#define APP_IMU_FILTER_SAMPLE_RATE_HZ            1000.0f
+
+/*
+ * Starting values for the rocket test phase:
+ * - Gyro keeps more control bandwidth.
+ * - Accelerometer receives stronger vibration attenuation.
+ */
+#define APP_IMU_GYRO_LPF_CUTOFF_HZ              50.0f
+#define APP_IMU_ACCEL_LPF_CUTOFF_HZ             30.0f
+
+/* Reset filter state after a long scheduling/data gap. */
+#define APP_IMU_FILTER_RESET_GAP_US              30000UL
+
+/* -------------------------------------------------------------------------- */
+/* Barometer / BMP585                                                        */
+/* -------------------------------------------------------------------------- */
+
+#define APP_BAROMETER_ENABLED                   1
+#define APP_BAROMETER_UPDATE_RATE_HZ            200U
+#define APP_BARO_STALE_TIMEOUT_US                50000UL
+
+#define APP_MS5611_CONVERSION_TIME_US           12000UL
+
+#define APP_MS5611_ADC_MIN_VALID                1000UL
+#define APP_MS5611_ADC_MAX_VALID                16777214UL
+
+#define APP_MS5611_REQUIRE_PROM_CRC             0U
+
+#define APP_BARO_PRESSURE_MIN_PA                30000.0f
+#define APP_BARO_PRESSURE_MAX_PA                125000.0f
+
+/* Preserve the previous ~2 s ground-reference averaging duration at 200 Hz. */
+#define APP_BARO_CALIBRATION_SAMPLE_COUNT       400UL
+
+/* P53: while the vehicle is confirmed stationary before separation, let the
+ * ground-pressure datum follow slow sensor warm-up / ambient pressure drift.
+ * Tracking is permanently frozen on first flight-active assertion. */
+#define APP_BARO_GROUND_TRACKING_ENABLED          1U
+#define APP_BARO_GROUND_TRACK_ALPHA               0.0025f
+#define APP_BARO_GROUND_TRACK_MAX_STEP_PA         0.050f
+#define APP_BARO_GROUND_TRACK_MAX_VZ_MPS          0.15f
+#define APP_BARO_GROUND_TRACK_LIDAR_MAX_AGE_US    50000UL
+
+/* -------------------------------------------------------------------------- */
+/* Barometer Butterworth filters                                              */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * BMP585 P112R12R8R5 normal-mode acquisition:
+ * - sensor ODR = 218.5 Hz
+ * - pressure x4 oversampling, temperature x1
+ * - direct atomic 6-byte pressure/temperature read at 200 Hz
+ * - DRDY acquisition gating disabled; identical raw P/T pair = duplicate
+ * - R8R4 bounded low-level recovery + 50 ms upper freshness hold retained
+ *
+ * Therefore the filter is designed for a real 200 Hz accepted stream.
+ */
+#define APP_BARO_BUTTERWORTH_ENABLED            1U
+#define APP_BARO_FILTER_SAMPLE_RATE_HZ           200.0f
+#define APP_BARO_PRESSURE_LPF_CUTOFF_HZ          3.0f
+#define APP_BARO_VERTICAL_SPEED_LPF_CUTOFF_HZ    3.0f
+#define APP_BARO_FILTER_RESET_GAP_US             200000UL
+
+/* P54 raw-pressure rate guard.
+ * At 200 Hz, a physically plausible near-ground trajectory cannot change
+ * pressure by tens/hundreds of pascals in one sample.  P53 logs showed rare
+ * +48 Pa and +1000 Pa transport spikes; the former slipped through the old
+ * fixed 50 Pa threshold and the latter could be accepted after a two-sample
+ * confirmation.  The new gate is time-aware: allow a small noise floor plus
+ * a generous 180 Pa/s (~15 m/s equivalent near sea level).  A 180 Pa absolute
+ * hard jump is never accepted by this driver. */
+#define APP_BARO_RAW_STEP_GUARD_ENABLED           1U
+#define APP_BARO_RAW_BASE_JUMP_PA                 4.0f
+#define APP_BARO_RAW_MAX_RATE_PA_PER_S            180.0f
+#define APP_BARO_RAW_HARD_JUMP_PA                 180.0f
+#define APP_BARO_RAW_STEP_CONFIRM_TOLERANCE_PA    3.0f
+
+/* -------------------------------------------------------------------------- */
+/* LIDAR median + Butterworth filters                                         */
+/* -------------------------------------------------------------------------- */
+
+#define APP_LIDAR_FILTER_ENABLED                 1U
+#define APP_LIDAR_FILTER_SAMPLE_RATE_HZ          200.0f
+#define APP_LIDAR_LPF_CUTOFF_HZ                  15.0f
+#define APP_LIDAR_FILTER_RESET_GAP_US            50000UL
+
+/*
+ * V8.18 flight/sensor-qualification rule: do NOT hard-code a 9 m
+ * startup distance into the LIDAR driver. Publish physical range. The ESKF
+ * owns the relative vertical reference, so startup location can change without
+ * creating a false sensor offset. The calibration code is retained but disabled.
+ */
+#define APP_LIDAR_STARTUP_CALIBRATION_ENABLED    0U
+#define APP_LIDAR_CALIBRATION_REFERENCE_M        9.00f
+#define APP_LIDAR_CALIBRATION_SAMPLE_COUNT       64U
+#define APP_LIDAR_CALIBRATION_MAX_JUMP_M         0.08f
+#define APP_LIDAR_CALIBRATION_STDDEV_MAX_M        0.025f
+#define APP_LIDAR_CALIBRATION_MAX_ERROR_M         0.75f
+
+/* -------------------------------------------------------------------------- */
+/* V8.18 sensor qualification thresholds                                      */
+/* -------------------------------------------------------------------------- */
+
+#define APP_SENSOR_QUAL_GOOD_WINDOWS_REQUIRED          3U
+#define APP_SENSOR_QUAL_IMU_RATE_MIN_HZ              950.0f
+#define APP_SENSOR_QUAL_IMU_RATE_MAX_HZ             1050.0f
+#define APP_SENSOR_QUAL_BARO_RATE_MIN_HZ             190.0f
+#define APP_SENSOR_QUAL_BARO_RATE_MAX_HZ             205.0f
+/* Garmin v3 default-sensitivity profile is completion-driven; ~175-185 Hz was
+ * already observed on the real unit, so qualification accepts 165..205 Hz. */
+#define APP_SENSOR_QUAL_LIDAR_RATE_MIN_HZ             165.0f
+#define APP_SENSOR_QUAL_LIDAR_RATE_MAX_HZ             205.0f
+#define APP_SENSOR_QUAL_BARO_FRESH_US                20000UL
+#define APP_SENSOR_QUAL_LIDAR_FRESH_US               50000UL
+#define APP_SENSOR_MANAGER_IMU_VALID_TIMEOUT_US       10000UL
+
+/* P29 system-level stale-data watchdogs.  They report/contain a frozen data
+ * path without coupling LIDAR loss to the independent RCS attitude loop. */
+#define APP_SYSTEM_MONITOR_STARTUP_GRACE_MS           15000UL
+#define APP_SYSTEM_MONITOR_IMU_STALE_US               20000UL
+#define APP_SYSTEM_MONITOR_LIDAR_STALE_US            100000UL
+#define APP_SYSTEM_MONITOR_ESKF_PUBLIC_STALE_US       50000UL
+#define APP_SENSOR_QUAL_IMU_REST_ACCEL_MIN_G            0.90f
+#define APP_SENSOR_QUAL_IMU_REST_ACCEL_MAX_G            1.10f
+#define APP_SENSOR_QUAL_IMU_REST_GYRO_MAX_DPS           1.00f
+
+/* -------------------------------------------------------------------------- */
+/* Quaternion attitude estimator - Phase 2                                    */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * World frame: ENU-style with +Z upward.
+ * Quaternion rotates body-frame vectors into the world frame.
+ * Initial yaw is zero because no magnetometer / external heading is present.
+ */
+#define APP_ATTITUDE_ESTIMATOR_ENABLED            1U
+#define APP_ATTITUDE_UPDATE_RATE_HZ                1000U
+
+/* Mahony-style accelerometer feedback gains. */
+#define APP_ATTITUDE_KP                            2.0f
+#define APP_ATTITUDE_KI                            0.05f
+#define APP_ATTITUDE_INTEGRAL_LIMIT_DPS            5.0f
+
+/*
+ * Accelerometer correction is trusted near 1 g and smoothly disabled during
+ * strong translational acceleration. Gyro propagation always continues.
+ */
+#define APP_ATTITUDE_ACCEL_FULL_WEIGHT_MIN_G       0.90f
+#define APP_ATTITUDE_ACCEL_FULL_WEIGHT_MAX_G       1.10f
+#define APP_ATTITUDE_ACCEL_ZERO_WEIGHT_MIN_G       0.75f
+#define APP_ATTITUDE_ACCEL_ZERO_WEIGHT_MAX_G       1.25f
+
+#define APP_ATTITUDE_GRAVITY_MPS2                  9.80665f
+#define APP_ATTITUDE_MAX_UPDATE_GAP_US             20000UL
+#define APP_ATTITUDE_STALE_TIMEOUT_US              10000UL
+
+/* Euler angles are diagnostic only; quaternion propagation remains 1000 Hz. */
+#define APP_ATTITUDE_EULER_DECIMATION               5U
+
+
+
+/* -------------------------------------------------------------------------- */
+/* V8.17 MATLAB controller port                                               */
+/* -------------------------------------------------------------------------- */
+
+/* V55 P28 PE9 break-wire input, matched to the confirmed harness.
+ * Harness connected: PE9 is shorted to GND (LOW).
+ * Harness separated/open: internal pull-up reads HIGH, then 10 ms debounce.
+ * A connected state must first be observed; booting with PE9 open cannot
+ * accidentally arm flight control. */
+#define APP_PREFLIGHT_TRIGGER_ENABLED                  1U
+#define APP_PREFLIGHT_MIN_CALIBRATION_MS            3000UL
+#define APP_PREFLIGHT_CONNECTED_CONFIRM_MS           100UL
+#define APP_PREFLIGHT_SEPARATION_DEBOUNCE_MS           10UL
+#define APP_PREFLIGHT_PE9_CONNECTED_IS_LOW              1U
+
+/* No actuator is allowed to move before a valid PE9 separation event. */
+#define APP_ACTUATOR_FLIGHT_INTERLOCK_ENABLED            1U
+
+/* Capture the already-closed needle position without energizing the motor.
+ * The operator must mechanically place the valve at CLOSED before power-up. */
+#define APP_NEEDLE_PREFLIGHT_ZERO_CAPTURE_ENABLED        1U
+#define APP_NEEDLE_PREFLIGHT_ZERO_STABLE_MS            250UL
+
+/*
+ * Flight-control data path is ready for the latest MATLAB/Simulink controller,
+ * but the MATLAB algorithm body is intentionally NOT active yet.
+ *
+ * Exact interface to preserve:
+ *   Valve_Cmd = fcn(z, v, m_guncel, P_main_bar)
+ *
+ * z          : rocket CG height [m]
+ * v          : vertical velocity [m/s], downward negative
+ * m_guncel   : current total mass [kg]
+ * P_main_bar : main-line pressure [bar or Pa]
+ * Valve_Cmd  : normalized needle command [0..1]
+ */
+#define APP_MATLAB_VALVE_CONTROLLER_IMPLEMENTED        0U
+
+/* R2025b model Ucus_Bilgisayari v1.214, embedded compute-only integration.
+ * The model's native sample time is 10 ms. No live pressure or thrust sensor
+ * exists in this hardware build, therefore the explicitly documented model
+ * values below are supplied. V55 routes the result to the needle only after
+ * the complete PE9 preflight/interlock sequence has authorized flight. */
+#define APP_GENERATED_FLIGHT_CONTROL_ENABLED            1U
+#define APP_GENERATED_FC_PHYSICAL_OUTPUT_ENABLED        1U
+#define APP_GENERATED_FC_MODEL_MASS_KG                 27.5f
+#define APP_GENERATED_FC_INITIAL_PRESSURE_BAR         300.0f
+#define APP_GENERATED_FC_THRUST_ESTIMATE_MAX_N         600.0f
+
+/*
+ * V50 vertical-navigation policy:
+ *
+ * - LIDAR acquisition never stops; the 1 kHz DMA state machine keeps trying.
+ * - Full-State ESKF accepts/rejects every LIDAR and barometer sample with its
+ *   own freshness and innovation checks.
+ * - The main-motor controller may continue when either aiding source is
+ *   currently usable. It must never require live LIDAR after thrust starts if
+ *   the barometric height aid remains healthy.
+ * - A preflight LIDAR reference is still mandatory because it establishes the
+ *   absolute height-above-ground datum before separation. Barometer altitude
+ *   is relative to its independently captured startup pressure reference.
+ */
+#define APP_V50_DUAL_VERTICAL_FUSION_ENABLED            1U
+#define APP_V50_REQUIRE_STARTUP_LIDAR_REFERENCE         1U
+#define APP_V50_ALLOW_LIDAR_ONLY_VERTICAL               1U
+#define APP_V50_ALLOW_BARO_ONLY_VERTICAL                1U
+
+#if ((APP_V50_DUAL_VERTICAL_FUSION_ENABLED != 1U) || \
+     (APP_V50_REQUIRE_STARTUP_LIDAR_REFERENCE != 1U) || \
+     (APP_V50_ALLOW_LIDAR_ONLY_VERTICAL != 1U) || \
+     (APP_V50_ALLOW_BARO_ONLY_VERTICAL != 1U))
+#error "V50 dual vertical fusion safety policy must remain fully enabled."
+#endif
+
+/* V55 USART2 diagnostic policy. PA2 transmits a CRC-protected CSV frame at
+ * 10 Hz through DMA1 Stream6. PA3 remains electrically configured as RX, but
+ * no UART command parser is permitted to reach an actuator in this build. */
+#define APP_V55_UART_FLIGHT_DIAGNOSTICS_ENABLED         1U
+#define APP_V55_UART_TELEMETRY_PERIOD_MS              100UL
+#define APP_V55_UART_RX_COMMANDS_ENABLED                0U
+
+#if ((APP_V55_UART_FLIGHT_DIAGNOSTICS_ENABLED != 1U) || \
+     (APP_V55_UART_RX_COMMANDS_ENABLED != 0U) || \
+     (APP_V55_UART_TELEMETRY_PERIOD_MS < 50UL))
+#error "V55 UART diagnostics must stay TX-only, enabled and bandwidth limited."
+#endif
+
+/* Slide-compatible 200 Hz vertical outer loop. Pressure is not measured:
+ * the integral term learns loss of delivered thrust from ESKF acceleration. */
+#define APP_VERTICAL_200HZ_HOVER_FEEDFORWARD_N          335.0f
+#define APP_VERTICAL_200HZ_MAX_THRUST_N                 460.0f
+#define APP_VERTICAL_200HZ_MAX_NET_DECEL_MPS2             6.0f
+#define APP_VERTICAL_200HZ_BURN_MARGIN_M                   0.10f
+#define APP_VERTICAL_200HZ_TARGET_DESCENT_MPS              0.05f
+#define APP_VERTICAL_200HZ_KP_N_PER_MPS                    55.0f
+#define APP_VERTICAL_200HZ_KI_N_PER_NS                      0.8f
+#define APP_VERTICAL_200HZ_INTEGRAL_LIMIT_N               90.0f
+
+#if ((APP_PREFLIGHT_PE9_CONNECTED_IS_LOW != 1U) || \
+     (APP_ACTUATOR_FLIGHT_INTERLOCK_ENABLED != 1U) || \
+     (APP_NEEDLE_PREFLIGHT_ZERO_CAPTURE_ENABLED != 1U) || \
+     (APP_GENERATED_FC_PHYSICAL_OUTPUT_ENABLED != 1U))
+#error "V55 flight actuator interlocks must remain enabled."
+#endif
+
+#define APP_CONTROL_INPUT_MASS_SOURCE_MODEL             1U
+#define APP_CONTROL_INPUT_PRESSURE_SOURCE_MODEL         1U
+#define APP_CONTROL_MODEL_MASS_KG                      27.5f
+#define APP_CONTROL_MODEL_MAIN_PRESSURE_BAR           300.0f
+
+/* P112R12 PRODUCTION AUTONOMOUS NEEDLE / 950+ CLOSED REFERENCE / INERT ONLY.
+ *
+ * The temporary R10 virtual-descent stimulus and R11 PA0 commissioning owner
+ * are disabled. The main needle is again owned only by the production chain:
+ *   GeneratedFlightControl -> authorization -> P111 -> P110/P112 -> motor.
+ *
+ * The mechanically validated feedback convention is retained:
+ *   real CLOSED = learned boot reference >= 950 ADC
+ *   real OPEN   = decreasing ADC.
+ *
+ * This is still an INERT/DEPRESSURIZED validation build, NOT a flight build.
+ * Main-needle motor output remains enabled through the production interlocks,
+ * while RCS solenoids, ground-vent solenoids and the vent servo are hard-locked
+ * to their safe states by APP_P112R12_INERT_OUTPUT_ISOLATION_MODE. UART remains
+ * TX-only diagnostics. */
+#define APP_P112R12R8R18_GNC_MOTOR_BENCH_REV                0U
+#define APP_P112R12R8R19_FLIGHT_LOGIC_DRYRUN_REV             1U
+#define APP_P112R12R8R20_THREE_TURN_LIMIT_REV                 1U
+#define APP_P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_REV             1U
+#define APP_P112R12R8R22_REAL_ESKF_INPUT_REV                     1U
+#define APP_P112R12R8R24_AXIS_SIGN_DIAGNOSTIC_REV                1U
+#define APP_P112R12R8R25_RCS_RELAY_AXIS_BENCH_REV                 1U
+#define APP_P112R12R8R26_IMU_ROCKET_FRAME_CAL_REV                  1U
+#define APP_P112R12R8R27_THREE_POSE_FRAME_CAL_REV                    1U
+#define APP_P112R12R8R28_FIVE_POSE_FRAME_CAL_REV                     1U
+#define APP_P112R12R8R29_PAIRED_AXIS_DERIVED_Z_FRAME_CAL_REV          1U
+#define APP_P112R12R8R30_FIXED_IMU_ROCKET_FRAME_REV                    1U
+#define APP_P112R12R8R32_REAL_FLIGHT_LOGIC_PHYSICAL_NEEDLE_REV         1U
+#define APP_P112R12R8R33_REAL_FLIGHT_LOGIC_PHYSICAL_RCS_REV            1U
+#define APP_P112R12R8R34_RCS_QUIET_UPRIGHT_ANTICHATTER_REV               1U
+#define APP_P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN_REV                       1U
+#define APP_P112R12R8R35R1_DIAGNOSTIC_CLOSURE_REV                           1U
+#define APP_P112R12R8R35R2_CLOSURE_FIXES_REV                                1U
+#define APP_P112R12R8R35R3_SD_SERVICE_CLOSURE_REV                             1U
+#define APP_P112R12R8R35R3R3_SD_PHASE_RETRY_REV                                1U
+#define APP_P112R12R8R35R3R4_SD_HOST_BUSY_DEFER_REV                             1U
+#define APP_P112R12R8R35R3R8_MOTOR_AWARE_SD_30HZ_REV                            1U
+#define APP_P112R12R8R35R3R9_SDIO_750KHZ_ACTUATOR_QUIET_REV                     1U
+/* R8R26 bench-only mount calibration. Keep rocket motion slow/stationary. */
+#define APP_R8R26_CAL_UPRIGHT_SAMPLES                              200U
+#define APP_R8R26_CAL_TILT_SAMPLES                                 120U
+#define APP_R8R26_CAL_GYRO_STILL_DPS                               1.50f
+#define APP_R8R26_CAL_ACCEL_NORM_MIN_G                             0.92f
+#define APP_R8R26_CAL_ACCEL_NORM_MAX_G                             1.08f
+#define APP_R8R26_CAL_TILT_MIN_DEG                                10.0f
+#define APP_R8R26_CAL_TILT_MAX_DEG                                28.0f
+/* R8R27 third static pose (+Y) and geometry acceptance gates. */
+#define APP_R8R27_CAL_Y_TILT_SAMPLES                               120U
+#define APP_R8R27_CAL_XY_ANGLE_MIN_DEG                            75.0f
+#define APP_R8R27_CAL_XY_ANGLE_MAX_DEG                           105.0f
+#define APP_R8R27_CAL_AXIS_AGREE_MIN                               0.90f
+#define APP_R8R27_CAL_DET_MIN                                      0.985f
+#define APP_R8R27_CAL_DET_MAX                                      1.015f
+#define APP_R8R27_CAL_ORTHO_ERR_MAX                                0.020f
+/* R8R28 five-pose capture: upright, +X, -X, +Y, -Y. */
+#define APP_R8R28_CAL_NEG_X_TILT_SAMPLES                           120U
+#define APP_R8R28_CAL_NEG_Y_TILT_SAMPLES                           120U
+#define APP_R8R28_CAL_PAIR_OPPOSITION_MIN                           0.940f
+#define APP_R8R28_CAL_XY_ANGLE_MIN_DEG                             80.0f
+#define APP_R8R28_CAL_XY_ANGLE_MAX_DEG                            100.0f
+#define APP_R8R28_CAL_AXIS_AGREE_MIN                                0.950f
+#define APP_R8R28_CAL_Z_AGREE_MIN                                   0.970f
+/* R8R29 final solver: derive +X/+Y plane normals and +Z = X x Y solely
+ * from the four +/- captures. The upright capture is validation/sign only;
+ * it is not blended into the solved matrix. */
+#define APP_R8R29_CAL_UPRIGHT_Z_AGREE_MIN                            0.970f
+#define APP_R8R29_CAL_OPPOSITE_SEPARATION_MIN_DEG                    18.0f
+
+/* R8R30: fixed SensorManager/ESKF body-frame -> physical rocket-frame
+ * rotation frozen from the successful physical R8R29 calibration log.
+ * Runtime five-pose capture is retired in this revision; the values below are
+ * calibration provenance and are applied immediately after flight-logic init.
+ * Matrix rows map IMU/body-frame vectors into the physical rocket frame. */
+#define APP_R8R30_FIXED_CAL_PHASE                                    12U
+#define APP_R8R30_R00                                               (-0.9907f)
+#define APP_R8R30_R01                                               (-0.1356f)
+#define APP_R8R30_R02                                               (-0.0112f)
+#define APP_R8R30_R10                                               (+0.1361f)
+#define APP_R8R30_R11                                               (-0.9888f)
+#define APP_R8R30_R12                                               (-0.0606f)
+#define APP_R8R30_R20                                               (-0.0029f)
+#define APP_R8R30_R21                                               (-0.0616f)
+#define APP_R8R30_R22                                               (+0.9981f)
+
+/* Frozen R8R29 calibration provenance. These are not re-measured at boot. */
+#define APP_R8R30_PROV_POS_X_TILT_DEG                                17.21f
+#define APP_R8R30_PROV_NEG_X_TILT_DEG                                16.73f
+#define APP_R8R30_PROV_POS_Y_TILT_DEG                                17.29f
+#define APP_R8R30_PROV_NEG_Y_TILT_DEG                                16.96f
+#define APP_R8R30_PROV_X_OPPOSITION                                   0.9907f
+#define APP_R8R30_PROV_Y_OPPOSITION                                   1.0000f
+#define APP_R8R30_PROV_XY_ANGLE_DEG                                  89.76f
+#define APP_R8R30_PROV_AXIS_AGREEMENT                                 1.0000f
+#define APP_R8R30_PROV_Z_AGREEMENT                                    0.9991f
+#define APP_R8R30_PROV_ORTHO_ERROR                                    0.0000f
+#define APP_R8R30_PROV_DET                                            1.0000f
+/* R8R21: retire every pre-V19.6 vertical/landing control owner.
+ * TaragayFlightLogic is the only mission flight-logic authority.
+ * Legacy source files may remain for provenance/telemetry compatibility, but
+ * they are compile-time prevented from producing actuator commands. */
+#define APP_LEGACY_VERTICAL_LANDING_RETIRED                       1U
+#define APP_R8R19_FLIGHT_LOGIC_COMPUTE_ONLY                  1U
+#define APP_R8R19_FLIGHT_LOGIC_SYNTHETIC_TEST                0U
+/* R8R22 real-input compute-only qualification gates.  Horizontal X/Y remains
+ * diagnostic because FullStateESKF currently has no absolute horizontal aid. */
+#define APP_R8R22_MAX_ESKF_AGE_US                           20000UL
+#define APP_R8R22_MAX_IMU_AGE_US                            10000UL
+
+/* R16 final: Valve_Cmd is normalized effective Cv command [0..1].
+ * Physical needle target is obtained through the final nonlinear Cv->turns
+ * map and spans 0.10..3.00 turns. PREPOSITION is permitted while PE9 remains
+ * connected once preflight_ready is true; flight authority remains PE9-gated. */
+#define APP_R8R32_HOVER_L_MAX                                        1.00f
+#define APP_R8R32_NEEDLE_MAX_TRAVEL_ADC                              585U
+#define APP_R16_NEEDLE_MAX_TURNS                                     3.00f
+#define APP_R8R32_FL_STEP_MAX_AGE_MS                                  50UL
+
+/* R8R33: give the final TaragayFlightLogic / RCS V7.13.4 request mask
+ * physical relay authority only after the real PE9 flight latch.  Keep the
+ * global P112R12 inert-isolation flag asserted so ground-vent and servo paths
+ * remain physically isolated; SolenoidOutput_SetMask contains the only
+ * explicit R8R33 exception. */
+#define APP_R8R33_RCS_STEP_MAX_AGE_MS                                  50UL
+/* R8R34: quiet-upright fine tracking. These values ONLY affect the
+ * low-angle reference-tracking pulse path. The V7.13.4 10 deg
+ * predictive/hard safety selector keeps the original raw gyro rate. */
+#define APP_R8R34_RCS_TRACK_START_DB_DEG                              2.50f
+#define APP_R8R34_RCS_TRACK_STOP_DB_DEG                               1.20f
+#define APP_R8R34_RCS_TRACK_RATE_ALPHA                                0.25f
+#define APP_R8R34_RCS_TRACK_CONFIRM_N                                  3U
+#define APP_P112R10R3_GNC_MOTOR_BENCH_MODE                   0U
+#define APP_P112R10R3_STIMULUS_HOLD_CLOSED_MS           1000UL
+#define APP_P112R10R3_STIMULUS_ACTIVE_MS                3000UL
+#define APP_P112R10R3_STIMULUS_COMMAND_CAP                 0.15f
+#define APP_P112R10R3_VIRTUAL_HEIGHT_M                      0.05f
+#define APP_P112R10R3_VIRTUAL_DESCENT_MPS                   0.10f
+
+#define APP_NEEDLE_P112R11_MECH_COMMISSION_MODE              0U
+#define APP_P112R11R1_MOTION_SAFETY_REV                       1U
+#define APP_P112R11R2_CLOSED_REFERENCE_950PLUS_REV            1U
+#define APP_P112R11_OPEN_TRAVEL_ADC                           78U
+#define APP_P112R11_BUTTON_DEBOUNCE_MS                        60UL
+#define APP_P112R11_RELEASE_ARM_MS                            750UL
+#define APP_P112R11_OPEN_DWELL_MS                             750UL
+#define APP_P112R11_SEQUENCE_TIMEOUT_MS                      8000UL
+
+#define APP_P112R12_PRODUCTION_AUTONOMOUS_950PLUS_REV          1U
+#define APP_P112R12R1_SAME_TARGET_GUARD_REV                     1U
+#define APP_P112R12R3_CLEAN_PRODUCTION_CHAIN_REV                 1U
+
+/* P112R12R8 clean production-candidate safety revisions.
+ *
+ * No virtual vertical state, target-step, fault injection, PA0 commissioning,
+ * UART actuator command, command scaling or no-motion test wrapper is present.
+ * The production chain is therefore again the sole main-needle owner:
+ *   sensors -> Full-State ESKF -> GeneratedFlightControl -> authorization
+ *   -> P111 supervisor -> P110/P112 adaptive actuator -> motor.
+ *
+ * R6R2 preserves FEEDBACK_INVALID as a P111 FEEDBACK root cause. R12R8 also
+ * promotes the physically validated R12R7 GFC step-age check into an always-on
+ * production handoff guard: a numerically valid command is forwarded only when
+ * a new GeneratedFlightControl step has been observed within 50 ms. A stale,
+ * invalid, source-less or NaN command submits CLOSED/0 instead.
+ *
+ * This package remains INERT/DEPRESSURIZED and is NOT flight-qualified.
+ * Non-needle physical outputs remain hard-isolated for the dry-run. */
+#define APP_P112R12R6R2_FAULT_CAUSE_PROPAGATION_REV                1U
+#define APP_P112R12R8_PRODUCTION_CANDIDATE_REV                      1U
+#define APP_P112R12R8_GNC_FRESHNESS_GUARD_ENABLED                   1U
+#define APP_P112R12R8_GNC_MAX_AGE_MS                               50UL
+#define APP_P112R12_INERT_OUTPUT_ISOLATION_MODE                     1U
+
+/* P112R8 production route retained underneath the R10 bench wrapper: the
+ * generated 200 Hz vertical controller is connected to the autonomous
+ * adaptive actuator supervisor.  PE9, preflight readiness, SystemMonitor and
+ * ESKF output-inhibit remain hard authorization gates. */
+#define APP_GNC_NEEDLE_PHYSICAL_ENABLED_PORT_READY      1U
+
+/* Explicit, mutually-exclusive inert bench profiles. Keep both 0 in the
+ * normal core/flight build. */
+#define APP_RELAY_SEQUENCE_TEST_MODE                     0U
+#define APP_NEEDLE_FOUR_TURN_TEST_MODE                   0U
+#define APP_NEEDLE_RAW_CHARACTERIZATION_MODE             0U
+#define APP_NEEDLE_ADC_DIAGNOSTIC_MODE                   0U
+#define APP_NEEDLE_P87_ADC_SWEEP_DIAGNOSTIC_MODE         0U
+#define APP_NEEDLE_P91_ADC_DELTA_400_MODE                0U
+
+/* P112R8 production architecture.  The P112 robust dual-ADC feedback and
+ * adaptive breakaway/speed/coast controller own TIM7.  There is no automatic
+ * bench move and no UART/PA0 command path. */
+#define APP_NEEDLE_AUTONOMOUS_ACTUATOR_MODE              1U
+
+#if ((APP_RELAY_SEQUENCE_TEST_MODE != 0U) && \
+     (APP_NEEDLE_FOUR_TURN_TEST_MODE != 0U))
+#error "Relay and needle bench tests are mutually exclusive."
+#endif
+
+#define APP_NEEDLE_AUTO_CONTROL_MODE                     0U
+#define APP_NEEDLE_COMMISSIONING_MODE                    0U
+
+#if ((APP_NEEDLE_AUTONOMOUS_ACTUATOR_MODE != 1U) || \
+     (APP_NEEDLE_RAW_CHARACTERIZATION_MODE != 0U) || \
+     (APP_NEEDLE_FOUR_TURN_TEST_MODE != 0U) || \
+     (APP_NEEDLE_ADC_DIAGNOSTIC_MODE != 0U) || \
+     (APP_NEEDLE_P87_ADC_SWEEP_DIAGNOSTIC_MODE != 0U) || \
+     (APP_NEEDLE_P91_ADC_DELTA_400_MODE != 0U) || \
+     (APP_V55_UART_RX_COMMANDS_ENABLED != 0U) || \
+     (APP_GNC_NEEDLE_PHYSICAL_ENABLED_PORT_READY != 1U) || \
+     (APP_P112R10R3_GNC_MOTOR_BENCH_MODE != 0U) || \
+     (APP_P112R12R8R19_FLIGHT_LOGIC_DRYRUN_REV != 1U) || \
+     (APP_P112R12R8R20_THREE_TURN_LIMIT_REV != 1U) || \
+     (APP_P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_REV != 1U) || \
+     (APP_P112R12R8R22_REAL_ESKF_INPUT_REV != 1U) || \
+     (APP_P112R12R8R24_AXIS_SIGN_DIAGNOSTIC_REV != 1U) || \
+     (APP_P112R12R8R25_RCS_RELAY_AXIS_BENCH_REV != 1U) || \
+     (APP_P112R12R8R26_IMU_ROCKET_FRAME_CAL_REV != 1U) || \
+     (APP_P112R12R8R27_THREE_POSE_FRAME_CAL_REV != 1U) || \
+     (APP_P112R12R8R28_FIVE_POSE_FRAME_CAL_REV != 1U) || \
+     (APP_P112R12R8R29_PAIRED_AXIS_DERIVED_Z_FRAME_CAL_REV != 1U) || \
+     (APP_P112R12R8R30_FIXED_IMU_ROCKET_FRAME_REV != 1U) || \
+     (APP_P112R12R8R32_REAL_FLIGHT_LOGIC_PHYSICAL_NEEDLE_REV != 1U) || \
+     (APP_P112R12R8R33_REAL_FLIGHT_LOGIC_PHYSICAL_RCS_REV != 1U) || \
+     (APP_P112R12R8R34_RCS_QUIET_UPRIGHT_ANTICHATTER_REV != 1U) || \
+     (APP_P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN_REV != 1U) || \
+     (APP_P112R12R8R35R1_DIAGNOSTIC_CLOSURE_REV != 1U) || \
+     (APP_P112R12R8R35R2_CLOSURE_FIXES_REV != 1U) || \
+     (APP_P112R12R8R35R3_SD_SERVICE_CLOSURE_REV != 1U) || \
+     (APP_P112R12R8R35R3R3_SD_PHASE_RETRY_REV != 1U) || \
+     (APP_P112R12R8R35R3R4_SD_HOST_BUSY_DEFER_REV != 1U) || \
+     (APP_P112R12R8R35R3R8_MOTOR_AWARE_SD_30HZ_REV != 1U) || \
+     (APP_P112R12R8R35R3R9_SDIO_750KHZ_ACTUATOR_QUIET_REV != 1U) || \
+     (APP_LEGACY_VERTICAL_LANDING_RETIRED != 1U) || \
+     (APP_R8R19_FLIGHT_LOGIC_COMPUTE_ONLY != 1U) || \
+     (APP_R8R19_FLIGHT_LOGIC_SYNTHETIC_TEST != 0U) || \
+     (APP_NEEDLE_P112R11_MECH_COMMISSION_MODE != 0U) || \
+     (APP_P112R11R2_CLOSED_REFERENCE_950PLUS_REV != 1U) || \
+     (APP_P112R12_PRODUCTION_AUTONOMOUS_950PLUS_REV != 1U) || \
+     (APP_P112R12R1_SAME_TARGET_GUARD_REV != 1U) || \
+     (APP_P112R12R3_CLEAN_PRODUCTION_CHAIN_REV != 1U) || \
+     (APP_P112R12R6R2_FAULT_CAUSE_PROPAGATION_REV != 1U) || \
+     (APP_P112R12R8_PRODUCTION_CANDIDATE_REV != 1U) || \
+     (APP_P112R12R8_GNC_FRESHNESS_GUARD_ENABLED != 1U) || \
+     (APP_P112R12R8R16_ESTOP_EMERGENCY_CLOSE_OVERRIDE_REV != 1U) || \
+     (APP_P112R12_INERT_OUTPUT_ISOLATION_MODE != 1U))
+#error "P112R12R8R35R3R4 SD host-busy-defer safety policy changed."
+#endif
+
+/* -------------------------------------------------------------------------- */
+/* P112R8 integrated GNC ownership                                            */
+/* -------------------------------------------------------------------------- */
+
+/* Sensor, estimator and SD paths remain online. The older GNCActiveControl
+ * and PA0 endurance supervisor stay disabled; GeneratedFlightControl plus the
+ * P112R8/P112R12 autonomous supervisor own the main-needle path. The V49 RCS
+ * logic remains scheduled, but P112R12 forces every non-needle physical output
+ * to its safe state for this inert/depressurized integration profile. */
+#define APP_GNC_ACTIVE_ENABLED                         0U
+#define APP_GNC_RCS_RELAY_BENCH_MODE                   0U
+#define APP_GNC_COMBINED_DRY_RUN_MODE                  0U
+#define APP_GNC_RCS_DRY_RUN                            0U
+
+/* V49: Full-State ESKF -> signed-PD -> physical four-relay RCS path. */
+#define APP_V49_ESKF_RCS_PHYSICAL_ENABLED              \
+    (((APP_P112R12_INERT_OUTPUT_ISOLATION_MODE != 0U) || \
+      (APP_P112R10R3_GNC_MOTOR_BENCH_MODE != 0U) || \
+      (APP_RELAY_SEQUENCE_TEST_MODE != 0U) || \
+      (APP_NEEDLE_RAW_CHARACTERIZATION_MODE != 0U)) ? 0U : 1U)
+/* Compatibility alias retained for older diagnostic source files. */
+#define APP_V23_DIRECT_RCS_FROM_ATTITUDE \
+        APP_V49_ESKF_RCS_PHYSICAL_ENABLED
+#define APP_GNC_NEEDLE_PHYSICAL_ENABLED                APP_GNC_NEEDLE_PHYSICAL_ENABLED_PORT_READY
+#define APP_GNC_VERTICAL_CONTROLLER_IMPLEMENTED         1U
+
+/* Persistent estimator/control invalidity before an armed fail-safe latches. */
+#define APP_GNC_SENSOR_FAULT_CONFIRM_MS              100UL
+
+/* Retained only for source compatibility with the disabled legacy PA0 service. */
+#define APP_GNC_BUTTON_DEBOUNCE_MS                   250UL
+
+/*
+ * Current bench/flight-model constants until real-time mass and main-pressure
+ * sources are wired into this module. These are NOT a substitute for a
+ * measured valve-opening -> thrust map.
+ */
+#define APP_GNC_MODEL_MASS_KG                         27.5f
+#define APP_GNC_MODEL_MAIN_PRESSURE_BAR              300.0f
+
+/*
+ * Vertical geometry used by the existing landing-controller family.
+ *
+ * ESKF vertical state is origin-relative. Current height above the touchdown
+ * plane is reconstructed as:
+ *
+ *   height_agl = lidar_reference + position_z
+ *   z_cg       = APP_GNC_CG_TOUCH_HEIGHT_M + height_agl
+ *
+ * This assumes the downward LIDAR zero-distance plane is the touchdown plane.
+ * Calibrate a sensor mounting offset before flight if that is not true.
+ */
+#define APP_GNC_CG_TOUCH_HEIGHT_M                     0.4013f
+#define APP_GNC_MAX_VALID_HEIGHT_AGL_M               20.0f
+
+/*
+ * V10.6 actuator-aware early-brake outer-loop constants.
+ * V55 keeps the needle travel at 4.0 turns / 780 ADC and preserves V53's
+ * physical target rates with +0.9625/-0.8250 normalized slew per second.
+ * The local position loop remains 1000 Hz.
+ */
+#define APP_GNC_VERT_F_RATED_N                      1120.0f
+#define APP_GNC_VERT_P_RATED_BAR                    300.0f
+#define APP_GNC_VERT_P_MAX_VALID_BAR                350.0f
+#define APP_GNC_VERT_V_TOUCH_MPS                      0.05f
+#define APP_GNC_VERT_A_PROFILE_MPS2                   2.40f
+#define APP_GNC_VERT_V_REFERENCE_MAX_MPS              5.40f
+#define APP_GNC_VERT_K_V                              5.00f
+#define APP_GNC_VERT_VALVE_CMD_MAX                    0.65f
+#define APP_GNC_VERT_SHUTDOWN_HEIGHT_M                0.010f
+#define APP_GNC_VERT_SHUTDOWN_SPEED_MPS               0.12f
+
+/* -------------------------------------------------------------------------- */
+/* V49: four-valve ESKF signed-PD pulse controller                            */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * The physical RCS path consumes the 200 Hz Full-State ESKF roll/pitch output
+ * and the bias-corrected IMU angular rate.  It does not generate PWM.  For
+ * each axis it generates a signed valve-open time:
+ *
+ *   signed_time_ms = Kp * angle_error_deg + Kd * rate_error_dps
+ *
+ * The sign selects the opposing valve.  When the vehicle is already moving
+ * toward zero fast enough, the derivative term changes the sign before the
+ * angle crosses zero; this is the requested natural active damping action.
+ *
+ * Physical model supplied by the mechanical team:
+ *   thrust                    = 30 N
+ *   moment arm                = 0.58 m
+ *   roll/pitch inertia        = 3.541 kg.m^2
+ *   angular acceleration      = 281.5 deg/s^2
+ *
+ * Valve naming is based on the attitude-error sign that the valve corrects:
+ *   ROLL_POS_ERROR / X+  : PB15 / relay IN1
+ *   ROLL_NEG_ERROR / X-  : PE15 / relay IN2
+ *   PITCH_POS_ERROR / Y+ : PE11 / relay IN3
+ *   PITCH_NEG_ERROR / Y- : PE7  / relay IN4
+ */
+#define APP_RCS_ESKF_SIGNED_PD_ENABLED               1U
+#define ATT_CTRL_ENABLE                              1U
+#define ATT_CTRL_DRY_RUN                             APP_GNC_RCS_DRY_RUN
+
+#define ATT_CTRL_ROLL_ENABLE                         1U
+#define ATT_CTRL_PITCH_ENABLE                        1U
+
+/* Change only after a verified axis-direction test with inert loads. */
+#define ATT_CTRL_ROLL_ANGLE_SIGN                     (+1)
+#define ATT_CTRL_ROLL_RATE_SIGN                      (+1)
+#define ATT_CTRL_PITCH_ANGLE_SIGN                    (+1)
+#define ATT_CTRL_PITCH_RATE_SIGN                     (+1)
+
+/*
+ * 3 deg + 10 deg/s example:
+ *   2.50*3 + 3.55*10 = 43.0 ms
+ * Kd is also close to 1000/281.5 = 3.55 ms/(deg/s), i.e. the measured
+ * angular acceleration needed to remove angular speed.
+ */
+#define ATT_CTRL_PD_KP_MS_PER_DEG                    2.50f
+#define ATT_CTRL_PD_KD_MS_PER_DPS                    3.55f
+
+/* Mechanical reality shield: output is exactly 0 ms or 20..60 ms. */
+#define ATT_CTRL_MIN_CORRECTION_TIME_MS              20UL
+#define ATT_CTRL_MAX_CORRECTION_TIME_MS              60UL
+
+/* Per-axis anti-chatter lock after every completed shot. */
+#define ATT_CTRL_COOLDOWN_MS                         100UL
+
+/* TIM7 provides the independent exact 1 ms non-blocking pulse countdown. */
+#define ATT_CTRL_TIMER_TICK_MS                         1UL
+#define ATT_CTRL_EXPECTED_UPDATE_MS                    5UL
+
+#define ATT_CTRL_STARTUP_DELAY_MS                  2000UL
+#define ATT_CTRL_SENSOR_TIMEOUT_MS                  100UL
+#define ATT_CTRL_TELEMETRY_PERIOD_MS                100UL
+
+/* -------------------------------------------------------------------------- */
+/* Vertical EKF - Phase 3: world-Z IMU aiding                                 */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * State:
+ *   x = [relative altitude, vertical velocity, world-Z accel bias]
+ *
+ * Input:
+ *   quaternion-rotated and gravity-compensated world-Z acceleration
+ *
+ * Measurements:
+ *   filtered relative barometric altitude
+ *   filtered relative downward-looking LIDAR distance
+ *
+ * No startup bias calibration is required. The third EKF state estimates the
+ * residual world-Z acceleration bias online when altitude measurements make it
+ * observable.
+ */
+#define APP_VERTICAL_EKF_ENABLED                    1U
+#define APP_VERTICAL_EKF_IMU_AIDING_ENABLED         1U
+
+#define APP_VERTICAL_EKF_BARO_REFERENCE_SAMPLES     8U
+#define APP_VERTICAL_EKF_LIDAR_REFERENCE_SAMPLES    32U
+#define APP_VERTICAL_EKF_LIDAR_REFERENCE_JUMP_M     0.10f
+
+#define APP_VERTICAL_EKF_BARO_STD_M                 0.10f
+#define APP_VERTICAL_EKF_LIDAR_STD_M                0.015f
+
+/* World-Z acceleration input and bias random-walk tuning. */
+#define APP_VERTICAL_EKF_IMU_ACCEL_STD_MPS2         0.80f
+#define APP_VERTICAL_EKF_ACCEL_BIAS_RW_STD_MPS3     0.05f
+#define APP_VERTICAL_EKF_IMU_ACCEL_ABS_MAX_MPS2     100.0f
+#define APP_VERTICAL_EKF_IMU_STALE_TIMEOUT_US       10000UL
+
+#define APP_VERTICAL_EKF_BARO_GATE_SIGMA            6.0f
+#define APP_VERTICAL_EKF_LIDAR_GATE_SIGMA           6.0f
+#define APP_VERTICAL_EKF_BARO_ABS_GATE_M             3.0f
+#define APP_VERTICAL_EKF_LIDAR_ABS_GATE_M            1.0f
+
+#define APP_VERTICAL_EKF_LIDAR_MIN_M                0.05f
+#define APP_VERTICAL_EKF_LIDAR_MAX_M                40.0f
+#define APP_VERTICAL_EKF_MAX_PREDICT_GAP_US          50000UL
+#define APP_VERTICAL_EKF_STALE_TIMEOUT_US            500000UL
+
+#define APP_VERTICAL_EKF_INITIAL_ALT_VAR_M2          0.0625f
+#define APP_VERTICAL_EKF_INITIAL_VEL_VAR_M2S2        4.0f
+#define APP_VERTICAL_EKF_INITIAL_BIAS_VAR_M2S4       1.0f
+
+/* -------------------------------------------------------------------------- */
+/* Full-state 15-error-state ESKF - shadow mode                               */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * Nominal state:
+ *   position(3), velocity(3), quaternion(4), accel bias(3), gyro bias(3)
+ *
+ * Error state:
+ *   delta position(3), delta velocity(3), delta attitude(3),
+ *   delta accel bias(3), delta gyro bias(3)
+ *
+ * The estimator runs beside the existing AttitudeEstimator and VerticalEKF.
+ * It is not connected to the control output in this phase.
+ */
+#define APP_FULL_ESKF_ENABLED                       1U
+#define APP_FULL_ESKF_SHADOW_MODE                   0U
+
+/*
+ * CPU optimization without changing estimator rates or equations:
+ * - Sparse covariance propagation removes multiplications by known zeros.
+ * - DWT cycle profiling measures actual Cortex-M4 execution cost.
+ */
+#define APP_FULL_ESKF_SPARSE_COVARIANCE_ENABLED     1U
+#define APP_FULL_ESKF_SPARSE_SCALAR_UPDATES_ENABLED  1U
+#define APP_FULL_ESKF_DWT_PROFILER_ENABLED           1U
+
+/*
+ * Nominal IMU propagation remains 1000 Hz.
+ * Public ESKF state/output is published at 200 Hz.
+ * Heavy 15x15 covariance propagation runs at 25 Hz.  Nominal propagation,
+ * public attitude output and both control loops keep their original rates.
+ */
+#define APP_FULL_ESKF_COVARIANCE_DECIMATION         32U
+#define APP_FULL_ESKF_GRAVITY_UPDATE_DECIMATION     4U
+/* R8R8: one gravity Joseph/scalar axis per 200 Hz correction slot.
+ * A 3-axis batch still starts every 4 corrections (50 Hz); X/Y/Z are
+ * completed over the next three 5 ms slots to remove the 3-update burst. */
+#define APP_FULL_ESKF_GRAVITY_AXES_PER_CORRECTION    1U
+/* Legacy compatibility constant; public state is now committed by the
+ * dedicated 5 ms correction task rather than an IMU sample decimator. */
+#define APP_FULL_ESKF_EULER_DECIMATION              5U
+/* P112R12R8R6: full covariance integrity is no longer executed monolithically
+ * on the healthy 200 Hz path. A fast diagonal guard runs every correction and
+ * the complete symmetry/integrity matrix is checked incrementally. The legacy
+ * decimation symbol is retained for source compatibility only. */
+#define APP_FULL_ESKF_HEALTH_CHECK_DECIMATION        4U
+#define APP_FULL_ESKF_INTEGRITY_ROWS_PER_CORRECTION  3U
+#define APP_FULL_ESKF_LIVE_DEBUG_DECIMATION          10U
+
+#define APP_FULL_ESKF_MAX_PREDICT_GAP_US            20000UL
+#define APP_FULL_ESKF_STALE_TIMEOUT_US               20000UL
+#define APP_FULL_ESKF_IMU_STALE_TIMEOUT_US           10000UL
+/* Measurement freshness gates. A reference may be remembered, but stale */
+/* sensor data is never allowed to participate in a correction. */
+#define APP_FULL_ESKF_BARO_STALE_TIMEOUT_US          50000UL
+#define APP_FULL_ESKF_LIDAR_STALE_TIMEOUT_US         50000UL
+#define APP_FULL_ESKF_MAX_COVARIANCE                 1000000.0f
+
+/* P45: full covariance integrity and public vertical-state publish guard.
+ * These limits are deliberately much wider than the normal 200 Hz motion and
+ * correction steps; they only catch catastrophic estimator discontinuities. */
+#define APP_FULL_ESKF_COV_SYMMETRY_ABS_TOL           1.0e-5f
+#define APP_FULL_ESKF_COV_SYMMETRY_REL_TOL           1.0e-3f
+/* P46: negative variance within this tiny single-precision band is treated as
+ * roundoff and floored, not as a structural covariance failure. Larger
+ * negatives are still latched and reported with state/stage/raw-value data. */
+#define APP_FULL_ESKF_COV_NEGATIVE_ROUNDOFF_TOL       1.0e-7f
+#define APP_FULL_ESKF_PUBLIC_GUARD_MAX_GAP_US         50000UL
+#define APP_FULL_ESKF_PUBLIC_Z_JUMP_BASE_M            0.50f
+#define APP_FULL_ESKF_PUBLIC_Z_SPEED_FACTOR           2.0f
+#define APP_FULL_ESKF_PUBLIC_VZ_JUMP_BASE_MPS         4.00f
+#define APP_FULL_ESKF_PUBLIC_VZ_ACCEL_MARGIN_MPS2     120.0f
+
+/* Continuous-time process-noise starting values. */
+#define APP_FULL_ESKF_ACCEL_NOISE_STD_MPS2           0.80f
+#define APP_FULL_ESKF_GYRO_NOISE_STD_DPS             0.20f
+#define APP_FULL_ESKF_ACCEL_BIAS_RW_STD_MPS3         0.03f
+#define APP_FULL_ESKF_GYRO_BIAS_RW_STD_DPS2          0.01f
+
+/* Initial covariance standard deviations. */
+#define APP_FULL_ESKF_INITIAL_POSITION_XY_STD_M      2.0f
+#define APP_FULL_ESKF_INITIAL_POSITION_Z_STD_M       0.25f
+#define APP_FULL_ESKF_INITIAL_VELOCITY_STD_MPS       2.0f
+#define APP_FULL_ESKF_INITIAL_ATTITUDE_STD_DEG       5.0f
+#define APP_FULL_ESKF_INITIAL_ACCEL_BIAS_STD_MPS2    0.50f
+#define APP_FULL_ESKF_INITIAL_GYRO_BIAS_STD_DPS      2.0f
+
+#define APP_FULL_ESKF_ACCEL_BIAS_ABS_MAX_MPS2        1.50f
+#define APP_FULL_ESKF_GYRO_BIAS_ABS_MAX_DPS          20.0f
+#define APP_FULL_ESKF_MAX_ATTITUDE_INJECTION_RAD     0.35f
+
+/* Accelerometer gravity-direction update: roll/pitch aid, yaw remains free. */
+#define APP_FULL_ESKF_GRAVITY_UPDATE_ENABLED         1U
+/* P48: gravity is an attitude-direction observation. Restrict its Kalman gain
+ * and state injection to delta-theta only; gyro bias remains observable through
+ * the dedicated stationary gyro-bias correction. */
+#define APP_FULL_ESKF_GRAVITY_ATTITUDE_ONLY_SPARSE_JOSEPH 1U
+
+/* P49: stationary zero-velocity measurements retain position/velocity/attitude/accel-bias cross-correction,
+ * but gyro-bias gain is explicitly zeroed. Gyro bias has its own constrained stationary update.
+ * Covariance uses a double-precision masked Joseph unit-state update to keep BG diagonals PSD. */
+#define APP_FULL_ESKF_ZUPT_MASKED_JOSEPH_ENABLED       1U
+#define APP_FULL_ESKF_GRAVITY_DIRECTION_STD          0.035f
+#define APP_FULL_ESKF_GRAVITY_GATE_SIGMA             6.0f
+#define APP_FULL_ESKF_GRAVITY_ABS_GATE               0.50f
+
+#define APP_FULL_ESKF_GRAVITY_FULL_WEIGHT_MIN_G      0.92f
+#define APP_FULL_ESKF_GRAVITY_FULL_WEIGHT_MAX_G      1.08f
+#define APP_FULL_ESKF_GRAVITY_ZERO_WEIGHT_MIN_G      0.75f
+#define APP_FULL_ESKF_GRAVITY_ZERO_WEIGHT_MAX_G      1.25f
+#define APP_FULL_ESKF_VIBRATION_JERK_START_G          0.030f
+#define APP_FULL_ESKF_VIBRATION_JERK_FULL_G           0.180f
+#define APP_FULL_ESKF_VIBRATION_R_MAX_MULTIPLIER      25.0f
+#define APP_FULL_ESKF_VIBRATION_EMA_ALPHA             0.20f
+
+/* Online stationary updates estimate biases before launch without blocking. */
+#define APP_FULL_ESKF_STATIONARY_UPDATE_ENABLED      1U
+#define APP_FULL_ESKF_STATIONARY_ACCEL_MIN_G         0.90f
+#define APP_FULL_ESKF_STATIONARY_ACCEL_MAX_G         1.10f
+/*
+ * The detector uses a low-pass filtered, bias-compensated gyro residual.
+ * This keeps high-frequency gyro noise from blocking stationary detection.
+ */
+#define APP_FULL_ESKF_STATIONARY_GYRO_ACQUIRE_MAX_DPS 3.0f
+#define APP_FULL_ESKF_STATIONARY_GYRO_RELEASE_MAX_DPS 2.0f
+#define APP_FULL_ESKF_STATIONARY_GYRO_LPF_ALPHA      0.05f
+/* CorrectMeasurements runs at 200 Hz: score 100 is about 0.5-0.8 second. */
+#define APP_FULL_ESKF_STATIONARY_MIN_SAMPLES         100UL
+/* One-shot startup origin alignment after gyro bootstrap + stable bench. */
+/* Correction service is 200 Hz: 200 samples ~= 1.0 s stationary. */
+#define APP_FULL_ESKF_ORIGIN_ZERO_STATIONARY_SAMPLES 200UL
+#define APP_FULL_ESKF_STATIONARY_SCORE_DECREMENT     4UL
+#define APP_FULL_ESKF_STATIONARY_RELEASE_SCORE       40UL
+/* Run stationary ZUPT and bias maintenance at 10 Hz. */
+#define APP_FULL_ESKF_STATIONARY_UPDATE_DECIMATION   20U
+/* P51 flight-safety gate: after the startup origin has been established,
+ * stationary/ZUPT may only re-arm when vertical speed is genuinely near zero.
+ * This prevents a low-rate, low-rotation powered descent from being
+ * misclassified as stationary and pulled toward vz=0 by ZUPT. */
+#define APP_FULL_ESKF_STATIONARY_MAX_VERTICAL_SPEED_MPS 0.15f
+
+/*
+ * Attitude must settle before accelerometer bias is adjusted.
+ * CorrectMeasurements runs at 200 Hz, so 400 samples is about 2 seconds.
+ */
+#define APP_FULL_ESKF_STATIONARY_ACCEL_BIAS_WARMUP_SAMPLES 400UL
+#define APP_FULL_ESKF_STATIONARY_ACCEL_BIAS_MAX_STEP_MPS2  0.02f
+#define APP_FULL_ESKF_STATIONARY_GYRO_BIAS_MAX_STEP_DPS    0.50f
+
+/*
+ * Startup-only, non-blocking gyro-bias bootstrap.
+ * Keep the vehicle motionless for the first 3-5 seconds after power-up.
+ */
+#define APP_FULL_ESKF_GYRO_BOOTSTRAP_ENABLED         1U
+#define APP_FULL_ESKF_GYRO_BOOTSTRAP_MIN_SAMPLES     400UL
+#define APP_FULL_ESKF_GYRO_BOOTSTRAP_MAX_SAMPLES     2000UL
+#define APP_FULL_ESKF_GYRO_BOOTSTRAP_ACCEL_MIN_G     0.90f
+#define APP_FULL_ESKF_GYRO_BOOTSTRAP_ACCEL_MAX_G     1.10f
+#define APP_FULL_ESKF_GYRO_BOOTSTRAP_MAX_NORM_DPS    15.0f
+#define APP_FULL_ESKF_GYRO_BOOTSTRAP_MAX_STD_DPS     4.0f
+#define APP_FULL_ESKF_GYRO_BOOTSTRAP_SCORE_DECREMENT  4UL
+
+#define APP_FULL_ESKF_ZUPT_STD_MPS                   0.04f
+#define APP_FULL_ESKF_STATIONARY_GYRO_BIAS_STD_DPS   0.20f
+#define APP_FULL_ESKF_STATIONARY_ACCEL_BIAS_STD_MPS2 0.50f
+#define APP_FULL_ESKF_STATIONARY_GATE_SIGMA          6.0f
+#define APP_FULL_ESKF_ZUPT_ABS_GATE_MPS              2.0f
+#define APP_FULL_ESKF_STATIONARY_GYRO_BIAS_ABS_GATE_DPS 5.0f
+#define APP_FULL_ESKF_STATIONARY_ACCEL_BIAS_ABS_GATE_MPS2 1.0f
+
+/* Relative altitude measurements. */
+#define APP_FULL_ESKF_BARO_REFERENCE_SAMPLES         8U
+#define APP_FULL_ESKF_LIDAR_REFERENCE_SAMPLES        32U
+#define APP_FULL_ESKF_LIDAR_REFERENCE_JUMP_M         0.10f
+
+#define APP_FULL_ESKF_BARO_STD_M                     0.10f
+#define APP_FULL_ESKF_LIDAR_STD_M                    0.015f
+
+#define APP_FULL_ESKF_BARO_GATE_SIGMA                6.0f
+#define APP_FULL_ESKF_LIDAR_GATE_SIGMA               6.0f
+#define APP_FULL_ESKF_BARO_ABS_GATE_M                3.0f
+#define APP_FULL_ESKF_LIDAR_ABS_GATE_M               0.25f
+
+#define APP_FULL_ESKF_LIDAR_MIN_M                    0.05f
+#define APP_FULL_ESKF_LIDAR_MAX_M                    40.0f
+
+/* Reject single-sample jumps and require a stable recovery sequence. */
+#define APP_FULL_ESKF_LIDAR_MAX_SAMPLE_JUMP_M         0.10f
+#define APP_FULL_ESKF_LIDAR_REACQUIRE_SAMPLES         4U
+#define APP_FULL_ESKF_LIDAR_REACQUIRE_CONSISTENCY_M   0.08f
+#define APP_FULL_ESKF_LIDAR_REACQUIRE_ABS_GATE_M      0.25f
+
+/* P39 innovation dead-zone recovery.  A stable physical LIDAR stream is
+ * allowed to pull a baro-drifted vertical state back into the normal 0.25 m
+ * gate only after several consecutive samples.  Each individual state update
+ * remains constrained by the same 5 cm / 0.5 m/s limits below. */
+#define APP_FULL_ESKF_LIDAR_INNOV_REACQUIRE_ENABLED       1U
+#define APP_FULL_ESKF_LIDAR_INNOV_REACQUIRE_CONFIRM_SAMPLES 6U
+#define APP_FULL_ESKF_LIDAR_INNOV_REACQUIRE_MAX_M         1.00f
+#define APP_FULL_ESKF_LIDAR_INNOV_REACQUIRE_EXIT_M        0.12f
+#define APP_FULL_ESKF_LIDAR_INNOV_REACQUIRE_EXIT_SAMPLES  8U
+
+/* Limit one LIDAR update so a bad sample cannot kick the full state. */
+#define APP_FULL_ESKF_LIDAR_MAX_POSITION_STEP_M       0.05f
+#define APP_FULL_ESKF_LIDAR_MAX_VELOCITY_STEP_MPS     0.50f
+
+/* Garmin LIDAR-Lite v3 nominal real rate = 200 Hz; fuse each new valid sample. */
+#define APP_FULL_ESKF_LIDAR_UPDATE_DECIMATION        1U
+
+/* P37 vertical-divergence containment.  The filter is inhibited before any
+ * physical output can use a state that disagrees with mutually-consistent
+ * absolute vertical sensors.  Reacquisition resets only PZ/VZ; attitude and
+ * bias states are preserved. */
+#define APP_FULL_ESKF_VERTICAL_DIVERGENCE_ENABLED       1U
+#define APP_FULL_ESKF_VERTICAL_DIVERGENCE_CONFIRM_SAMPLES 10U
+#define APP_FULL_ESKF_VERTICAL_DUAL_CONSISTENCY_M       1.00f
+#define APP_FULL_ESKF_VERTICAL_DIVERGENCE_ABS_M         5.00f
+#define APP_FULL_ESKF_VERTICAL_HARD_BARO_ERROR_M        5.0f
+#define APP_FULL_ESKF_VERTICAL_HARD_POSITION_M          10.0f
+#define APP_FULL_ESKF_VERTICAL_REACQUIRE_STABLE_SAMPLES 40U
+#define APP_FULL_ESKF_VERTICAL_REACQUIRE_INNOV_M        0.75f
+#define APP_FULL_ESKF_VERTICAL_REACQUIRE_VZ_MAX_MPS     30.0f
+
+/* Kept off initially so LIDAR semantics match the proven VerticalEKF path. */
+#define APP_FULL_ESKF_LIDAR_TILT_COMPENSATION_ENABLED 0U
+
+/* V8.19E sensor/flight logging:
+ * - BMP585 direct accepted stream ~200 Hz (DRDY-independent)
+ * - flight/state frame 200 Hz
+ * - five raw 1 kHz IMU samples embedded per state frame
+ */
+
+/* -------------------------------------------------------------------------- */
+/* SD Logger                                                                  */
+/* -------------------------------------------------------------------------- */
+
+#define APP_OPTIONAL_SDLOGGER_ENABLED           1U
+#define APP_SDLOGGER_ENABLED                    APP_OPTIONAL_SDLOGGER_ENABLED
+
+/* 5 ms = 200 Hz flight-state frame rate. Each frame also embeds the latest
+ * five 1 kHz raw IMU samples, preserving high-rate IMU evidence without a
+ * second SD file. */
+#define APP_SDLOGGER_SAMPLE_PERIOD_US            33333UL
+
+/* R8R35R3R10: 4 frames x 384 byte = 1536 byte = 3 sectors.
+ * Short preflight/postflight DMA bursts minimize the only remaining chance
+ * that a command launched just before PE9 is still on the bus after PE9. */
+#define APP_SDLOGGER_BUFFER_SIZE                 1536U
+#define APP_SDLOGGER_WRITE_CHUNK_SIZE           APP_SDLOGGER_BUFFER_SIZE
+
+/*
+ * Dosya acilista tek parca olarak ayrilir ve bir kez senkronize edilir.
+ * Ucus/kayit sirasinda f_sync() calismaz. Boylece 10.24 saniyelik periyodik
+ * ana-dongu duraklamasi olusmaz.
+ *
+ * Normal SDLogger_Stop() sonunda dosya gercek boyuta kirpilir. Ani guc
+ * kesilmesinde dosya ayrilmis boyutta gorunur; V10 donusturucu ard arda gecerli
+ * magic + sequence + CRC karelerini okuyarak gercek kaydi kurtarir.
+ */
+#define APP_SDLOGGER_PREALLOCATE_ENABLED        1U
+#define APP_SDLOGGER_PREALLOCATE_BYTES          (128UL * 1024UL * 1024UL)
+/* P45 long-soak profile: V14 is 384 bytes x 200 Hz = 76,800 B/s.
+ * 128 MiB is about 29.1 minutes; a 96 MiB fallback still keeps ~21.8 min. */
+#define APP_SDLOGGER_PREALLOCATE_MIN_BYTES      (96UL * 1024UL * 1024UL)
+#define APP_SDLOGGER_GUARD_SECTOR_ENABLED       1U
+
+/*
+ * Runtime data path: non-blocking raw SDIO multi-sector DMA.
+ * FatFS is used only for startup allocation and explicit shutdown metadata.
+ */
+#define APP_SDLOGGER_RAW_DMA_ENABLED            1U
+#define APP_SDLOGGER_DMA_TIMEOUT_MS             500UL
+#define APP_SDLOGGER_CARD_POLL_PERIOD_MS        1UL
+#define APP_SDLOGGER_STOP_TIMEOUT_MS            5000UL
+
+/* Runtime metadata sync kapali; final sync yalnizca SDLogger_Stop() icinde. */
+#define APP_SDLOGGER_SYNC_INTERVAL_BUFFERS      0U
+
+#define APP_SDLOGGER_FILE_NAME                  "flight.bin"
+
+/* V8.19 ring: 128 x 384 byte = 49152 byte = 0.64 s backlog at 200 Hz.
+ * Keep this in CCMRAM; P48 adds DMA-writer buffering in normal SRAM instead of
+ * consuming the remaining CCM margin. */
+#define APP_SDLOGGER_RING_FRAME_COUNT           128U
+
+/* R3R10: four short DMA-accessible writer buffers (4 x 1536 = 6 KiB). */
+#define APP_SDLOGGER_DMA_BUFFER_COUNT           4U
+
+/* Main loop can move at most this many frames from ring to SD buffers/pass. */
+#define APP_SDLOGGER_RING_DRAIN_MAX_FRAMES      4U
+#define APP_SDLOGGER_RING_DRAIN_BUDGET_US        320UL
+
+/* P48: enter backpressure earlier than P47.  A 32-frame backlog is already
+ * ~1.07 s at 30 Hz, so draining accelerates before long SD busy intervals can
+ * consume the full 127-frame CCM ring. */
+#define APP_SDLOGGER_RING_BACKPRESSURE_CLEAR_FRAMES     16U
+#define APP_SDLOGGER_RING_BACKPRESSURE_START_FRAMES     32U
+#define APP_SDLOGGER_RING_BACKPRESSURE_CRITICAL_FRAMES  72U
+#define APP_SDLOGGER_RING_DRAIN_MAX_FRAMES_HIGH          8U
+#define APP_SDLOGGER_RING_DRAIN_BUDGET_US_HIGH          520UL
+#define APP_SDLOGGER_RING_DRAIN_MAX_FRAMES_CRITICAL      12U
+#define APP_SDLOGGER_RING_DRAIN_BUDGET_US_CRITICAL      760UL
+/* Never spend a long guard-sector busy interval while meaningful capture
+ * backlog exists. DATA buffers continue to have strict priority. */
+#define APP_SDLOGGER_GUARD_RESUME_MAX_RING_FRAMES        8U
+
+/* TIM5 update interrupt frequency. Must match the 33.333 ms logger period. */
+#define APP_SDLOGGER_CAPTURE_TIMER_HZ            30U
+
+/* R8R35R3R10R1 endurance bench profile: ground/preflight remains exact 30 Hz,
+ * but flight RAM storage keeps one of every four TIM5 samples. The control,
+ * sensor and scheduler rates are unchanged. 512 / 7.5 Hz = 68.27 s. */
+#define APP_SDLOGGER_R10_RAM_DECIMATION          4U
+
+/* R8R35R3R10: SDIO is used only on the quiet ground/postflight side of PE9.
+ * Restore the proven faster divider: 48 MHz / (10 + 2) = 4 MHz. */
+#define APP_SDIO_RUNTIME_CLOCK_DIV               10U
+
+/* R3R10 replaces timed actuator blackouts with a hard flight-session rule:
+ * after PE9, new SDIO command launches are forbidden until touchdown or
+ * latched E-stop and a quiet postflight window. Legacy R9 hold code remains
+ * compiled only for provenance; it is not called by the R10 runtime path.
+ *
+ * R3R10R4R1 tightens the E-STOP replay gate: the quiet timer may start only
+ * AFTER the one-shot needle E-STOP close reports COMPLETE and all motor/RCS
+ * outputs are actually OFF. Keep the SD command path untouched for 3 s, then
+ * perform one bounded host/DMA soft-recovery before RAM -> SD replay. */
+#define APP_SDLOGGER_MOTOR_WRITE_HOLD_ENABLED      0U
+#define APP_SDLOGGER_FLIGHT_ENTRY_HOLD_MS          2500UL
+#define APP_SDLOGGER_MOTOR_WRITE_COOLDOWN_MS        500UL
+#define APP_SDLOGGER_RCS_WRITE_COOLDOWN_MS          350UL
+#define APP_SDLOGGER_R10_POSTFLIGHT_QUIET_MS       3000UL
+
+/* -------------------------------------------------------------------------- */
+/* Debug                                                                      */
+/* -------------------------------------------------------------------------- */
+
+#define APP_DEBUG_DASHBOARD_ENABLED             1
+#define APP_LIVE_EXPRESSIONS_ENABLED            1
+
+#endif

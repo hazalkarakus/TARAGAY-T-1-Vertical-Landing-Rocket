@@ -1,0 +1,16 @@
+P51 onerilen Live Expressions
+=============================
+full_eskf_stationary_detected
+full_eskf_stationary_confirmed_sample_count
+full_eskf_zupt_joseph_update_count
+full_eskf_zupt_joseph_fault_count
+full_eskf_covariance_fault_count
+full_eskf_covariance_state_preserving_recovery_count
+full_eskf_gravity_joseph_update_count
+full_eskf_gravity_joseph_fault_count
+scheduler_realign_count
+v87_imu_task_deadline_miss_count
+v815_eskf_correction_task_deadline_miss_count
+sd_logger_dropped_frame_count
+sd_logger_ring_overrun_count
+sd_logger_fifo_order_fault_count

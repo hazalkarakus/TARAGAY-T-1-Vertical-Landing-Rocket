@@ -1,0 +1,18 @@
+P112R12R8R22 FROZEN CORE HASH AUDIT vs R8R21
+Intentional control-input revision only. The qualified sensor/scheduler/ESKF/nRF/SD/needle low-level core must remain byte-identical.
+PASS App/Core/Scheduler/scheduler.c ab4f73a091ada9363c3fbe2690fd17d2ac5bb0866e7fec862e172093c641fe53
+PASS App/Core/Tasks/app_tasks.c 2823f286bb81cb8c1037a5b6cb1145762485d77ea29976304aaa2a1284281213
+PASS App/Modules/Estimation/FullStateESKF/full_state_eskf.c 0586a0ffa7544b44303357a2f61e3570cc0282a0a0569ae6fb0cf2ad5f47e43e
+PASS App/Modules/Sensors/SensorManager/sensor_manager.c 367021da06f9b3bcc94c5f19e13efca858c8bac572de02c3b849473e0ac157ac
+PASS App/Modules/Sensors/IMU/imu.c ea896a917b7296495437db24e86e23c7270f7d2f93d144ab123a43197398767f
+PASS App/Modules/Sensors/Barometer/barometer.c e475dd99c9045bf643318006fbe9e05f4d5d68adf27c787ecdaa90dd04787143
+PASS App/Modules/Sensors/Lidar/Lidar.c f0bc9547ff78400d56abb4c07068539cde9761443e3fd4380111ca9718813f92
+PASS App/Services/SDLogger/sd_logger.c adbaf9a64eb91148a9ac8e3367c5b10b9242e61d2e9aba328657f6a0bcfa7b20
+PASS App/Services/NRFTelemetry/nrf_telemetry.c 53d25d5ceaf277c795ef5eeea0835e676e453551c0774181627451630cd853b2
+PASS App/Modules/RemoteControl/remote_control.c 03588e5f5c60e1e4e50c74807fc901e5b8fc22cce3ef025b2c24a97ee4226f37
+PASS App/Modules/NRF24/nrf24.c 7e00ab5529245211fc31e7e3f96441db5956f075690e45196e1b6d587160fd32
+PASS App/Services/NeedleValveAutonomousControl/needle_valve_autonomous_control.c 06ffd08ca04c7077a8b831edd9f86fe79518de76edd81a334c0010c9ccc3d6db
+PASS App/Services/NeedleValveIntegrationTest/needle_valve_integration_test.c e21c58cbcf5f751124d7e5dce82f21cf72b0c0a20686d4d041f612983918dbf6
+PASS App/Modules/Control/NeedleValve/needle_valve_controller.c 11d17fa548233757016b92b36ef78de2d502335e50ef5dc2915ab130b4f8aa31
+RESULT: PASS — all listed frozen core files byte-identical to R8R21.
+Intentional modified source files: app_config.h, app_version.h, TaragayFlightLogic .c/.h, UARTTelemetry banner/append-only diagnostics, .project, R8R22 monitor/docs/tests.

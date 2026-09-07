@@ -1,0 +1,7 @@
+P112R12R3 IS NOT A FLIGHT-QUALIFIED BUILD.
+INERT / FULLY DEPRESSURIZED BENCH VALIDATION ONLY.
+
+All propellant, pressure, gas, pyrotechnic, ignition, RCS and vent loads must be physically disconnected/isolated.
+The main needle motor may move after normal production authorization.
+UART is read-only diagnostics and is not part of actuator authorization or control.
+RCS and vent physical outputs remain software hard-isolated by APP_P112R12_INERT_OUTPUT_ISOLATION_MODE=1.

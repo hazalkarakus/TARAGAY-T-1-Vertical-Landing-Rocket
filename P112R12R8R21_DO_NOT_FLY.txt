@@ -1,0 +1,1 @@
+R8R21 is INERT / DRY-RUN validation only. NOT FLIGHT QUALIFIED. Physical RCS and needle outputs must remain isolated.

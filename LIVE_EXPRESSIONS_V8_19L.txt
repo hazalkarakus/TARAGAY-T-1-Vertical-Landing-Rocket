@@ -1,0 +1,102 @@
+V8.19L NEEDLE AUTOHOME + COMMAND TEST
+=====================================
+
+needle_valve_v8_magic
+needle_valve_raw_adc
+needle_valve_hw_adc_raw12
+needle_valve_hw_adc_mv
+needle_valve_zero_adc
+needle_valve_target_adc
+needle_valve_max_open_adc
+needle_valve_adc_per_turn
+needle_valve_max_travel_adc
+needle_valve_position_turns
+needle_valve_max_turns
+needle_valve_requested_cmd
+needle_valve_limited_cmd
+needle_valve_error_adc
+needle_valve_lpwm
+needle_valve_rpwm
+needle_valve_enabled
+needle_valve_zero_valid
+needle_valve_lock
+needle_valve_homing_active
+needle_valve_homing_complete
+needle_valve_homing_elapsed_ms
+needle_valve_homing_start_adc
+needle_valve_fault
+needle_valve_stall_ms
+needle_valve_control_tick_count
+needle_valve_adc_invalid_count
+needle_valve_hw_adc_timeout_count
+
+v819l_auto_magic
+v819l_auto_state
+v819l_auto_last_action_ok
+v819l_auto_ready_for_command
+v819l_auto_command_index
+v819l_auto_command_x10000
+v819l_auto_button_press_count
+v819l_auto_home_start_count
+v819l_auto_home_pass_count
+v819l_auto_abort_count
+v819l_auto_command_accept_count
+v819l_auto_command_reject_count
+v819l_auto_boot_wait_remaining_ms
+v819l_button_raw
+v819l_button_stable
+v819l_button_armed
+v819l_button_raw_transition_count
+v819l_button_glitch_reject_count
+v819l_button_press_event_count
+
+gnc_v816_armed
+gnc_v816_rcs_applied_mask
+sd_logger_logging_active
+sd_logger_total_bytes_written
+sd_logger_error_count
+
+SABITLER / GUVENLI BEKLENTILER
+------------------------------
+needle_valve_v8_magic            = 0x4E56394B
+needle_valve_adc_per_turn        = 195
+needle_valve_max_travel_adc      = 878
+needle_valve_max_turns           = 4.5
+gnc_v816_armed                   = 0
+gnc_v816_rcs_applied_mask        = 0
+
+AUTOHOME BASARILI BITIS
+-----------------------
+v819l_auto_state                 = 2
+v819l_auto_home_start_count      = 1
+v819l_auto_home_pass_count       = 1
+v819l_auto_ready_for_command     = 1
+v819l_auto_button_press_count    = 0
+v819l_button_raw                 = 0
+v819l_button_stable              = 0
+v819l_button_armed               = 1
+needle_valve_homing_active       = 0
+needle_valve_homing_complete     = 1
+needle_valve_zero_valid          = 1
+needle_valve_zero_adc            = 1015..1023
+needle_valve_enabled             = 0
+needle_valve_fault               = 0
+needle_valve_lpwm                = 0
+needle_valve_rpwm                = 0
+
+PA0 FILTRE KURALLARI
+--------------------
+- Ready olmasi icin PA0 en az 1000 ms LOW kalir.
+- Gecerli basma icin PA0 en az 500 ms HIGH kalir.
+- Kisa darbe v819l_button_glitch_reject_count sayacini artirabilir ama
+  v819l_auto_button_press_count ve auto_state degismemelidir.
+
+FAULT KODLARI
+-------------
+0 : yok
+1 : guvensiz ZERO
+2 : stall / homing ilerlemiyor
+3 : hedef aralik disi
+4 : ADC gecersiz/kopuk
+5 : homing toplam zaman asimi
+6 : homing ters yon

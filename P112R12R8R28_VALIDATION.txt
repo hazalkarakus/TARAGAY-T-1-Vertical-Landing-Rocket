@@ -1,0 +1,40 @@
+P112R12R8R28 VALIDATION
+========================
+
+Purpose:
+- Replace manual-sensitive three-pose R8R27 final calibration with five poses: upright, +X, -X, +Y, -Y.
+- Use direct static-UP vector differencing across +/- pairs to cancel common vertical/manual tilt-magnitude error.
+- Keep physical relay authorization locked until all five poses and geometry checks pass.
+- Preserve real ESKF input, RCS V7.13.4, single flight authority, 3-turn=585 ADC needle limit, E-STOP semantics and inert output isolation.
+
+Host regression:
+- Upright 200 samples -> phase 2 PASS
+- +X 120 samples -> phase 4 PASS
+- deliberate same-sign X while waiting -X -> rejected, 0 -X samples PASS
+- -X 120 samples with intentionally unequal angle (+14/-19 deg) -> phase 6, opposition 1.000 PASS
+- +Y 120 samples -> phase 8 PASS
+- deliberate same-sign Y while waiting -Y -> rejected, 0 -Y samples PASS
+- -Y 120 samples with intentionally unequal angle (+17/-12 deg) -> phase 10 CALIBRATED PASS
+- X/Y opposition 1.000/1.000 PASS
+- XY angle 90.00 deg PASS
+- axis agreement 1.0000 PASS
+- Z agreement 1.0000 PASS
+- determinant 1.00000 PASS
+- orthogonality error 0.000000 PASS
+- recovered synthetic mount matrix max error 0.00000 PASS
+- corrected +10 deg lateral-A and -11 deg lateral-B attitude tests PASS
+
+Changed-source syntax:
+- taragay_flight_logic.c host regression compile with -Wall -Wextra -Werror: PASS
+- app_tasks.c / solenoid_output.c / uart_telemetry.c: host -fsyntax-only PASS
+- only expected x86 CMSIS pointer-width warnings and pre-existing UART unused banner/header warnings
+- monitor Python import/argparse assertion: PASS (227 fields)
+
+Safety:
+- Calibration phase 11 maps to MOUNT_CAL_FAULT; all other incomplete phases map to MOUNT_CAL_IN_PROGRESS.
+- Physical RCS relay authorization requires preflight ready + real input valid + calibration valid + system_ok + no STOP.
+- Needle authorization remains revoked in this pressureless bench branch.
+- APP_P112R12R8R28_FIVE_POSE_FRAME_CAL_REV compile-guarded at 1.
+
+No ARM/CubeIDE target compiler is installed in assistant environment.
+Required user-side target check: Clean -> Build -> Flash.

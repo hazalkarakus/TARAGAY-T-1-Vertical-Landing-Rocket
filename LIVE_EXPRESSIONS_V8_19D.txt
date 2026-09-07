@@ -1,0 +1,44 @@
+V8.19D BMP585 minimum Live Expressions
+======================================
+
+Not: Live Expressions degerleri fiziksel olarak imkansizsa sembollere guvenme.
+Karar icin 0x1000F300 sabit bellek blogunu kullan.
+
+bmp585_chip_id
+bmp585_int_config_before_reg
+bmp585_int_config_written_reg
+bmp585_int_config_reg
+bmp585_int_config_ok
+bmp585_standby_config_reg
+bmp585_config_stage
+bmp585_int_source_reg
+bmp585_drdy_source_ok
+bmp585_odr_config_reg
+bmp585_osr_config_reg
+bmp585_osr_eff
+bmp585_config_ok
+bmp585_drdy_count
+bmp585_register_readback_ok
+bmp585_register_mismatch_count
+sensor_qual_baro_rate_hz
+sensor_qual_state
+sensor_qual_pass
+sensor_qual_good_windows
+
+Beklenen:
+
+bmp585_chip_id             = 81 / 0x51
+bmp585_int_config_before_reg  = tipik 53 / 0x35
+bmp585_int_config_written_reg = tipik 58 / 0x3A
+bmp585_int_config_reg         = tipik 58 / 0x3A
+bmp585_int_config_ok          = tipik 1; 0 olsa da polled veri yolu calisir
+bmp585_standby_config_reg  = 128 / 0x80
+bmp585_config_stage        = 8
+bmp585_int_source_reg      = 1
+bmp585_drdy_source_ok      = 1
+bmp585_odr_config_reg      = 169 / 0xA9
+bmp585_osr_config_reg      = 89 / 0x59
+bmp585_osr_eff             = 153 / 0x99
+bmp585_config_ok           = 1
+sensor_qual_baro_rate_hz   = 90..111 Hz
+sensor_qual_pass           = 1 (tum sensor kosullari 3 temiz pencere ise)

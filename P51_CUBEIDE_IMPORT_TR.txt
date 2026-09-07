@@ -1,0 +1,38 @@
+P51 CubeIDE
+===========
+
+Proje adi:
+TGY_V8_19M_P51_STAGGERED_STATIONARY_FLIGHT_GATE
+
+Beklenen ELF:
+Debug/TGY_V8_19M_P51_STAGGERED_STATIONARY_FLIGHT_GATE.elf
+
+Beklenen UART:
+$TGY62
+TGY UART FLIGHT DIAGNOSTICS V62
+FW 8.19M-P51-STAGGERED-STATIONARY-FLIGHT-GATE
+
+Adimlar:
+1. ZIP'i yeni bos klasore cikart.
+2. CubeIDE -> File -> Import -> Existing Projects into Workspace.
+3. P51 klasorunu sec.
+4. Project -> Clean...
+5. Build Project.
+6. 0 error ve RAM/Flash overflow olmadigini dogrula.
+7. Yeni P51 ELF'ini karta flash et.
+8. Aktuator/pnomatik enerji kapali ilk bench testini yap.
+9. UART:
+   python -u monitor_uart_p51.py --port COM8
+
+Ilk hedef:
+eskf_cov_faults=0
+grav_joseph_faults=0
+zupt_joseph_faults=0
+sd_dropped=0
+sd_ring_overruns=0
+sd_fifo_order_faults=0
+imu_recovery_failures=0
+uart_dma_errors=0
+miss_imu << P50'deki 72
+scheduler_realigns << P50'deki 76
+task_eskf_max_us tercihen <1000 us

@@ -1,0 +1,28 @@
+P49R1 GENERATED TYPES BUILD FIX
+===============================
+
+P49 build hatasi:
+  Ucus_Bilgisayari_types.h: No such file or directory
+
+P49 ZIP icinde header fiziksel olarak mevcut olsa da CubeIDE/Windows tarafinda
+generated model header discovery problemi goruldu. P49R1 bu bagimliligi ortadan
+kaldirir:
+
+- Ucus_Bilgisayari_types.h icerigi Ucus_Bilgisayari.h icine korumali olarak gomuldu.
+- Ucus_Bilgisayari.c ve Ucus_Bilgisayari_private.h artik bu ayri header'i dogrudan
+  include etmez.
+- Orijinal types header dosyasi referans/Simulink generated source butunlugu icin
+  projede tutulur.
+- CubeIDE proje adi P49R1 olarak degistirildi; eski workspace build cache'iyle
+  cakisma onlenir.
+
+IMPORT:
+1) Eski P49 projesini kapat.
+2) Bu ZIP'i YENI bos klasore cikar.
+3) CubeIDE -> File -> Import -> Existing Projects into Workspace.
+4) TGY_V8_19M_P49R1_GENERATED_TYPES_BUILD_FIX projesini sec.
+5) Project -> Clean.
+6) Build Project.
+
+Bu revizyon P49'un ZUPT Joseph, vertical recovery ve SD FIFO mantigini degistirmez;
+yalniz generated flight-control build bagimliligini sertlestirir.

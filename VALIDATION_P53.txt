@@ -1,0 +1,38 @@
+P53 VALIDATION
+
+Retained from P52:
+- observability-aware PX/PY covariance guard
+- sparse gravity Joseph / masked staggered ZUPT
+- P49 SD FIFO + backpressure
+- vertical degraded-source recovery
+- V14 384-byte SD format
+
+P53 additions:
+- stationary-only preflight ground-pressure tracking
+- PE9 debounced separation / flight-active one-way ground-reference freeze
+- filtered-pressure IIR reference update: alpha=0.0025, max 0.05 Pa/sample
+- reference motion does not create fake barometric vertical speed
+- Full-State ESKF baro reference follows the preflight moving datum and freezes with it
+- persistent last IMU repeated-word raw 3-burst diagnostic
+- UART $TGY64 / V64 / 297 fields + CRC16
+- UART data buffer increased 3072 -> 4096 B for diagnostic headroom
+
+Automated checks completed:
+- tools/validate_p53.py: PASS
+- Python py_compile monitor/decoder/validator: PASS
+- P44 scheduler host test: PASS
+- V50 vertical sensor policy host test: PASS
+- V50 generated vertical fallback host test: PASS
+- host GCC -fsyntax-only: barometer.c PASS
+- host GCC -fsyntax-only: imu.c PASS
+- host GCC -fsyntax-only: uart_telemetry.c PASS
+- host GCC -fsyntax-only: app_tasks.c PASS
+- host GCC -fsyntax-only: full_state_eskf.c PASS
+- TGY64 C/header/Python contract: 297/297 PASS
+- synthetic TGY64 CRC decode: PASS
+- pure 10-min +20 Pa warmup drift model leaves ~5.5 mm residual altitude
+- after reference freeze, -12 Pa pressure delta maps to ~+1.0 m
+- V14 binary SD layout unchanged
+
+Target CubeIDE Clean + Build is still mandatory because arm-none-eabi-gcc is not installed in this environment.
+Acceptance starts with 10-min stationary preflight soak, then PE9 freeze + controlled +0.5/+1.0 m lift test.

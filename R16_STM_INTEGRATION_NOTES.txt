@@ -1,0 +1,24 @@
+TARAGAY-T1 R16 FINAL STM32 INTEGRATION CANDIDATE
+
+Source Simulink authority:
+ Ucus_Bilgisayari_3p5mm_HOVER_R16e5_BHAT_D50U15
+ Final validation: R16e6 PASS / R16 CLOSED
+
+Ported into existing TaragayFlightLogic authority path:
+ - states 0..8 INIT/SELF_CHECK/PREPOSITION/READY/ASCENT/CAPTURE/HOVER/DEGRADED/SAFE
+ - z0 + 3 m target, +/-4 m downstream latched safety
+ - low-probe thrust ID, B=[4,30]
+ - b_hat alpha DOWN=0.050 / UP=0.015
+ - fast authority DOWN=0.18 / UP=0.02, ratio<1 confirm 150 ms
+ - nonlinear Cv<->turns map, physical max 3.0 turns / 585 ADC
+ - pre-release needle PREPOSITION allowed only after preflight_ready
+ - PE9 remains mandatory for RCS/flight authority
+ - horizontal velocity damping -0.90*Vx/Vy, 0.03 m/s deadband
+ - RCS +/-30 deg envelope, existing 4-sample pair deadtime retained
+ - final RCS fail-closed gate, same-sample revoke, 200 ms re-arm
+
+NOTES:
+ - Main +/-4 m Safety_Trip intentionally does NOT directly revoke RCS.
+ - No separate needle hard guard added.
+ - Existing sensor/ESKF/SD drivers and actuator adaptive motion implementation retained.
+ - This is an integration candidate until CubeIDE target build + hardware regression are run.

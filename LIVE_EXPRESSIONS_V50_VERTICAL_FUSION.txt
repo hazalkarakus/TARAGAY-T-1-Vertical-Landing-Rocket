@@ -1,0 +1,42 @@
+V50 DUAL VERTICAL FUSION - LIVE EXPRESSIONS
+
+generated_fc_status.vertical_sensor_source_mask
+generated_fc_status.vertical_sensor_degraded
+generated_fc_status.lidar_aiding_active
+generated_fc_status.baro_aiding_active
+generated_fc_status.vertical_sensor_transition_count
+generated_fc_status.vertical_dual_source_count
+generated_fc_status.vertical_lidar_only_count
+generated_fc_status.vertical_baro_only_count
+generated_fc_status.vertical_no_aiding_count
+generated_fc_status.vertical_200hz_valve_cmd
+generated_fc_status.vertical_target_force_n
+generated_fc_status.vertical_estimated_thrust_n
+generated_fc_status.suicide_burn_active
+
+full_eskf_vertical_position_valid
+full_eskf_lidar_fresh
+full_eskf_baro_fresh
+full_eskf_position_z_m
+full_eskf_velocity_z_mps
+full_eskf_lidar_sample_age_us
+full_eskf_baro_sample_age_us
+
+lidar_distance_valid
+lidar_raw_distance_cm
+lidar_filtered_distance_m
+lidar_error_count
+lidar_timeout_count
+lidar_dma_error_count
+lidar_last_i2c_error_code
+
+v87_baro_pressure_valid
+v87_baro_filtered_altitude_m
+preflight_trigger_status.lidar_reference_ready
+preflight_trigger_status.barometer_reference_ready
+
+SOURCE MASK
+0 = no usable aiding; vertical command forced safe
+1 = LIDAR only; degraded redundancy
+2 = barometer only; expected during thrust-induced LIDAR dropout
+3 = LIDAR + barometer; normal dual-aided mode

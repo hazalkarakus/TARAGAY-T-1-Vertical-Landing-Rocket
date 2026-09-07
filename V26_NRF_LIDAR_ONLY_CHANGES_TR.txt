@@ -1,0 +1,31 @@
+V26 - SADECE NRF + LIDAR ENTEGRASYON DUZELTMESI
+
+TABAN: Kullanici tarafindan tekrar yuklenen ve calistigi teyit edilen V23.
+
+DEGISTIRILEN KOD DOSYALARI SADECE:
+1) App/app.c
+   - RemoteControl_Init, calisan V20 projesindeki gibi BusManager_Init sonrasi erkene alindi.
+2) App/Core/Tasks/app_tasks.c
+   - Lidar_Init, Barometer_Init oncesine alindi.
+   - Ikinci RemoteControl_Init cagrisi kaldirildi.
+3) App/Modules/RemoteControl/remote_control.c
+   - Gecerli F103 paketi ekstra 40 ms deglitch beklemeden dogrudan 0/1 komutuna cevriliyor.
+   - V23 Live Expressions diagnostikleri korunuyor.
+
+DEGISTIRILMEYENLER:
+- IMU surucusu / SPI1
+- BMP585 surucusu / SPI2
+- SDIO / SD logger
+- Lidar.c / Lidar.h
+- i2c.c / dma.c
+- nrf24.c / nrf24.h
+- ServoOutput
+- SolenoidOutput / RCS
+- Needle valve / ana motor
+- Estimator ve kontrol algoritmalari
+
+NRF PROTOKOLU KORUNDU:
+- Address: TGY01
+- Channel: 76
+- Payload: 4 byte
+- 1 Mbps / 2-byte CRC / Auto-ACK

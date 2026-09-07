@@ -1,0 +1,52 @@
+TGY RCS + nRF + SOLENOID MERGE VALIDATION
+========================================
+
+Source merge base:
+- STM32F407_TGY_NRF_ALICI_LED_DUZELTILMIS.zip
+
+RCS/solenoid source:
+- tgy_landing_envelope_v3.zip
+
+Preserved:
+- nRF24 driver and RemoteControl module
+- SPI3 / PD0 CSN / PD1 CE / PD3 IRQ configuration
+- PD12 green LED behavior
+- sensor, estimator, SD logger and UART telemetry modules
+- newer IMU and LIDAR startup calibration configuration
+
+Added:
+- AttitudeControl module
+- SolenoidOutput module
+- PE7, PE11, PE15 and PB15 active-LOW relay outputs
+- Euler publication counter required by the controller
+- Live Expression shadow variables
+
+Validation completed in this environment:
+1. Strict C11 host syntax checks for all modified/added application sources:
+   -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+   Result: PASS
+
+2. Host controller behavior test:
+   4 deg roll -> all outputs OFF
+   +11 deg roll -> IN1 / PE7
+   -11 deg roll -> IN2 / PE11
+   +11 deg pitch -> IN3 / PE15
+   -11 deg pitch -> IN4 / PB15
+   Result: PASS
+
+3. Output interlock test:
+   Opposing roll channels requested simultaneously -> both rejected, fault set
+   Result: PASS
+
+4. Active-LOW and fail-safe test:
+   Active channel drives GPIO LOW; ForceSafe drives all four GPIOs HIGH
+   Result: PASS
+
+5. Project source configuration:
+   App source tree has no NRF24 exclusion in .cproject
+   Result: PASS
+
+Limitations:
+- A physical STM32F407/relay/IMU test cannot be performed in this environment.
+- The final ARM build must be run with STM32CubeIDE before flashing.
+- Start with a no-pressure relay-only bench test.

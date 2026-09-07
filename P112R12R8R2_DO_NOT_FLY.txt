@@ -1,0 +1,9 @@
+P112R12R8R2 - DO NOT FLY
+
+Bu sürüm yalnız tamamen basınçsız/inert bench doğrulaması içindir.
+Gaz/propellant/pyro/ignition/energetic hardware fiziksel olarak izole olmalıdır.
+RCS ve vent fiziksel yükleri izole tutulmalıdır.
+UART read-only diagnostiktir; UART üzerinden aktüasyon eklenmemiştir.
+
+Amaç: R12R8R1'de tekrarlanan kalıcı LiDAR/I2C2 dropout sonrası bounded GPIO bus-clear recovery davranışını doğrulamak.
+Bu paket uçuş kalifikasyonu değildir.

@@ -1,0 +1,13 @@
+PASS App/Core/Tasks/app_tasks.c
+
+
+PASS App/Modules/Control/TaragayFlightLogic/taragay_flight_logic.c
+
+
+PASS App/Services/NeedleValveAutonomousControl/needle_valve_autonomous_control.c
+
+
+PASS App/Services/UARTTelemetry/uart_telemetry.c
+
+
+PASS App/Services/SolenoidOutput/solenoid_output.c

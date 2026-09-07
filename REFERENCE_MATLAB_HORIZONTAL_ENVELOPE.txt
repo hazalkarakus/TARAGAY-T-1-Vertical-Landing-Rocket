@@ -1,0 +1,548 @@
+function [hedef_pitch, hedef_yaw] = ...
+    yatayKontrol_EnvelopeUyumlu(x,y,vx,vy,z,Hover_Durum)
+%#codegen
+%
+% YATAY KONTROL + GUVENLI LANDING DIKLESTIRME
+%
+% NORMAL UCUS / HOVER:
+%   Onceki iyi calisan ayarlar korunmustur.
+%
+% Hover_Durum = 3:
+%   Inis modu.
+%   Yatay hiz sondurulur.
+%   Yere yaklastikca izin verilen Pitch/Yaw azaltir.
+%
+% Hover_Durum >= 4:
+%   Pitch/Yaw hedefi direkt 0 derece.
+
+%% =========================================================
+%% SABITLER
+%% =========================================================
+
+g   = 9.80665;
+DEG = pi/180.0;
+
+X_HEDEF = 0.0;
+Y_HEDEF = 0.0;
+
+%% =========================================================
+%% X EKSENI - AYNI
+%% =========================================================
+
+Kp_X_NORMAL = 0.40;
+Kd_X_NORMAL = 0.90;
+
+Kp_X_EDGE = 0.90;
+Kd_X_EDGE = 1.60;
+
+%% =========================================================
+%% Y EKSENI - SON IYI AYAR
+%% =========================================================
+
+Kp_Y_NORMAL = 0.25;
+Kd_Y_NORMAL = 1.00;
+
+Kp_Y_EDGE = 0.75;
+Kd_Y_EDGE = 2.40;
+
+Y_RETURN_BRAKE_GAIN = 0.65;
+
+%% =========================================================
+%% NORMAL UCUS ACI LIMITLERI - AYNI
+%% =========================================================
+
+NORMAL_TILT   = 4.0*DEG;
+MAX_TILT      = 4.8*DEG;
+COMBINED_TILT = 5.5*DEG;
+
+COMBINED_TRIGGER = g*tan(1.5*DEG);
+
+%% =========================================================
+%% PLATFORM / GUVENLIK - AYNI
+%% =========================================================
+
+PLATFORM_HALF = 4.5;
+SAFE_HALF     = 3.0;
+GUARD_START   = 1.0;
+
+LOOKAHEAD_S = 1.00;
+
+A_BRAKE_PLAN = 0.40;
+BRAKE_MARGIN = 0.40;
+
+POSITION_DEADBAND = 0.03;
+VELOCITY_DEADBAND = 0.03;
+
+PITCH_CMD_SIGN = 1.0;
+YAW_CMD_SIGN   = 1.0;
+
+%% =========================================================
+%% LANDING KONTROL KAZANCLARI
+%% =========================================================
+
+Kp_X_LANDING = 0.10;
+Kd_X_LANDING = 1.40;
+
+Kp_Y_LANDING = 0.10;
+Kd_Y_LANDING = 1.40;
+
+%% =========================================================
+%% YENI - DAHA ERKEN DIKLESTIRME
+%% =========================================================
+%
+% SADECE BU LANDING BOLUMUNU SIKILASTIRDIK.
+%
+% z > 1.50 m :
+%     max 0.8 derece
+%
+% 1.00 - 1.50 m :
+%     0.5 -> 0.8 derece
+%
+% 0.70 - 1.00 m :
+%     0.25 -> 0.5 derece
+%
+% 0.60 - 0.70 m :
+%     0 -> 0.25 derece
+%
+% z <= 0.60 m :
+%     hedef_pitch = 0
+%     hedef_yaw   = 0
+%
+
+LANDING_TILT_HIGH = 0.80*DEG;
+LANDING_TILT_MID  = 0.50*DEG;
+LANDING_TILT_LOW  = 0.25*DEG;
+
+LANDING_Z_HIGH = 1.50;
+LANDING_Z_MID  = 1.00;
+LANDING_Z_LOW  = 0.70;
+
+UPRIGHT_Z = 0.60;
+
+%% =========================================================
+%% CIKISLAR
+%% =========================================================
+
+hedef_pitch = 0.0;
+hedef_yaw   = 0.0;
+
+%% =========================================================
+%% GIRIS KONTROLU
+%% =========================================================
+
+if ~(isfinite(x) && ...
+     isfinite(y) && ...
+     isfinite(vx) && ...
+     isfinite(vy) && ...
+     isfinite(z) && ...
+     isfinite(Hover_Durum))
+
+    return;
+
+end
+
+%% =========================================================
+%% GOREV BITTI
+%% =========================================================
+
+if Hover_Durum >= 4.0
+
+    hedef_pitch = 0.0;
+    hedef_yaw   = 0.0;
+
+    return;
+
+end
+
+%% =========================================================
+%% KONUM HATALARI
+%% =========================================================
+
+ex = x - X_HEDEF;
+ey = y - Y_HEDEF;
+
+%% =========================================================
+%% DEADBAND
+%% =========================================================
+
+if abs(ex) < POSITION_DEADBAND && ...
+   abs(vx) < VELOCITY_DEADBAND
+
+    ex = 0.0;
+    vx_use = 0.0;
+
+else
+
+    vx_use = vx;
+
+end
+
+if abs(ey) < POSITION_DEADBAND && ...
+   abs(vy) < VELOCITY_DEADBAND
+
+    ey = 0.0;
+    vy_use = 0.0;
+
+else
+
+    vy_use = vy;
+
+end
+
+%% =========================================================
+%% LANDING MODU
+%% =========================================================
+
+if Hover_Durum >= 3.0
+
+    %% -----------------------------------------------------
+    %% YATAY HIZ ONCELIKLI KONTROL
+    %% -----------------------------------------------------
+
+    ax_cmd = ...
+        -Kp_X_LANDING*ex ...
+        -Kd_X_LANDING*vx_use;
+
+    ay_cmd = ...
+        -Kp_Y_LANDING*ey ...
+        -Kd_Y_LANDING*vy_use;
+
+    %% -----------------------------------------------------
+    %% YERE YAKLASTIKCA DIKLESTIR
+    %% -----------------------------------------------------
+
+    if z > LANDING_Z_HIGH
+
+        landing_tilt_limit = LANDING_TILT_HIGH;
+
+    elseif z > LANDING_Z_MID
+
+        oran = ...
+            (z - LANDING_Z_MID) / ...
+            (LANDING_Z_HIGH - LANDING_Z_MID);
+
+        landing_tilt_limit = ...
+            LANDING_TILT_MID + ...
+            oran * ...
+            (LANDING_TILT_HIGH-LANDING_TILT_MID);
+
+    elseif z > LANDING_Z_LOW
+
+        oran = ...
+            (z - LANDING_Z_LOW) / ...
+            (LANDING_Z_MID - LANDING_Z_LOW);
+
+        landing_tilt_limit = ...
+            LANDING_TILT_LOW + ...
+            oran * ...
+            (LANDING_TILT_MID-LANDING_TILT_LOW);
+
+    elseif z > UPRIGHT_Z
+
+        oran = ...
+            (z - UPRIGHT_Z) / ...
+            (LANDING_Z_LOW-UPRIGHT_Z);
+
+        landing_tilt_limit = ...
+            oran*LANDING_TILT_LOW;
+
+    else
+
+        % Yere cok yakin:
+        % artik konum kovalamiyoruz.
+        % Roketin dik kalmasini istiyoruz.
+
+        hedef_pitch = 0.0;
+        hedef_yaw   = 0.0;
+
+        return;
+
+    end
+
+    %% -----------------------------------------------------
+    %% LANDING IVME LIMITI
+    %% -----------------------------------------------------
+
+    a_landing_max = ...
+        g*tan(landing_tilt_limit);
+
+    ax_cmd = ...
+        min(max(ax_cmd,...
+        -a_landing_max),...
+         a_landing_max);
+
+    ay_cmd = ...
+        min(max(ay_cmd,...
+        -a_landing_max),...
+         a_landing_max);
+
+    %% -----------------------------------------------------
+    %% IVME -> ACI
+    %% -----------------------------------------------------
+
+    % +yaw   -> +X
+    % +pitch -> -Y
+
+    pitch_cmd = ...
+        -atan2(ay_cmd,g);
+
+    yaw_cmd = ...
+         atan2(ax_cmd,g);
+
+    hedef_pitch = ...
+        PITCH_CMD_SIGN*pitch_cmd;
+
+    hedef_yaw = ...
+        YAW_CMD_SIGN*yaw_cmd;
+
+    %% -----------------------------------------------------
+    %% SON LANDING LIMITI
+    %% -----------------------------------------------------
+
+    hedef_pitch = ...
+        min(max(hedef_pitch,...
+        -landing_tilt_limit),...
+         landing_tilt_limit);
+
+    hedef_yaw = ...
+        min(max(hedef_yaw,...
+        -landing_tilt_limit),...
+         landing_tilt_limit);
+
+    return;
+
+end
+
+%% =========================================================
+%% NORMAL UCUS / HOVER
+%% =========================================================
+
+x_pred = ...
+    x + LOOKAHEAD_S*vx_use;
+
+y_pred = ...
+    y + LOOKAHEAD_S*vy_use;
+
+%% =========================================================
+%% KENARA YAKINLIK
+%% =========================================================
+
+edge_x = ...
+    (abs(x_pred)-GUARD_START) / ...
+    (SAFE_HALF-GUARD_START);
+
+edge_y = ...
+    (abs(y_pred)-GUARD_START) / ...
+    (SAFE_HALF-GUARD_START);
+
+edge_x = min(max(edge_x,0.0),1.0);
+edge_y = min(max(edge_y,0.0),1.0);
+
+%% =========================================================
+%% DINAMIK KAZANCLAR
+%% =========================================================
+
+Kp_x = ...
+    Kp_X_NORMAL + ...
+    edge_x*(Kp_X_EDGE-Kp_X_NORMAL);
+
+Kd_x = ...
+    Kd_X_NORMAL + ...
+    edge_x*(Kd_X_EDGE-Kd_X_NORMAL);
+
+Kp_y = ...
+    Kp_Y_NORMAL + ...
+    edge_y*(Kp_Y_EDGE-Kp_Y_NORMAL);
+
+Kd_y = ...
+    Kd_Y_NORMAL + ...
+    edge_y*(Kd_Y_EDGE-Kd_Y_NORMAL);
+
+%% =========================================================
+%% NORMAL YATAY KONTROL
+%% =========================================================
+
+ax_cmd = ...
+    -Kp_x*ex ...
+    -Kd_x*vx_use;
+
+ay_cmd = ...
+    -Kp_y*ey ...
+    -Kd_y*vy_use;
+
+%% =========================================================
+%% Y MERKEZE DONUS FRENLEMESI
+%% =========================================================
+
+if (y*vy_use < 0.0) && ...
+   (abs(y) > POSITION_DEADBAND)
+
+    ay_cmd = ...
+        ay_cmd - ...
+        Y_RETURN_BRAKE_GAIN*vy_use;
+
+end
+
+%% =========================================================
+%% BIRLESIK X-Y KONTROL
+%% =========================================================
+
+combined_control = ...
+    (abs(ax_cmd) >= COMBINED_TRIGGER) && ...
+    (abs(ay_cmd) >= COMBINED_TRIGGER) && ...
+    ((x*vx_use > 0.0) || ...
+     (y*vy_use > 0.0));
+
+if combined_control
+
+    active_max_tilt = COMBINED_TILT;
+
+else
+
+    active_max_tilt = MAX_TILT;
+
+end
+
+%% =========================================================
+%% FRENLEME MESAFESI
+%% =========================================================
+
+a_edge_max = ...
+    g*tan(active_max_tilt);
+
+stop_x = ...
+    (vx_use*vx_use) / ...
+    (2.0*A_BRAKE_PLAN);
+
+stop_y = ...
+    (vy_use*vy_use) / ...
+    (2.0*A_BRAKE_PLAN);
+
+%% =========================================================
+%% X SINIR KORUMASI
+%% =========================================================
+
+if abs(x) >= SAFE_HALF
+
+    if x > 0.0
+
+        ax_cmd = -a_edge_max;
+
+    elseif x < 0.0
+
+        ax_cmd = a_edge_max;
+
+    end
+
+elseif (x*vx_use > 0.0) && ...
+       ((abs(x)+stop_x+BRAKE_MARGIN) >= SAFE_HALF)
+
+    if vx_use > 0.0
+
+        ax_cmd = -a_edge_max;
+
+    elseif vx_use < 0.0
+
+        ax_cmd = a_edge_max;
+
+    end
+
+end
+
+%% =========================================================
+%% Y SINIR KORUMASI
+%% =========================================================
+
+if abs(y) >= SAFE_HALF
+
+    if y*vy_use >= 0.0
+
+        if y > 0.0
+
+            ay_cmd = -a_edge_max;
+
+        elseif y < 0.0
+
+            ay_cmd = a_edge_max;
+
+        end
+
+    end
+
+elseif (y*vy_use > 0.0) && ...
+       ((abs(y)+stop_y+BRAKE_MARGIN) >= SAFE_HALF)
+
+    if vy_use > 0.0
+
+        ay_cmd = -a_edge_max;
+
+    elseif vy_use < 0.0
+
+        ay_cmd = a_edge_max;
+
+    end
+
+end
+
+%% =========================================================
+%% NORMAL EGIM LIMITI
+%% =========================================================
+
+edge_level = ...
+    max(edge_x,edge_y);
+
+tilt_limit = ...
+    NORMAL_TILT + ...
+    edge_level * ...
+    (active_max_tilt-NORMAL_TILT);
+
+if combined_control
+
+    tilt_limit = COMBINED_TILT;
+
+end
+
+a_axis_max = ...
+    g*tan(tilt_limit);
+
+ax_cmd = ...
+    min(max(ax_cmd,...
+    -a_axis_max),...
+     a_axis_max);
+
+ay_cmd = ...
+    min(max(ay_cmd,...
+    -a_axis_max),...
+     a_axis_max);
+
+%% =========================================================
+%% IVME -> ACI
+%% =========================================================
+
+pitch_cmd = ...
+    -atan2(ay_cmd,g);
+
+yaw_cmd = ...
+     atan2(ax_cmd,g);
+
+hedef_pitch = ...
+    PITCH_CMD_SIGN*pitch_cmd;
+
+hedef_yaw = ...
+    YAW_CMD_SIGN*yaw_cmd;
+
+%% =========================================================
+%% SON LIMIT
+%% =========================================================
+
+hedef_pitch = ...
+    min(max(hedef_pitch,...
+    -active_max_tilt),...
+     active_max_tilt);
+
+hedef_yaw = ...
+    min(max(hedef_yaw,...
+    -active_max_tilt),...
+     active_max_tilt);
+
+end

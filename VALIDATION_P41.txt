@@ -1,0 +1,10 @@
+P41 validation: PASS
+- P41 structural validator: PASS
+- V55 UART schema validator: PASS (214 fields)
+- P40 actuator-fault hardening preserved
+- P40 IMU quick-retry / 12-NOP / medium-slew SW-SPI preserved
+- P40 session-safe V14 decoder preserved
+- Scheduler priority: IMU -> LIDAR -> ESKF -> BARO -> COV -> NRF -> MON
+- Scheduler C host GCC syntax: PASS (STM32F407xx headers; expected CMSIS host pointer-size warnings only)
+- Python monitor/decoder compile: PASS
+- ARM target link/build: NOT RUN (arm-none-eabi-gcc unavailable in this environment)

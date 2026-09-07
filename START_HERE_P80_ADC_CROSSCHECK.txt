@@ -1,0 +1,56 @@
+TARAGAY-T1 P80 ADC1 / ADC2 / VREFINT CROSS-CHECK
+=================================================
+Firmware: 8.19M-P80-ADC1-ADC2-VREF-DIAGNOSTIC
+STATUS  : DO NOT FLY - BENCH DIAGNOSTIC ONLY
+
+AMAÇ
+----
+P79'da motor tamamen kapaliyken PC1/needle ADC'nin 0..1023 araliginda ciddi
+sicramalar yaptigi goruldu. P80, hicbir kabloyu sokmeden ayni PC1 sinyalini
+iki ADC peripheral'i ile karsilastirir ve MCU'nun dahili VREFINT hattini izler.
+
+P80 NE OKUR?
+------------
+1) ADC1 -> PC1 / IN11, 480-cycle uzun sample (~500 Hz)
+2) ADC2 -> PC1 / IN11, 480-cycle uzun sample (~500 Hz)
+3) ADC1 -> VREFINT / channel 17 (50 ms probe)
+4) VREFINT sonrasinda ADC1 -> PC1, 3-cycle kisa sample
+5) Ardindan ADC1 -> PC1, 480-cycle recovery sample
+
+GUVENLIK
+--------
+- Gaz/basinc OLMASIN.
+- RCS fiziksel gucu kapali/inhibit olsun.
+- Mumkunse motor gucunu da fiziksel olarak kapat.
+- Firmware seviyesinde L_EN/R_EN zorla LOW.
+- LPWM/RPWM zorla 0.
+- DriveOpen/DriveClose no-op.
+- USER/PA0 butonu motor komutu vermez.
+
+TEST
+----
+1) CubeIDE: Clean Project -> Build Project -> Flash.
+2) Kabloya/pota dokunma. Mekanizmayi mevcut konumunda birak.
+3) Calistir:
+   python -u monitor_uart_p80_adc_crosscheck.py --port COM21 --log uart_p80_adc_crosscheck.txt
+4) 20-30 saniye hicbir seye dokunmadan log al.
+5) Ctrl+C ile bitir ve uart_p80_adc_crosscheck.txt dosyasini gonder.
+
+MONITOR YORUMU
+--------------
+- ADC1 ve ADC2 beraber zipliyor, VREF stabil:
+  PC1'e gelen dis sinyal/pot/kablo/GND hattina guclu isaret.
+- Sadece ADC1 zipliyor:
+  ADC1/config/peripheral tarafi supheli.
+- Sadece ADC2 zipliyor:
+  ADC2/config/peripheral tarafi supheli.
+- VREFINT de belirgin oynuyor:
+  VDDA/3.3V/GND analog referans tarafi supheli.
+- Short-long farki buyuk:
+  kaynak empedansi, wiper temasi veya acquisition settling supheli.
+
+NOT
+---
+P80'de hesaplanan vdda_mv_est, VREFINT tipik 1.210 V kabulune dayali tani
+amacli yaklasik degerdir. Mutlak voltaj kalibrasyonu olarak kullanilmaz;
+onemli olan VREFINT'in zaman icindeki stabilitesidir.

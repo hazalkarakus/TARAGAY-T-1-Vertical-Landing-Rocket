@@ -1,0 +1,162 @@
+===== App/Common/app_version.h =====
+--- /mnt/data/r3r10r3_work/P112R12R8R35R3R10R3_FINAL_CANDIDATE/App/Common/app_version.h	2026-09-04 21:45:14.041986898 +0000
++++ /mnt/data/r3r10r4_work/P112R12R8R35R3R10R4_NRF_STABLE_TDD/App/Common/app_version.h	2026-09-04 22:11:59.226470816 +0000
+@@ -5,7 +5,7 @@
+ #define APP_VERSION_MINOR                       19
+ #define APP_VERSION_PATCH                       99
+ 
+-#define APP_VERSION_STRING "8.19M-P112R12R8R35R3R10R3-FINAL-CANDIDATE"
++#define APP_VERSION_STRING "8.19M-P112R12R8R35R3R10R4-NRF-STABLE-TDD"
+ 
+ #define APP_BUILD_TYPE                          "DEBUG"
+ 
+===== App/Common/app_config.h =====
+--- /mnt/data/r3r10r3_work/P112R12R8R35R3R10R3_FINAL_CANDIDATE/App/Common/app_config.h	2026-09-04 21:45:14.043207461 +0000
++++ /mnt/data/r3r10r4_work/P112R12R8R35R3R10R4_NRF_STABLE_TDD/App/Common/app_config.h	2026-09-04 22:11:59.227617516 +0000
+@@ -121,13 +121,19 @@
+ 
+ #define APP_REMOTE_POLL_PERIOD_MS               5UL
+ #define APP_REMOTE_LINK_TIMEOUT_MS              500UL
+-/* R8R35R3R10R3 flight command-priority RF policy.
+- * Once PE9/flight is active, rocket-side nRF downlink TX is suppressed and the
+- * radio stays PRX so STOP/vent command heartbeats have priority. If the command
+- * link times out, PRX is re-asserted periodically without blocking or changing
+- * the flight-control authority. */
+-#define APP_NRF_FLIGHT_COMMAND_PRIORITY_RX_ONLY        1U
+-#define APP_NRF_FLIGHT_RX_REARM_PERIOD_MS            250UL
++/* R8R35R3R10R4 flight RF policy.
++ * The final R3R10R3 test showed that completely suppressing rocket downlink in
++ * flight starved the existing ground-station TDD state machine: with switches
++ * OFF only three fresh commands were accepted in ~15 s, while STOP emergency
++ * retransmission still arrived. Keep command reception dominant, but answer
++ * every accepted command with exactly ONE proven 32-byte FAST frame after the
++ * existing 4.5 ms TDD delay. No duplicate and no detail-page rotation in flight.
++ * This gives the ground station the response it expects so it can immediately
++ * return to its 20 Hz command heartbeat, while the rocket spends only one short
++ * bounded TX slot per accepted command and returns to 4-byte PRX. */
++#define APP_NRF_FLIGHT_COMMAND_PRIORITY_RX_ONLY        0U
++#define APP_NRF_FLIGHT_MINIMAL_FAST_TDD                1U
++#define APP_NRF_FLIGHT_RX_REARM_PERIOD_MS           1000UL
+ /* Reject brief 0/1 command chatter without weakening RF link timeout. */
+ #define APP_REMOTE_COMMAND_DEGLITCH_MS           40UL
+ #define APP_REMOTE_LED_BLINK_PERIOD_MS          250UL
+===== App/Services/NRFTelemetry/nrf_telemetry.c =====
+--- /mnt/data/r3r10r3_work/P112R12R8R35R3R10R3_FINAL_CANDIDATE/App/Services/NRFTelemetry/nrf_telemetry.c	2026-09-04 21:45:42.772259500 +0000
++++ /mnt/data/r3r10r4_work/P112R12R8R35R3R10R4_NRF_STABLE_TDD/App/Services/NRFTelemetry/nrf_telemetry.c	2026-09-04 22:11:59.227765298 +0000
+@@ -472,27 +472,37 @@
+         {
+             nrf_tlm_tx_success_count++;
+ 
+-            /* P73: transmit the exact same 32-byte frame one more time inside
+-             * the same ground receive window. Ground closes PRX after the
+-             * first valid copy, so the second copy is only useful when the
+-             * first copy was missed. No command parser or actuator path is
+-             * changed. */
+-            duplicate_pending = 1U;
+-            duplicate_due_us = now_us + NRF_TLM_DUPLICATE_DELAY_US;
+-            nrf_tlm_dup_schedule_count++;
+-
+-            if (tx_fast_in_flight != 0U)
++#if (APP_NRF_FLIGHT_MINIMAL_FAST_TDD != 0U)
++            if (flight_rx_only != 0U)
+             {
+-                if (fast_since_detail < NRF_TELEMETRY_FAST_PER_DETAIL)
+-                {
+-                    fast_since_detail++;
+-                }
++                /* R3R10R4: one response is enough to release the existing
++                 * ground TDD receive window. Do not schedule a second copy or
++                 * rotate detail pages in flight; return to PRX immediately. */
++                duplicate_pending = 0U;
++                tx_duplicate_in_flight = 0U;
+             }
+             else
++#endif
+             {
+-                next_page = (uint8_t)(tx_page_in_flight + 1U);
+-                if (next_page >= NRF_TELEMETRY_PAGE_COUNT) next_page = 0U;
+-                fast_since_detail = 0U;
++                /* P73 preflight behavior is retained byte-for-byte in spirit:
++                 * a duplicate may improve downlink observability before flight. */
++                duplicate_pending = 1U;
++                duplicate_due_us = now_us + NRF_TLM_DUPLICATE_DELAY_US;
++                nrf_tlm_dup_schedule_count++;
++
++                if (tx_fast_in_flight != 0U)
++                {
++                    if (fast_since_detail < NRF_TELEMETRY_FAST_PER_DETAIL)
++                    {
++                        fast_since_detail++;
++                    }
++                }
++                else
++                {
++                    next_page = (uint8_t)(tx_page_in_flight + 1U);
++                    if (next_page >= NRF_TELEMETRY_PAGE_COUNT) next_page = 0U;
++                    fast_since_detail = 0U;
++                }
+             }
+         }
+         else
+@@ -503,23 +513,51 @@
+         }
+     }
+ 
+-#if (APP_NRF_FLIGHT_COMMAND_PRIORITY_RX_ONLY != 0U)
++#if (APP_NRF_FLIGHT_MINIMAL_FAST_TDD != 0U)
+     if (flight_rx_only != 0U)
+     {
+-        /* R8R35R3R10R3 command-priority flight mode. A TX that began before
+-         * PE9 is allowed only to finish its already-running async return-to-RX
+-         * state above; no new 32-byte telemetry or duplicate is launched. */
+-        if (pending != 0U)
+-        {
+-            pending = 0U;
+-            nrf_tlm_pending_replace_count++;
+-        }
++        /* R8R35R3R10R4: keep the ground station's explicit-TDD heartbeat
++         * alive. R3R10R3 RX-only mode proved the rocket receiver itself was
++         * healthy (STOP arrived), but the ground station stopped its normal
++         * heartbeat while waiting for a downlink response.
++         *
++         * In flight, each newly accepted 4-byte command schedules exactly one
++         * FAST 32-byte response at the proven +4.5 ms point. No duplicate, no
++         * 19-page rotation. The async radio state machine returns to PRX before
++         * the next command opportunity. */
+         if ((duplicate_pending != 0U) && (tx_duplicate_in_flight == 0U))
+         {
+             duplicate_pending = 0U;
+             nrf_tlm_dup_cancel_count++;
+         }
+-        last_seen_valid_packet_count = remote_rx_valid_packet_count;
++
++        if (remote_rx_valid_packet_count != last_seen_valid_packet_count)
++        {
++            last_seen_valid_packet_count = remote_rx_valid_packet_count;
++            if (pending != 0U) nrf_tlm_pending_replace_count++;
++            pending = 1U;
++            pending_command_sequence = remote_rx_last_sequence;
++            pending_due_us = now_us + NRF_TLM_COMMAND_TO_DOWNLINK_DELAY_US;
++            nrf_tlm_schedule_count++;
++        }
++
++        if ((pending != 0U) &&
++            (NRF24_AsyncTxIsBusy() == 0U) &&
++            ((int32_t)(now_us - pending_due_us) >= 0))
++        {
++            uint8_t packet[NRF_TELEMETRY_PACKET_SIZE];
++            BuildFast(pending_command_sequence, packet);
++            nrf_tlm_page_id = NRF_TELEMETRY_FAST_TYPE;
++            tx_fast_in_flight = 1U;
++
++            if (NRF24_AsyncTxStart(packet, NRF_TELEMETRY_PACKET_SIZE) != 0U)
++            {
++                pending = 0U;
++                tx_started_us = now_us;
++                nrf_tlm_sequence++;
++                nrf_tlm_tx_start_count++;
++            }
++        }
+         return;
+     }
+ #else

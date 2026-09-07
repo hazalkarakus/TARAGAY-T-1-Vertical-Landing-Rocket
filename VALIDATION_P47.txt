@@ -1,0 +1,49 @@
+P47 VALIDATION
+==============
+
+Scope
+-----
+Base: P46R1
+Changes: GRAV two-state Joseph covariance update + SD adaptive backpressure/data-first guard scheduling + TGY58 diagnostics.
+
+Automated validation
+--------------------
+PASS: tools/validate_p47.py
+  - P46 z/vz public guard retained
+  - P46 covariance root-cause latch + state-preserving rollback retained
+  - GRAV scalar TwoState path routed through Joseph covariance helper
+  - Joseph diagnostics survive SafeReinitialize
+  - SD ring remains 128 frames in CCM
+  - SD V14 / 384-byte binary format unchanged
+  - 128 MiB preallocation / 96 MiB fallback unchanged
+  - adaptive drain thresholds: 24/48/96 frames, 4->6->8 max drain frames
+  - DATA DMA prioritized over pending guard DMA
+  - pending guard included in blocking stop/finalize drain
+  - TGY58 C/header/Python field contract: 253 data fields
+  - synthetic TGY58 CRC roundtrip PASS
+
+Regression host tests
+---------------------
+PASS: P44 scheduler host tests
+PASS: V50 vertical sensor policy host tests
+PASS: V50 generated vertical fallback host tests
+
+Host GCC syntax checks (-DSTM32F407xx)
+--------------------------------------
+PASS: App/Modules/Estimation/FullStateESKF/full_state_eskf.c
+PASS: App/Services/SDLogger/sd_logger.c
+      (one existing HAL TIM macro host-width warning only)
+PASS: App/Services/UARTTelemetry/uart_telemetry.c
+
+Python syntax
+-------------
+PASS: monitor_uart_p47.py
+PASS: decode_flight_v14_p47.py
+PASS: tools/validate_p47.py
+
+Target build note
+-----------------
+arm-none-eabi-gcc/CubeIDE target linker was not available in this environment.
+Before flashing: CubeIDE -> Clean Project -> Build Project and require 0 errors.
+Expected project: TGY_V8_19M_P47_GRAV_JOSEPH_SD_BACKPRESSURE
+Expected UART: $TGY58

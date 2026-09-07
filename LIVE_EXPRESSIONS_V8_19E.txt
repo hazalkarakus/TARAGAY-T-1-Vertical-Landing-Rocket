@@ -1,0 +1,63 @@
+V8.19E BMP585 200 Hz direct-read Live Expressions
+==================================================
+
+bmp585_chip_id
+bmp585_config_ok
+bmp585_direct_read_mode_ok
+bmp585_odr_config_reg
+bmp585_osr_config_reg
+bmp585_osr_eff
+bmp585_int_source_reg
+bmp585_status_reg
+bmp585_register_readback_ok
+bmp585_register_snapshot_error_count
+bmp585_register_mismatch_count
+
+bmp585_service_call_count
+bmp585_measurement_read_count
+bmp585_measurement_read_error_count
+bmp585_fresh_sample_count
+bmp585_duplicate_raw_count
+
+bmp585_last_service_interval_us
+bmp585_min_service_interval_us
+bmp585_max_service_interval_us
+bmp585_last_fresh_interval_us
+bmp585_min_fresh_interval_us
+bmp585_max_fresh_interval_us
+
+ms5611_update_count
+ms5611_adc_read_count
+ms5611_invalid_adc_count
+ms5611_communication_error_count
+ms5611_pressure_pa
+ms5611_temperature_c
+
+barometer_update_count
+barometer_source_update_count
+barometer_duplicate_sample_skip_count
+barometer_pressure_pa
+barometer_filtered_pressure_pa
+barometer_altitude_m
+barometer_filtered_altitude_m
+barometer_vertical_speed_mps
+barometer_calibrated
+barometer_healthy
+
+sensor_qual_baro_rate_hz
+sensor_qual_good_windows
+sensor_qual_pass
+
+BEKLENEN
+--------
+bmp585_chip_id                  = 81 / 0x51
+bmp585_direct_read_mode_ok      = 1
+bmp585_config_ok                = 1
+bmp585_odr_config_reg           = 133 / 0x85
+bmp585_osr_config_reg           = 80 / 0x50
+bmp585_osr_eff                  = 144 / 0x90
+bmp585_int_source_reg           = 0
+bmp585_register_readback_ok     = 1
+sensor_qual_baro_rate_hz        = 190..205 Hz
+bmp585_measurement_read_error_count = 0
+ms5611_communication_error_count    = 0

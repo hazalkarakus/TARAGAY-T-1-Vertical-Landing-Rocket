@@ -1,0 +1,17 @@
+R8R35R3R6 VALIDATION
+
+Static/source checks performed in container:
+- Modified SDLogger C file: host gcc -fsyntax-only PASS (CMSIS host-size warnings only).
+- R3R6 live monitor: python py_compile PASS.
+- Critical control-source SHA256 comparison versus R3R5: SAME for scheduler,
+  NeedleValveAutonomousControl, NeedleValveAutoControl, SolenoidOutput,
+  TaragayFlightLogic, NeedleValve controller, FullStateESKF, NeedleValveHardware.
+- Change is intentionally limited to SD start-failure containment plus
+  version/banner/monitor/documentation.
+
+Not performed here:
+- ARM/CubeIDE target build.
+- Hardware powered-needle qualification.
+- Long-duration soak.
+
+DO NOT mark flight-ready until those hardware tests pass.

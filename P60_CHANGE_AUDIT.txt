@@ -1,0 +1,22 @@
+P60 CHANGE / INTEGRITY AUDIT
+============================
+P60 is a narrow safety-hardening patch on P59.
+
+Intentionally modified existing project files:
+  .project
+  App/Common/app_version.h
+  App/app.h
+  App/app.c
+  App/Core/Tasks/app_tasks.c
+  App/Services/UARTTelemetry/uart_telemetry.c
+
+New P60 documentation/tools do not alter runtime behavior.
+
+All other 552 files present in the P59 receiver baseline were SHA-256 compared
+and are byte-identical in the P60 receiver tree. In particular, NRF24,
+RemoteControl, SolenoidOutput, IMU, FullStateESKF, Barometer, Lidar, SDLogger
+and NeedleValve controller internals were not changed.
+
+The STM32F103 TX project is copied unchanged from P59/V4:
+  Switch-1 VENT = PA1 -> GND
+  Switch-2 E-STOP = PA0 -> GND

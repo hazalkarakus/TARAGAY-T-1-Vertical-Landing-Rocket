@@ -1,0 +1,101 @@
+V8.19M NEEDLE 10-CYCLE ENDURANCE
+================================
+
+needle_valve_raw_adc
+needle_valve_zero_adc
+needle_valve_target_adc
+needle_valve_error_adc
+needle_valve_position_turns
+needle_valve_zero_valid
+needle_valve_enabled
+needle_valve_lock
+needle_valve_fault
+needle_valve_stall_ms
+needle_valve_lpwm
+needle_valve_rpwm
+needle_valve_homing_active
+needle_valve_homing_complete
+needle_valve_homing_elapsed_ms
+needle_valve_control_tick_count
+
+v819m_auto_magic
+v819m_auto_state
+v819m_endurance_phase
+v819m_auto_last_action_ok
+v819m_auto_ready_for_test
+v819m_endurance_target_cycles
+v819m_endurance_current_cycle
+v819m_endurance_cycles_completed
+v819m_endurance_command_x10000
+v819m_endurance_total_elapsed_ms
+v819m_endurance_phase_elapsed_ms
+v819m_endurance_leg_elapsed_ms
+v819m_endurance_cooldown_remaining_ms
+v819m_endurance_min_raw_adc
+v819m_endurance_max_raw_adc
+
+v819m_failure_reason
+v819m_failure_cycle
+v819m_failure_phase
+v819m_failure_controller_fault
+v819m_failure_raw_adc
+v819m_failure_error_adc
+
+v819m_auto_button_press_count
+v819m_auto_home_start_count
+v819m_auto_home_pass_count
+v819m_auto_abort_count
+v819m_auto_command_accept_count
+v819m_auto_command_reject_count
+v819m_button_raw
+v819m_button_stable
+v819m_button_armed
+v819m_button_glitch_reject_count
+v819m_button_press_event_count
+
+v819m_cycle_open_raw_adc
+v819m_cycle_close_raw_adc
+v819m_cycle_open_time_ms
+v819m_cycle_close_time_ms
+
+gnc_v816_armed
+gnc_v816_rcs_applied_mask
+
+SABIT GUVENLIK BEKLENTILERI
+---------------------------
+needle_valve_adc_per_turn             = 195
+needle_valve_max_travel_adc           = 878
+gnc_v816_armed                        = 0
+gnc_v816_rcs_applied_mask             = 0
+
+HOMING SONUCU / TESTE HAZIR
+---------------------------
+v819m_auto_state                      = 2
+v819m_auto_ready_for_test             = 1
+v819m_auto_home_start_count           = 1
+v819m_auto_home_pass_count            = 1
+needle_valve_zero_valid               = 1
+needle_valve_enabled                  = 0
+needle_valve_fault                    = 0
+
+10 CEVRIM BASARILI
+------------------
+v819m_auto_state                      = 4
+v819m_endurance_phase                 = 6
+v819m_endurance_cycles_completed      = 10
+v819m_failure_reason                  = 0
+needle_valve_raw_adc                  = 1015..1023
+needle_valve_lock                     = 1
+needle_valve_enabled                  = 0
+needle_valve_fault                    = 0
+needle_valve_lpwm/rpwm                = 0
+
+FAULT OLURSA RESET ATMADAN OKU
+------------------------------
+v819m_failure_reason
+v819m_failure_cycle
+v819m_failure_phase
+v819m_failure_controller_fault
+v819m_failure_raw_adc
+v819m_failure_error_adc
+

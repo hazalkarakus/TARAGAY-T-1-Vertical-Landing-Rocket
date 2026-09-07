@@ -1,0 +1,37 @@
+P112R12R8R35R3R4 SD HOST-BUSY DEFER VALIDATION
+
+SOURCE INTENT
+- Base: P112R12R8R35R3R3 SD phase retry hotfix.
+- SD throughput architecture preserved: 200 Hz V14, 384-byte frames, bounded one-frame drain.
+- Only SD DMA launch admission + read-only UART diagnostics changed.
+
+R3R4 CHANGE
+- Added SDLogger_DMAHostReadyForStart().
+- DMA launch is deferred (not failed) when any of these are not idle/ready:
+  * sd_dma_transfer_active != 0
+  * hsd.State != HAL_SD_STATE_READY
+  * hsd.Context != SD_CONTEXT_NONE
+  * hsd.hdmatx->State != HAL_DMA_STATE_READY
+- Gate is applied to DATA DMA, GUARD DMA, and retry restart paths.
+- Existing sd_logger_dma_retry_card_busy_count is reused as benign host-busy defer counter.
+- Real BSP/HAL DMA start errors still take the pre-existing fail-visible path.
+
+SAFETY / AUTHORITY
+- No changes to TaragayFlightLogic, Hover V19.6, RCS V7.13.4, needle controller, ESKF, scheduler, PE9, STOP, authorization.
+- No HAL abort/reinit is added to the active-flight path.
+- Real CRC/timeout/SDIO errors remain faults.
+
+HOST VALIDATION
+- All App C sources: 45/45 host-GCC syntax-only PASS.
+- R3R4 monitor Python compile PASS.
+- R3R4 monitor synthetic 302-field TGY73 CRC parse PASS.
+- CubeIDE/ARM target build is NOT claimed in this environment; build in CubeIDE before hardware test.
+
+HARDWARE ACCEPTANCE TARGET
+- 35 s pressureless/inert full-system dry-run.
+- SD final ready/log = 1/1.
+- SD drop/overrun/write-error/async-timeout delta = 0.
+- SD DMA start-error delta = 0.
+- SD capture/push/pop >= 190 Hz, expected ~200 Hz.
+- Ring stays far below 127.
+- Scheduler miss/realign = 0.

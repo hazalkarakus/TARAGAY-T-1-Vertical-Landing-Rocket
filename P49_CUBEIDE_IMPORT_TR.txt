@@ -1,0 +1,22 @@
+P49 CubeIDE import / build
+==========================
+
+1. ZIP'i yeni ve bos bir klasore cikart.
+2. CubeIDE -> File -> Import -> Existing Projects into Workspace.
+3. Proje adi kesinlikle:
+   TGY_V8_19M_P49_ZUPT_JOSEPH_VERTICAL_RECOVERY_SD_FIFO
+4. Project -> Clean...
+5. Build Project.
+6. Console: 0 errors.
+7. Linker Memory region overflow OLMAMALI.
+8. Beklenen ELF:
+   Debug/TGY_V8_19M_P49_ZUPT_JOSEPH_VERTICAL_RECOVERY_SD_FIFO.elf
+9. Karta bu ELF'i flash et.
+10. Reset sonrasi UART banner:
+    TGY UART FLIGHT DIAGNOSTICS V60
+    FW 8.19M-P49-ZUPT-JOSEPH-VERT-REC-SD-FIFO
+11. UART data prefix:
+    $TGY60
+12. P49 UART contract: 258 data field.
+
+Ilk testte aktuator/pnomatik enerji kapali tutulmalidir.

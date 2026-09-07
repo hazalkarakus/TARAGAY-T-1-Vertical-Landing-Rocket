@@ -1,0 +1,9 @@
+P40 validation: PASS
+- P40 structural validator: PASS
+- V55 UART schema validator: PASS (214 fields)
+- V49/P40 active-pulse fast/system fault host regression: PASS
+- Modified critical C files host GCC syntax: PASS
+- Synthetic UART CRC/decode: PASS (214 fields)
+- Synthetic V14 preallocated old-tail session boundary: PASS
+- Runtime IMU recovery service remains non-blocking (no HAL_Delay)
+- ARM target link/build: NOT RUN (arm-none-eabi-gcc unavailable in this environment)

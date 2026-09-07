@@ -1,0 +1,58 @@
+TGY V8.19M ENDURANCE VALIDATION
+===============================
+
+ENDURANCE SUPERVISOR HOST TESTS: PASS
+------------------------------------
+1. No-touch startup and automatic homing
+2. Short PA0 HIGH glitch rejection
+3. One stable PA0 press starts the test
+4. Ten automatic 1.00 -> 0.00 cycles
+5. Two-second open/closed endpoint verification
+6. Five-second driver-disabled cooldown between cycles
+7. Twenty per-cycle commands accepted; zero rejected
+8. Immediate armed PA0 emergency abort
+9. Controller fault propagation with cycle/phase snapshot
+10. Command-rejection safe shutdown
+
+INTEGRATED CONTROLLER + SUPERVISOR TESTS: PASS
+----------------------------------------------
+1. Real needle controller automatic homing from 500 ADC
+2. Ten physical-model full 878 ADC / 4.5-turn openings
+3. Ten returns to the captured ZERO region
+4. Endpoint ADC and leg-time arrays populated for all cycles
+5. Final PASS disables LPWM, RPWM, L_EN and R_EN
+6. Frozen motor on cycle 4 is captured as:
+   - failure_reason = controller
+   - failure_cycle = 4
+   - failure_phase = opening
+   - controller fault = no-progress/stall
+   - motor outputs disabled
+
+NEEDLE CONTROLLER REGRESSION TESTS: PASS
+----------------------------------------
+1. Automatic closing reference
+2. ZERO capture in 1015..1023 ADC region
+3. Full 878 ADC / 4.5-turn opening
+4. Return to ZERO
+5. Wrong homing direction fault
+6. No-progress/stall fault
+7. Already-closed homing
+
+SOURCE AND PROJECT CHECKS: PASS
+-------------------------------
+- Host syntax scan: 55 App/Core/FATFS/USB C files
+- .project XML valid
+- .cproject XML valid
+- Unique project name: TGY_V8_19M_NEEDLE_ENDURANCE_10CYCLE
+- App version: 8.19M
+- Calibration preserved: 195 ADC/turn, 878 ADC, 4.5 turns
+- GNC physical needle command remains disabled
+- RCS physical outputs remain dry-run/safe
+- V8.19L controller and hardware sources otherwise preserved
+
+NOTE
+----
+The host syntax scan supplies standard-library and case-alias compatibility
+only for Linux-host parsing of unchanged CubeIDE-generated sources. The target
+build must still be confirmed with Clean Project -> Build Project in CubeIDE.
+

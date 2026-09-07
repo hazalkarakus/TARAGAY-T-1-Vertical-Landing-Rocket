@@ -1,0 +1,5 @@
+FROZEN CORE AUDIT vs R8R25
+PASS byte-identical App/Modules/Estimation/FullStateESKF/full_state_eskf.c
+PASS byte-identical App/Modules/Sensors/SensorManager/sensor_manager.c
+PASS byte-identical App/Core/Scheduler/scheduler.c
+PASS byte-identical App/Services/SDLogger/sd_logger.c

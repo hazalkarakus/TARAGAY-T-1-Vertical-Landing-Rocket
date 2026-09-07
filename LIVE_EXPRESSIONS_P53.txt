@@ -1,0 +1,29 @@
+P53 onerilen Live Expressions
+
+Baro reference:
+barometer_ground_pressure_pa
+barometer_ground_reference_tracking_allowed
+barometer_ground_reference_tracking_active
+barometer_ground_reference_frozen
+barometer_ground_reference_error_pa
+barometer_ground_reference_last_step_pa
+barometer_ground_reference_update_count
+barometer_ground_reference_freeze_count
+barometer_ground_reference_last_update_us
+barometer_temperature_c
+barometer_filtered_altitude_m
+
+Existing critical:
+full_eskf_velocity_z_mps
+full_eskf_stationary_detected
+eskf_covariance_fault_count
+sd_logger_dropped_frame_count
+sd_logger_ring_overrun_count
+scheduler_release_realign_count
+imu_pattern_error_count
+imu_pattern_retry_count
+imu_pattern_recovery_escalation_count
+imu_recovery_count
+imu_recovery_failure_count
+
+UART is preferred for IMU raw pattern triplets because the diagnostic struct is copied into TGY64.

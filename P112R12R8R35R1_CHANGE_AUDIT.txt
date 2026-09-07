@@ -1,0 +1,6 @@
+R8R35 -> R8R35R1 intended source delta:
+Files /mnt/data/r8r35_src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/.project and /mnt/data/r8r35r1_work/P112R12R8R35R1_DIAGNOSTIC_CLOSURE/.project differ
+Files /mnt/data/r8r35_src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Common/app_version.h and /mnt/data/r8r35r1_work/P112R12R8R35R1_DIAGNOSTIC_CLOSURE/App/Common/app_version.h differ
+Files /mnt/data/r8r35_src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Common/app_config.h and /mnt/data/r8r35r1_work/P112R12R8R35R1_DIAGNOSTIC_CLOSURE/App/Common/app_config.h differ
+Files /mnt/data/r8r35_src/P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN/App/Services/UARTTelemetry/uart_telemetry.c and /mnt/data/r8r35r1_work/P112R12R8R35R1_DIAGNOSTIC_CLOSURE/App/Services/UARTTelemetry/uart_telemetry.c differ
+New monitor/readme/validation files added.

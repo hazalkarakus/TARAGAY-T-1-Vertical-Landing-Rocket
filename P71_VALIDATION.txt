@@ -1,0 +1,15 @@
+PASS  critical P70 core files unchanged
+PASS  X opposing pair mask exists
+PASS  Y opposing pair mask exists
+PASS  vent sequencer cycles two pairs only
+PASS  vent-only roll pair allowed
+PASS  vent-only pitch pair allowed
+PASS  all-four/cross multi masks rejected
+PASS  normal opposing interlock remains
+PASS  post-separation grounded gate remains
+PASS  P71 version
+PASS  host-clang syntax App/app.c
+PASS  host-clang syntax SolenoidOutput/solenoid_output.c
+PASS  Python monitor py_compile
+PASS  rocket ZIP integrity
+PASS  bundle ZIP integrity

@@ -1,0 +1,33 @@
+TGY V8.19M V55 FLIGHT INTERLOCK - VALIDATION SUMMARY
+
+PASS - PE9 connected GND/LOW / separated HIGH with internal pull-up
+PASS - 10 ms separation debounce and connector-seen-before-arm rule
+PASS - Needle enable, command and ISR all independently flight-gated
+PASS - Solenoid output has an independent flight authorization gate
+PASS - PA0 endurance/auto-control profile disabled
+PASS - RCS physical output enabled; active-low safe preload retained
+PASS - RCS pin order: IN1 PB15 X+, IN2 PE15 X-, IN3 PE11 Y+, IN4 PE7 Y-
+PASS - Needle four-turn travel guard (780 ADC) retained
+PASS - Needle signed-derivative damping, median+EMA and near-target pulses
+PASS - LIDAR continuous service and LIDAR/barometer vertical aid policy
+PASS - nRF24 receiver path remains enabled
+PASS - USART2 TX-only V55 frame, 101 fields and CRC16 monitor match
+PASS - P29 scheduler discards missed releases and re-aligns to current time
+PASS - P29 IMU sample-age guard clears stale imu_valid independently
+PASS - P29 LIDAR WAIT/HAL_BUSY timeout and task-context I2C recovery
+PASS - P29 LIDAR runtime recovery retries continuously without blocking probe
+PASS - P29 IMU/LIDAR/ESKF freeze ages and faults exposed to SystemMonitor/UART
+PASS - P29 ESKF public output remains 200 Hz; covariance propagation is 25 Hz
+PASS - USART2 DMA false FIFO-error accounting removed
+PASS - SystemMonitor service restored at 10 Hz
+PASS - Modified C sources pass host GCC syntax checks
+PASS - RCS signed-PD host tests pass
+PASS - Dual LIDAR/barometer vertical policy host tests pass
+PASS - Generated vertical fallback host tests pass
+PASS - tools/validate_v55.py
+
+NOT RUN - ARM link/HEX generation: arm-none-eabi-gcc is not installed in the
+delivery environment. Build in STM32CubeIDE before flashing.
+
+NOT RUN - Target HIL, relay load, BTS7960 load, pressurized gas or hot-fire test.
+Do not interpret static/host validation as flight qualification.

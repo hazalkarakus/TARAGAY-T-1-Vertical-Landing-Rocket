@@ -1,0 +1,22 @@
+TARAGAY T1 NRF RX-ONLY 100 Hz / RF 250 kbps - CHANGE AUDIT
+
+Changed active source:
+1) App/Modules/NRF24/nrf24.c
+   - RF_SETUP expected/written value: 0x06 -> 0x26
+   - 0x26 = 250 kbps, 0 dBm for nRF24L01+
+   - configuration readback now requires 0x26
+
+Preserved:
+- Ground -> rocket only nRF architecture
+- APP_REMOTE_POLL_PERIOD_MS = 5 ms (200 Hz receiver polling)
+- APP_REMOTE_LINK_TIMEOUT_MS = 500 ms
+- 4-byte command payload
+- channel/address/CRC settings
+- Auto-ACK disabled
+- hardware retransmit disabled
+
+Static source verification:
+- active rocket RF_SETUP references all use NRF24_RF_SETUP_250KBPS_0DBM
+- no active 1 Mbps RF_SETUP constant remains in nrf24.c
+
+Both ends MUST use the 250 kbps builds at the same time.

@@ -1,0 +1,5 @@
+P112R5 autonomous supervisor host test: PASS
+P112R12R1 same-target mechanical guard host test: PASS
+hold<=12 deadband<=20 confirm=200ms requests=2 retargets=0 force_safe=3
+P112R12R6R2 feedback root-cause propagation host test: PASS
+P112R15 E-STOP safe-close host test: PASS

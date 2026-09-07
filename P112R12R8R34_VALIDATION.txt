@@ -1,0 +1,20 @@
+P112R12R8R34 SOURCE/TEST VALIDATION
+
+PASS R8R34 revision enabled
+PASS R8R33 physical RCS authority retained
+PASS R8R32 physical needle authority retained
+PASS Start deadband 2.50 deg
+PASS Stop deadband 1.20 deg
+PASS Fine tracking LPF alpha 0.25
+PASS Fine tracking 3-sample confirmation
+PASS Hard safety raw-rate path preserved
+PASS LPF only in reference tracking
+PASS Confirmation not applied to hard selector
+PASS Version updated
+PASS Project name updated
+PASS Monitor present
+PASS 45/45 App C host syntax
+PASS Old R8R33 log rejected for upright pulse
+
+RESULT: PASS
+NOTE: Host/source validation only. STM32CubeIDE target build/flash and pressureless hardware validation remain required.

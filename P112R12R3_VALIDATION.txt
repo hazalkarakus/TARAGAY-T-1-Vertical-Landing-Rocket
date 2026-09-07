@@ -1,0 +1,56 @@
+P112R5 autonomous supervisor host test: PASS
+P112R12R1 same-target mechanical guard host test: PASS
+hold<=12 deadband<=20 confirm=200ms requests=2 retargets=0 force_safe=3
+PASS: version
+PASS: project name
+PASS: R12 production profile retained
+PASS: R12R1 same-target guard retained
+PASS: R12R3 clean profile
+PASS: inert output isolation retained
+PASS: R10 stimulus disabled
+PASS: R11 commissioning disabled
+PASS: R12R2 target-step removed
+PASS: R12R2R1 max-hold removed
+PASS: R12R2R2 full-kick removed
+PASS: no 255 kick symbol in P110
+PASS: 950 closed floor
+PASS: same target firm hold 12
+PASS: same target deadband 20
+PASS: same target confirm 200ms
+PASS: production GNC submit route
+PASS: RCS hard isolation retained
+PASS: vent servo hard isolation retained
+PASS: generated private header packaged
+PASS: do not fly marker
+PASS: clean R12R1 behavior unchanged: App/Services/NeedleValveAutonomousControl/needle_valve_autonomous_control.c
+PASS: clean R12R1 behavior unchanged: App/Services/NeedleValveIntegrationTest/needle_valve_integration_test.c
+PASS: clean R12R1 behavior unchanged: App/Services/NeedleValveHardware/needle_valve_hw.c
+PASS: clean R12R1 behavior unchanged: App/Core/Tasks/app_tasks.c
+PASS: clean R12R1 behavior unchanged: App/Modules/Control/GeneratedFlightControl/generated_flight_control.c
+PASS: clean R12R1 behavior unchanged: App/app.c
+PASS: clean R12R1 behavior unchanged: Core/Src/stm32f4xx_it.c
+PASS: clean R12R1 behavior unchanged: App/Services/SDLogger/sd_logger.c
+PASS: clean R12R1 behavior unchanged: App/Services/UARTTelemetry/uart_telemetry.c
+PASS: clean R12R1 behavior unchanged: App/Services/SolenoidOutput/solenoid_output.c
+PASS: clean R12R1 behavior unchanged: App/Services/ServoOutput/servo_output.c
+P112R12R3 clean production-autonomous inert validation: PASS
+ARM compiler: NOT AVAILABLE; Cortex-M4/CubeIDE target build NOT RUN.
+
+--- R12R3 CONFIG AUDIT ---
+468: * to their safe states by APP_P112R12_INERT_OUTPUT_ISOLATION_MODE. UART remains
+470:#define APP_P112R10R3_GNC_MOTOR_BENCH_MODE                 0U
+477:#define APP_NEEDLE_P112R11_MECH_COMMISSION_MODE              0U
+486:#define APP_P112R12_PRODUCTION_AUTONOMOUS_950PLUS_REV          1U
+487:#define APP_P112R12R1_SAME_TARGET_GUARD_REV                     1U
+488:#define APP_P112R12R3_CLEAN_PRODUCTION_CHAIN_REV                 1U
+489:#define APP_P112R12_INERT_OUTPUT_ISOLATION_MODE                1U
+527:     (APP_P112R10R3_GNC_MOTOR_BENCH_MODE != 0U) || \
+528:     (APP_NEEDLE_P112R11_MECH_COMMISSION_MODE != 0U) || \
+530:     (APP_P112R12_PRODUCTION_AUTONOMOUS_950PLUS_REV != 1U) || \
+531:     (APP_P112R12R1_SAME_TARGET_GUARD_REV != 1U) || \
+532:     (APP_P112R12R3_CLEAN_PRODUCTION_CHAIN_REV != 1U) || \
+533:     (APP_P112R12_INERT_OUTPUT_ISOLATION_MODE != 1U))
+553:    (((APP_P112R12_INERT_OUTPUT_ISOLATION_MODE != 0U) || \
+554:      (APP_P112R10R3_GNC_MOTOR_BENCH_MODE != 0U) || \
+R12R2/R2R1/R2R2 symbols:
+NONE

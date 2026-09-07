@@ -1,0 +1,66 @@
+V54 UART LIVE EXPRESSIONS + NEEDLE 4 TURN
+========================
+
+UART protocol/service:
+  uart_telemetry_initialized
+  uart_telemetry_streaming
+  uart_telemetry_frame_sequence
+  uart_telemetry_send_count
+  uart_telemetry_busy_skip_count
+  uart_telemetry_format_error_count
+  uart_telemetry_last_service_ms
+  uart_telemetry_last_message_length
+  uart_telemetry_last_crc16
+
+USART2 DMA transport:
+  usart2_initialized
+  usart2_actual_baud_rate
+  usart2_tx_dma_busy
+  usart2_tx_dma_start_count
+  usart2_tx_dma_complete_count
+  usart2_tx_dma_error_count
+  usart2_tx_dma_busy_reject_count
+  usart2_tx_dma_last_length
+
+V50 vertical-source policy:
+  generated_fc_status.vertical_sensor_source_mask
+  generated_fc_status.vertical_sensor_degraded
+  generated_fc_status.lidar_aiding_active
+  generated_fc_status.baro_aiding_active
+  generated_fc_status.vertical_sensor_transition_count
+  generated_fc_status.vertical_lidar_only_count
+  generated_fc_status.vertical_baro_only_count
+  generated_fc_status.vertical_dual_source_count
+  generated_fc_status.vertical_no_aiding_count
+  generated_fc_status.vertical_200hz_valve_cmd
+  generated_fc_status.vertical_target_force_n
+  generated_fc_status.vertical_estimated_thrust_n
+  generated_fc_status.suicide_burn_active
+
+PE9 / preflight:
+  preflight_trigger_status.raw_open
+  preflight_trigger_status.debounced_open
+  preflight_trigger_status.preflight_ready
+  preflight_trigger_status.flight_active
+  preflight_trigger_status.fault_latched
+  preflight_trigger_status.state
+  preflight_trigger_status.flight_time_ms
+
+NRF / STOP:
+  nrf24_connected
+  nrf24_rx_count
+  remote_rx_link_active
+  remote_rx_command
+  remote_rx_command_flags
+  remote_rx_last_packet_age_ms
+  v30_stop_latched
+
+Expected idle UART transport:
+  uart_telemetry_initialized       = 1
+  uart_telemetry_streaming         = 1 (after banner + header)
+  usart2_actual_baud_rate          ~= 115200
+  usart2_tx_dma_error_count        = 0
+  uart_telemetry_format_error_count= 0
+
+vertical_sensor_source_mask:
+  0 = none, 1 = Lidar, 2 = barometer, 3 = both

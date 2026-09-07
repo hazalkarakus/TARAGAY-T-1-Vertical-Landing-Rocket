@@ -1,0 +1,16 @@
+P109 validation summary
+
+- Firmware: 8.19M-P109-PREBRAKE-COAST-120MS-50ADC
+- P108 baseline preserved except P109 telemetry namespace and sustain budget.
+- Boost: PWM144 / 20 ms.
+- Sustain: PWM128 / max 120 ms (P108 was 60 ms).
+- Target: START-50 ADC.
+- Pre-brake threshold: TARGET+20 ADC = START-30 ADC.
+- Active brake: 500 ms; snapshots at 100/250/500 ms.
+- No automatic return.
+- Hard powered overshoot guard retained.
+- P83 command-aware robust feedback retained.
+- Cortex-M4 clang -Wall -Wextra -Werror syntax check: PASS (see P109_CLANG_SYNTAX.txt, RETURN_CODE=0).
+- Python monitor py_compile: PASS.
+- Monitor/UART field count: 435; tail telemetry names are p109_*.
+- Full STM32CubeIDE Clean -> Build -> Flash is still required on the user's toolchain.

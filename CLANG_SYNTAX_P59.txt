@@ -1,0 +1,12 @@
+P59 changed-source syntax validation
+====================================
+Tool available in this environment: clang 17 targeting arm-none-eabi.
+GNU ARM / STM32CubeIDE linker toolchain is not installed, so no ELF/HEX is packaged.
+
+PASS App/app.c
+PASS App/Modules/RemoteControl/remote_control.c
+PASS App/Services/SolenoidOutput/solenoid_output.c
+PASS Core/Src/gpio.c
+PASS App/Core/Tasks/app_tasks.c (syntax-only with a minimal math.h declaration stub because this container has no ARM libc headers; the project source itself was not changed for this test)
+
+All P59 integration C files therefore pass ARM-target syntax checking in the available environment.

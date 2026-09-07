@@ -1,0 +1,3 @@
+P82 DO-NOT-FLY / BENCH ONLY
+Motor output is compile-time locked OFF. RCS is forced safe. No pressure/gas.
+Purpose: validate physical-rate gate, 16 ms trajectory persistence and 100 ms quarantine against intermittent PC1 feedback glitches.

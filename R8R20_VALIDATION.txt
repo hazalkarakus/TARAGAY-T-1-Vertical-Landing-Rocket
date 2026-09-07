@@ -1,0 +1,25 @@
+P112R12R8R20 VALIDATION
+
+Three-turn needle audit:
+  ADC per turn = 195
+  Maximum turns = 3.0
+  Maximum travel = 585 ADC
+  Example CLOSED=1018 -> minimum target=433 ADC
+  Low-level NeedleValve controller = 585 ADC
+  Autonomous supervisor = 585 ADC
+  RESULT=PASS
+
+Flight-logic host regression:
+  states=11111
+  final=4
+  max valve cmd=0.1180
+  RCS request seen=1
+  max RCS fault=0
+  hover best=8.000 s
+  RESULT=PASS
+
+Monitor py_compile: PASS
+
+IMPORTANT:
+  ARM/CubeIDE target Clean+Build has not been executed in this environment.
+  User must Clean -> Build -> Flash in STM32CubeIDE.

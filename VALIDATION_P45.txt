@@ -1,0 +1,68 @@
+P45 VALIDATION REPORT
+=====================
+Firmware: 8.19M-P45-ESKF-GUARD-COV-RECOVERY
+Scope: ESKF public z/vz guard, 15x15 covariance integrity/reacquire,
+       reset/counter UART diagnostics, IMU second-bad recovery escalation,
+       SD preallocation 128/96 MiB.
+
+1) P45 source/protocol validator
+   Command: python3 tools/validate_p45.py
+   Result : PASS
+   Checks :
+   - P44 scheduler/LiDAR timing invariants preserved
+   - ESKF numerical/covariance checks exist before public commit
+   - covariance faults route through safe reinitialize/reacquire
+   - IMU only gets one soft resync; next bad sample starts full recovery
+   - TGY56 C emission/header/Python decoder all agree at 228 fields
+   - synthetic TGY56 frame CRC/decode round-trip succeeds
+   - SD preallocation is 128 MiB with 96 MiB fallback
+
+2) Original uploaded P44 baseline validator
+   Command: (inside untouched P44 baseline) python3 tools/validate_p44.py
+   Result : PASS
+   Output : P44 validation: PASS (64/48 MiB SD; covariance-first slot; IMU soft bus resync)
+
+3) P44 scheduler host regression
+   Sources: tools/p44_scheduler_host_test.c + App/Core/Scheduler/scheduler.c
+   Result : PASS
+   Output : P44 scheduler host tests: PASS
+
+4) V50 vertical sensor policy host regression
+   Source : tools/v50_vertical_sensor_policy_host_test.c
+   Result : PASS
+   Output : V50 vertical sensor policy host tests: PASS
+
+5) V50 generated vertical fallback host regression
+   Sources: tools/v50_generated_vertical_fallback_host_test.c +
+            App/Modules/Control/GeneratedFlightControl/generated_flight_control.c
+   Result : PASS
+   Output : V50 generated vertical fallback host tests: PASS
+
+6) Host GCC syntax-only checks for P45-modified C sources
+   Files:
+   - App/Modules/Estimation/FullStateESKF/full_state_eskf.c
+   - App/Modules/Sensors/IMU/imu.c
+   - App/Services/SDLogger/sd_logger.c
+   - App/Services/UARTTelemetry/uart_telemetry.c
+   Result : PASS (no syntax errors)
+   Note   : Host-x86 CMSIS pointer-width/HAL macro warnings are expected and
+            are not STM32 target compile errors.
+
+7) Python syntax checks
+   Files:
+   - monitor_uart_p45.py
+   - monitor_uart_v56.py
+   - tools/validate_p45.py
+   Result : PASS
+
+8) STM32 target build
+   arm-none-eabi-gcc is not installed in this execution environment.
+   Therefore a real Cortex-M4 link/build was NOT performed here.
+   REQUIRED BEFORE FLASHING:
+   CubeIDE -> Project -> Clean -> Build Project, then verify zero errors.
+
+Hardware-soak status
+--------------------
+Not executed in this environment. The first P45 hardware run should be a
+power-safe avionics soak (actuator/pressure power disabled) as described in
+README_P45_ESKF_GUARD_COV_RECOVERY_TR.md.

@@ -1,0 +1,12 @@
+R8R24 TILT AXIS SOURCE FIX — VALIDATION
+
+- Root cause from R8R23 log: second lateral RCS channel used FullStateESKF yaw (body-Z heading/spin), not a lateral tilt state.
+- Fix: MATLAB logical channel-1 <- ESKF roll + (gyro-X - bias-X)
+- Fix: MATLAB logical channel-2 <- ESKF pitch + (gyro-Y - bias-Y)
+- FullStateESKF yaw is no longer fed to lateral RCS control.
+- horizontal_position_valid=0 gate remains active; horizontal target is forced 0/0.
+- Physical RCS applied mask remains INERT/0.
+- Physical needle path remains INERT in this diagnostic revision.
+- Host regression: four logical valve channels generated events; rcs_fault=0.
+- Python UART monitor py_compile: PASS.
+- ARM/CubeIDE target compile not performed in assistant environment.

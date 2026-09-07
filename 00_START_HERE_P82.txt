@@ -1,0 +1,15 @@
+TARAGAY-T1 P82 - START HERE
+============================
+Firmware banner must be:
+8.19M-P82-PHYSICAL-RATE-QUARANTINE-FEEDBACK
+
+DO-NOT-FLY / BENCH ONLY.
+No gas / no pressure. Prefer motor and RCS electrical power physically OFF.
+Motor outputs are also compile-time locked OFF in this build.
+
+CubeIDE: Clean -> Build -> Flash
+Then:
+python -u monitor_uart_p82_physical_rate_quarantine.py --port COM21 --log uart_p82_physical_rate_quarantine.txt
+
+Run 60-120 seconds without touching pot/shaft/cables.
+Send uart_p82_physical_rate_quarantine.txt for analysis.

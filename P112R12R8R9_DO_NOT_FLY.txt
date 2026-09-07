@@ -1,0 +1,4 @@
+P112R12R8R9 IS AN INERT BENCH VALIDATION BUILD.
+DO NOT FLY.
+DO NOT ENABLE NEEDLE ACTUATOR OR RCS MOTION.
+Purpose: validate ESKF covariance execution bound and scheduler timing only.

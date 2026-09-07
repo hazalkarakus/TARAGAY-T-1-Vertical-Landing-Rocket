@@ -1,0 +1,4 @@
+P112R12R8R16 IS AN INERT / DEPRESSURIZED BENCH VALIDATION BUILD.
+RCS / ground vent / vent servo remain hard isolated by the R12 inert policy.
+Main needle emergency-close is enabled only for depressurized actuator validation.
+DO NOT USE THIS PACKAGE FOR A PRESSURIZED OR FLIGHT TEST.

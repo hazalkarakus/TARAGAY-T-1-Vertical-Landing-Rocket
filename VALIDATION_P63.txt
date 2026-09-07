@@ -1,0 +1,10 @@
+PASS - P60 static FEATURE=0 retained
+PASS - P60 static DYNPD=0 retained
+PASS - No ACK-payload command
+PASS - Explicit async downlink present
+PASS - Telemetry is 32 bytes
+PASS - 19 telemetry pages retained
+PASS - Command parser unchanged from P60
+PASS - Core scheduler/tasks unchanged from P60
+PASS - Async TDD runtime path has no HAL_Delay
+P64 validation PASS (9/9)

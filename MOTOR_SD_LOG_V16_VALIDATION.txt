@@ -1,0 +1,35 @@
+TARAGAY-T1 MOTOR SD LOG V16 VALIDATION
+======================================
+Base: TAHLIYE_FIX_V2
+
+Scope:
+- Control/actuation logic unchanged.
+- Only App/Services/SDLogger/sd_logger.c changed in existing firmware source.
+- New decoder/readme files added.
+
+Format:
+- Normal frame remains V14 / 384 bytes.
+- Flight compact RAM frame: V16 / 192 bytes.
+- Flight RAM capacity: 256 frames x 192 bytes = 49,152 bytes (same CCM allocation).
+- Flight capture remains 7.5 Hz => ~34.13 s capacity.
+- Replay file frame remains 384 bytes.
+
+Motor data captured:
+- valve command, requested/limited command
+- raw/zero/target/error ADC
+- direct position turns, max turns, max-open ADC, ADC/turn, max travel ADC
+- RPWM/LPWM, motor active, opening/closing, homing flags, fault
+- stall/homing timing, homing start ADC, control ticks, ADC invalid counter
+- hardware ADC raw12 and mV
+- P83 robust feedback essentials/counters
+- P110 adaptive actuator essentials/state/result/abort
+- P111 supervisor state/result
+
+Validation performed:
+- host GCC syntax-only for modified sd_logger.c: PASS
+- Python reader py_compile: PASS
+- synthetic V16 frame + CRC decode to flight_v16_replay.csv: PASS
+- synthetic motor-focused flight_motor.csv generation: PASS
+
+Note:
+- Full STM32 CubeIDE/arm-none-eabi target link was not executed in this environment.

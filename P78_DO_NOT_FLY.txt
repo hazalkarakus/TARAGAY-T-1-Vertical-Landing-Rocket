@@ -1,0 +1,3 @@
+P78 IS DO-NOT-FLY BENCH FIRMWARE.
+Purpose: isolated needle-valve PWM75 breakaway timing characterization only.
+Flight baseline remains P71.

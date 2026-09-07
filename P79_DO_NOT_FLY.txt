@@ -1,0 +1,6 @@
+P79 NEEDLE ADC DIAGNOSTIC - DO NOT FLY
+
+Bu firmware SADECE tezgah ADC ariza teshisi icindir.
+Needle motor cikisi compile-time kilitlidir ve fiziksel kontrol icin kullanilamaz.
+NRF kapali, UART RX komutlari kapali, raw bench profile aktiftir.
+Ucus firmware'i olarak kullanma.

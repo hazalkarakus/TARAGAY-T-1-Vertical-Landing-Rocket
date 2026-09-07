@@ -1,0 +1,29 @@
+R8R35R3R7 VALIDATION
+
+Purpose:
+- Diagnostic-only extension over R8R35R3R6.
+- Preserve R3R6 flight-safe SD DMA START retry behavior unchanged.
+- Capture exact first/last HAL_SD_WriteBlocks_DMA launch-failure state before BSP cleanup.
+
+Static checks performed in container:
+- FATFS/Target/bsp_driver_sd.c host GCC -fsyntax-only: PASS.
+- App/Services/UARTTelemetry/uart_telemetry.c host GCC -fsyntax-only: PASS.
+- R3R7 live monitor python py_compile: PASS.
+- TGY73 monitor body field count: 323.
+- TGY73 C timing header count: 323 body fields + crc label, consistent.
+- Critical control sources and SDLogger source are SHA256-identical to R3R6:
+  scheduler, NeedleValveAutonomousControl, NeedleValveAutoControl,
+  SolenoidOutput, TaragayFlightLogic, NeedleValve controller,
+  FullStateESKF, SDLogger, App/app.c.
+
+Modified runtime sources:
+- FATFS/Target/bsp_driver_sd.c: diagnostic snapshot only.
+- App/Services/UARTTelemetry/uart_telemetry.c: read-only diagnostic fields/banner.
+- App/Common/app_version.h: revision string only.
+
+Not performed here:
+- ARM/CubeIDE target build.
+- Hardware powered-needle test.
+- Flight qualification.
+
+Use only for pressureless/inert bench diagnosis until validated.

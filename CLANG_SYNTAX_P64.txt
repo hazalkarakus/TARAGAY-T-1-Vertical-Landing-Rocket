@@ -1,0 +1,3 @@
+PASS host-clang syntax rocket nrf24.c
+PASS host-clang syntax ground nrf24l01p.c
+PASS host-clang syntax ground main.c

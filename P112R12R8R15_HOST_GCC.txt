@@ -1,0 +1,213 @@
+In file included from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h:166,
+                 from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h:132,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h:29,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:27,
+                 from Core/Inc/stm32f4xx_hal_conf.h:275,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:29,
+                 from Core/Inc/main.h:30,
+                 from App/Services/NeedleValveAutonomousControl/needle_valve_autonomous_control.c:8:
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_SetVector':
+Drivers/CMSIS/Include/core_cm4.h:1913:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1913 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_GetVector':
+Drivers/CMSIS/Include/core_cm4.h:1929:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1929 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+In file included from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h:166,
+                 from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h:132,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h:29,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:27,
+                 from Core/Inc/stm32f4xx_hal_conf.h:275,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:29,
+                 from Core/Inc/main.h:30,
+                 from App/Core/Scheduler/scheduler.h:4,
+                 from App/Core/Tasks/app_tasks.c:6:
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_SetVector':
+Drivers/CMSIS/Include/core_cm4.h:1913:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1913 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_GetVector':
+Drivers/CMSIS/Include/core_cm4.h:1929:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1929 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+In file included from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h:166,
+                 from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h:132,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h:29,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:27,
+                 from Core/Inc/stm32f4xx_hal_conf.h:275,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:29,
+                 from Core/Inc/main.h:30,
+                 from Core/Inc/usart.h:8,
+                 from App/app.c:2:
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_SetVector':
+Drivers/CMSIS/Include/core_cm4.h:1913:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1913 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_GetVector':
+Drivers/CMSIS/Include/core_cm4.h:1929:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1929 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+In file included from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h:166,
+                 from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h:132,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h:29,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:27,
+                 from Core/Inc/stm32f4xx_hal_conf.h:275,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:29,
+                 from Core/Inc/main.h:30,
+                 from App/Core/Scheduler/scheduler.h:4,
+                 from App/Services/UARTTelemetry/uart_telemetry.c:6:
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_SetVector':
+Drivers/CMSIS/Include/core_cm4.h:1913:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1913 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_GetVector':
+Drivers/CMSIS/Include/core_cm4.h:1929:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1929 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+In file included from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h:166,
+                 from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h:132,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h:29,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:27,
+                 from Core/Inc/stm32f4xx_hal_conf.h:275,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:29,
+                 from Core/Inc/main.h:30,
+                 from App/Core/Scheduler/scheduler.h:4,
+                 from App/Core/Scheduler/scheduler.c:1:
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_SetVector':
+Drivers/CMSIS/Include/core_cm4.h:1913:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1913 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_GetVector':
+Drivers/CMSIS/Include/core_cm4.h:1929:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1929 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+In file included from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h:166,
+                 from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h:132,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h:29,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:27,
+                 from Core/Inc/stm32f4xx_hal_conf.h:275,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:29,
+                 from Core/Inc/main.h:30,
+                 from App/Services/Timebase/timebase.h:4,
+                 from App/Modules/Estimation/FullStateESKF/full_state_eskf.c:8:
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_SetVector':
+Drivers/CMSIS/Include/core_cm4.h:1913:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1913 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_GetVector':
+Drivers/CMSIS/Include/core_cm4.h:1929:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1929 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+In file included from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h:166,
+                 from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h:132,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h:29,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:27,
+                 from Core/Inc/stm32f4xx_hal_conf.h:275,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:29,
+                 from Core/Inc/main.h:30,
+                 from Core/Inc/spi.h:29,
+                 from App/Platform/board_handles.h:12,
+                 from App/Modules/Sensors/IMU/imu.c:5:
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_SetVector':
+Drivers/CMSIS/Include/core_cm4.h:1913:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1913 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_GetVector':
+Drivers/CMSIS/Include/core_cm4.h:1929:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1929 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+In file included from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h:166,
+                 from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h:132,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h:29,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:27,
+                 from Core/Inc/stm32f4xx_hal_conf.h:275,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:29,
+                 from Core/Inc/main.h:30,
+                 from App/Modules/Sensors/Barometer/ms5611_spi.h:18,
+                 from App/Modules/Sensors/Barometer/ms5611_spi.c:33:
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_SetVector':
+Drivers/CMSIS/Include/core_cm4.h:1913:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1913 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_GetVector':
+Drivers/CMSIS/Include/core_cm4.h:1929:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1929 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+In file included from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h:166,
+                 from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h:132,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h:29,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:27,
+                 from Core/Inc/stm32f4xx_hal_conf.h:275,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:29,
+                 from Core/Inc/main.h:30,
+                 from App/Services/Timebase/timebase.h:4,
+                 from App/Modules/Sensors/Lidar/Lidar.c:5:
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_SetVector':
+Drivers/CMSIS/Include/core_cm4.h:1913:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1913 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_GetVector':
+Drivers/CMSIS/Include/core_cm4.h:1929:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1929 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+In file included from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h:166,
+                 from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h:132,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h:29,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:27,
+                 from Core/Inc/stm32f4xx_hal_conf.h:275,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:29,
+                 from Core/Inc/main.h:30,
+                 from Core/Inc/spi.h:29,
+                 from App/Platform/board_handles.h:12,
+                 from App/Modules/NRF24/nrf24.c:4:
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_SetVector':
+Drivers/CMSIS/Include/core_cm4.h:1913:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1913 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_GetVector':
+Drivers/CMSIS/Include/core_cm4.h:1929:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1929 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+In file included from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h:166,
+                 from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h:132,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h:29,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:27,
+                 from Core/Inc/stm32f4xx_hal_conf.h:275,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:29,
+                 from Core/Inc/main.h:30,
+                 from App/Services/Timebase/timebase.h:4,
+                 from App/Services/NRFTelemetry/nrf_telemetry.c:16:
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_SetVector':
+Drivers/CMSIS/Include/core_cm4.h:1913:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1913 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_GetVector':
+Drivers/CMSIS/Include/core_cm4.h:1929:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1929 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+In file included from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h:166,
+                 from Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h:132,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h:29,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:27,
+                 from Core/Inc/stm32f4xx_hal_conf.h:275,
+                 from Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:29,
+                 from Core/Inc/main.h:30,
+                 from App/Services/Timebase/timebase.h:4,
+                 from App/Services/SDLogger/sd_logger.c:14:
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_SetVector':
+Drivers/CMSIS/Include/core_cm4.h:1913:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1913 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_GetVector':
+Drivers/CMSIS/Include/core_cm4.h:1929:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1929 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+In file included from Core/Inc/stm32f4xx_hal_conf.h:407:
+App/Services/SDLogger/sd_logger.c: In function 'SDLogger_Init':
+Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:1223:89: warning: conversion from 'long unsigned int' to 'uint32_t' {aka 'unsigned int'} changes value from '18446744073709551614' to '4294967294' [-Woverflow]
+ 1223 | #define __HAL_TIM_CLEAR_FLAG(__HANDLE__, __FLAG__)        ((__HANDLE__)->Instance->SR = ~(__FLAG__))
+      |                                                                                         ^
+App/Services/SDLogger/sd_logger.c:3402:5: note: in expansion of macro '__HAL_TIM_CLEAR_FLAG'
+ 3402 |     __HAL_TIM_CLEAR_FLAG(&htim5, TIM_FLAG_UPDATE);
+      |     ^~~~~~~~~~~~~~~~~~~~

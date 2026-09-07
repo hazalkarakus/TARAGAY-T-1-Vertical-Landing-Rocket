@@ -1,0 +1,76 @@
+TARAGAY-T1 P82 PHYSICAL-RATE + QUARANTINE FEEDBACK VALIDATION
+=============================================================
+Firmware: 8.19M-P82-PHYSICAL-RATE-QUARANTINE-FEEDBACK
+Purpose : DO-NOT-FLY bench validation against multi-sample common-mode PC1 glitches
+
+1) WHY P82
+---------
+P81 suppressed normal noise well, but a multi-sample common-mode event could pass
+its 3-sample (~6 ms) persistence check and create a large filtered jump. P82 adds
+physical-rate limits, direction-consistent persistence, output slew limiting, and
+post-glitch quarantine.
+
+2) SAFETY
+---------
+PASS - APP_NEEDLE_ADC_DIAGNOSTIC_MODE remains 1.
+PASS - NeedleValveHW_SetEnabled() compile-time forces enable=0.
+PASS - DriveOpen()/DriveClose() remain no-ops in diagnostic mode.
+PASS - Integration service continuously Stop()+SetEnabled(0).
+PASS - RCS SolenoidOutput_ForceSafe() remains continuous.
+PASS - PA0 creates no motion command in the P82 service.
+PASS - NRF remains disabled; UART RX commands remain disabled.
+
+3) P82 ROBUST PATH
+------------------
+PASS - ADC1 + ADC2 PC1 pair @ ~500 Hz, 480-cycle acquisition.
+PASS - Pair hard reject: |ADC1-ADC2| > 30 ADC10.
+PASS - 3 consecutive pair rejects -> quarantine.
+PASS - Raw common-mode physical-rate reject: >80 ADC / 2 ms.
+PASS - 7 accepted-sample median.
+PASS - Median physical-rate reject: >20 ADC / 2 ms.
+PASS - >24 ADC excursion requires 8 direction-consistent samples (~16 ms).
+PASS - Reverse dither tolerance = 4 ADC.
+PASS - Normal output: 3 ADC deadband + 1/4 IIR.
+PASS - Published output capped at 6 ADC/sample; no instant teleport.
+PASS - Rate violation -> minimum 100 ms quarantine, last-good hold, valid=0.
+PASS - Quarantine recovery also requires 25 stable medians (~50 ms) within +/-25 ADC.
+PASS - Confidence valid threshold = 60%.
+PASS - VREFINT and combined ADC timeout diagnostics retained.
+
+4) UART / PYTHON
+----------------
+PASS - Exactly 20 P82 tail fields; full monitor FIELDS = 356.
+PASS - monitor_uart_p82_physical_rate_quarantine.py py_compile.
+PASS - Synthetic compact-status rendering.
+
+5) STATIC C CHECKS
+------------------
+Tool: clang, target arm-none-eabi, Cortex-M4, USE_HAL_DRIVER, STM32F407xx.
+PASS - NeedleValveIntegrationTest (-Wall -Wextra -Werror).
+PASS - NeedleValveHardware (-Wall -Wextra -Werror).
+PASS - UARTTelemetry (-Wall -Wextra -Werror).
+NOTE - Final STM32CubeIDE Clean + Build + link is still required before flash.
+
+6) EXACT-ALGORITHM HOST SYNTHETIC TEST
+--------------------------------------
+PASS - Abrupt common-mode glitch 596 -> ~846 for 12 ms -> 596:
+       rate rejects=2, quarantine events=1, max filtered step=0, recovery valid=1.
+PASS - Physically plausible ramp at 5 ADC / 2 ms:
+       rate rejects=0, quarantine=0, max filtered step=5, final feedback valid=1.
+
+7) REQUIRED BENCH RUN
+---------------------
+- No gas / no pressure.
+- Prefer motor and RCS electrical power physically OFF.
+- Clean -> Build -> Flash.
+- Verify P82 banner.
+- Run monitor for 60-120 s without touching pot/shaft/cables.
+- Send uart_p82_physical_rate_quarantine.txt.
+
+Primary success criterion:
+If a large PC1 glitch occurs, p82_rate_reject_count and p82_quarantine_count must
+increase while p82_win_filtered_max_step remains small and feedback_valid drops
+through quarantine. needle_enabled/rpwm/lpwm must remain 0/0/0.
+
+OFFLINE VALIDATION RESULT: PASS
+HARDWARE RESULT          : PENDING USER CUBEIDE BUILD + BENCH RUN

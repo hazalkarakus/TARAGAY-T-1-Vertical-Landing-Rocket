@@ -1,0 +1,2 @@
+states=11111 final=4 step=1300 elapsed=13000 maxL=0.1180 req=1 fault=0 hover=8.000
+PASS R8R19 flight-logic dry-run host test

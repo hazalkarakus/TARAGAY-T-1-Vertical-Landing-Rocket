@@ -1,0 +1,45 @@
+P112R12R1 PRODUCTION AUTONOMOUS 950+ SAME-TARGET GUARD / INERT VALIDATION
+
+CONTROL CHANGE
+PASS: same-target firm HOLD <= 12 ADC
+PASS: same-target mechanical deadband 13..20 ADC
+PASS: same-target >20 ADC requires 200 ms continuous persistence before correction
+PASS: returning to <=20 ADC resets persistence timer
+PASS: genuine GNC target change > +/-8 ADC bypasses guard immediately
+PASS: guard also arms on repeated same CLOSED target after authorization, before any P110 move
+PASS: post-P110 PASS same-target guard retained
+
+HOST TESTS
+PASS: P112R5 autonomous supervisor regression
+PASS: P112R12R1 same-target mechanical guard regression
+PASS: CLOSED reference 949 rejected / 950 accepted in host regression
+PASS: <=20 ADC same-target jitter -> zero P110 requests
+PASS: >20 ADC spike <200 ms -> zero P110 requests
+PASS: genuine target change -> immediate P110 request
+PASS: same-target >20 ADC for 200 ms -> exactly one correction request
+
+UNCHANGED FROM P112R12
+PASS: P110 adaptive controller byte-identical
+PASS: needle hardware byte-identical
+PASS: GeneratedFlightControl byte-identical
+PASS: app_tasks production submit route byte-identical
+PASS: TIM7 IRQ byte-identical
+PASS: SD logger byte-identical
+PASS: UART telemetry byte-identical
+PASS: RCS hard-isolation implementation byte-identical
+PASS: vent-servo hard-isolation implementation byte-identical
+PASS: APP_P112R12_INERT_OUTPUT_ISOLATION_MODE remains enabled
+PASS: UART actuator RX path remains disabled by the P112R12 production profile
+PASS: CLOSED reference floor remains 950 ADC
+
+FILES CHANGED FROM P112R12 BASE
+- .project (project name only)
+- App/Common/app_version.h
+- App/Common/app_config.h (R12R1 revision guard only)
+- App/Services/NeedleValveAutonomousControl/needle_valve_autonomous_control.c
+
+SUPERVISOR SHA256
+759ff1eaffe925c43a569ba64e964d4aa3acf4ab5f8dcb6d49f06afd6966b877  App/Services/NeedleValveAutonomousControl/needle_valve_autonomous_control.c
+
+NOT RUN: STM32/Cortex-M4 target compile (arm-none-eabi-gcc unavailable in this environment).
+DO NOT FLY: inert/depressurized bench validation only.

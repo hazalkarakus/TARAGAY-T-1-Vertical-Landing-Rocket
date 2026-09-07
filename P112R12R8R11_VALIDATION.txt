@@ -1,0 +1,7 @@
+P112R12R8R11 validation scope
+- Frozen ESKF/scheduler/sensor/control hashes checked against R8R10 baseline.
+- Only version/project, app_config background timing limits, SD logger timing kernel, UART timing path, monitor/docs/validator changed.
+- Host GCC syntax-only validation executed where available.
+- Needle actuator host regressions executed.
+- TGY71 monitor CRC/parser synthetic test executed.
+- ARM/CubeIDE target build is NOT claimed in this environment.

@@ -1,0 +1,11 @@
+upright phase=2 valid=0 upright=200
++X phase=4 samples=120 tilt=14.00
+wrong -X phase=4 negX=0 opp=-1.000
+-X phase=6 negX=120 tilt=19.00 xOpp=1.0000
++Y phase=8 samples=120 tilt=17.00 xy=90.00 agree=1.0000
+wrong -Y phase=8 negY=0 opp=-1.000
+-Y phase=10 valid=1 fault=0 negY=120 tilt=12.00 xOpp=1.0000 yOpp=1.0000 xy=90.00 agree=1.0000 zAgree=1.0000 det=1.00000 ortho=0.000000 err=0.00000
+R= -0.98628 -0.15096 -0.06683 / 0.15268 -0.98804 -0.02144 / -0.06279 -0.03135 0.99753
+roll corrected A/B=10.00/0.00 events=1/154/0/0
+pitch corrected A/B=0.00/-11.00
+PASS R8R28 five-pose +/-pair mount calibration + sign rejection + rocket-frame transform

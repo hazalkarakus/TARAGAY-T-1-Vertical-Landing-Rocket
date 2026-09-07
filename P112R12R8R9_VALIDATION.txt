@@ -1,0 +1,6 @@
+P112R12R8R9 validation targets
+- Frozen R8R8 sensors/scheduler/control/SD/actuator/RCS.
+- Only covariance timing kernels get function-specific GCC O2.
+- No fast-math and no estimator constant/frequency changes.
+- Physical 120 s target: cov_max <650 us, miss_imu=0, miss_eskf<=5, miss_baro<=5,
+  no sensor freshness drop, system healthy after warmup, inert outputs zero.

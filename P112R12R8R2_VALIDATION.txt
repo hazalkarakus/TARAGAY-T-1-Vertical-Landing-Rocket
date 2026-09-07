@@ -1,0 +1,61 @@
+P112R12R8R2 LiDAR BUS-CLEAR PRODUCTION CANDIDATE / INERT
+
+PHYSICAL R12R8R1 LOG DIAGNOSIS
+- 414 valid UART frames, 0 rejects.
+- LiDAR valid until t=26.656 s.
+- Persistent dropout begins t=26.931 s and never recovers by t=86.803 s.
+- Ongoing invalid duration at end: 59.872 s.
+- lidar_reads freezes at 3659.
+- One LiDAR error / one timeout triggers the event.
+- End of log recovery diagnostics: attempts=246, success=0, failures=82.
+- recovery step max ~35.945 ms; LiDAR task max ~36.179 ms.
+- vertical source falls from 0x03 (LiDAR+baro) to 0x02 (baro), degraded=1.
+- actuator remained safe: PWM=0, moves=0, P111 fault=0, needle fault=0, RCS=0, hard-off=0.
+
+ROOT-CAUSE DIRECTION
+Current R12R8 recovery quiesces DMA then executes HAL_I2C_DeInit()+MX_I2C2_Init().
+The persistent 35-36 ms HOST_RESET duration with zero successful recovery is consistent with I2C BUSY remaining asserted / a slave holding SDA low. Reinitializing the peripheral does not electrically clock a stuck slave out of that state.
+
+R12R8R2 CHANGE
+Only the LiDAR recovery path is functionally changed:
+- Deinit I2C2.
+- Temporarily configure PB10=SCL / PB11=SDA as open-drain GPIO.
+- If SDA is low, pulse SCL up to 9 times.
+- Generate explicit STOP.
+- Verify SCL and SDA are both released HIGH.
+- If still stuck, do NOT enter MX_I2C2_Init; retry later with existing bounded recovery cadence.
+- If clear, force/release I2C2 peripheral reset, then run normal MX_I2C2_Init and restart acquisition.
+- Intentional GPIO pulse time is bounded below ~120 us.
+
+UNCHANGED PRODUCTION CORE
+- GeneratedFlightControl unchanged.
+- P111/P110/P112 actuator core unchanged.
+- TIM7 ISR unchanged.
+- SD logger unchanged.
+- UART telemetry field count/protocol unchanged.
+- RCS/vent isolation unchanged.
+- R12R8 production GNC freshness guard unchanged.
+- UART RX commands remain disabled.
+- No test stimulus/fault injection/no-motion hook added.
+
+VALIDATION
+PASS - host GCC -fsyntax-only on modified Lidar.c with STM32F407/HAL headers.
+       Only host pointer-size CMSIS warnings; no syntax errors.
+PASS - P112R5 autonomous supervisor host regression.
+PASS - R12R1 same-target mechanical guard host regression.
+PASS - R12R6R2 feedback root-cause propagation host regression.
+PASS - R12R8 production freshness model.
+PASS - monitor py_compile.
+PASS - static checks: 9-clock bound, PB10/PB11 GPIO clear, STOP/release check,
+       I2C2 reset, and no MX_I2C2_Init while bus remains stuck.
+
+Compared with R12R8 base, common-file changes are exactly:
+- .project (project name only)
+- App/Common/app_version.h (version only)
+- App/Modules/Sensors/Lidar/Lidar.c (LiDAR recovery change)
+Added docs/monitor/validator only.
+
+IMPORTANT
+ARM/Cortex-M4 target compiler / CubeIDE target build was not available here.
+CubeIDE target build PASS is NOT claimed.
+DO NOT FLY. Completely depressurized/inert bench only.

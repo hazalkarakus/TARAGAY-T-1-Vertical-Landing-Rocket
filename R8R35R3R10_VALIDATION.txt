@@ -1,0 +1,28 @@
+R8R35R3R10 RAM-FIRST FLIGHT LOGGER — STATIC VALIDATION
+
+Architecture:
+- 30 Hz ground/preflight V14 logging
+- PE9 -> no NEW SDIO command launch during active flight
+- 30 Hz / 96-byte compact RAM flight record
+- 512 compact records in the same 49,152-byte CCM allocation
+- 17.07 s RAM flight capacity
+- touchdown or latched E-stop + 1000 ms quiet -> V15 replay to flight.bin
+- SDIO ClockDiv=10 (~4 MHz) on quiet side only
+- 1536-byte / 3-sector writer buffers
+
+Static checks performed in container:
+- SDLogger compact-frame C static size check: compiled PASS
+- SDLogger union storage fixed-size static check: compiled PASS
+- All App/*.c host GCC -fsyntax-only: PASS
+- Core/Src/sdio.c host GCC -fsyntax-only: PASS
+- FATFS/Target/bsp_driver_sd.c host GCC -fsyntax-only: PASS
+- Total checked C translation units: 48 / 48 PASS
+- UART timing header: 342 labels incl. crc => 341 body fields
+- Standalone R3R10 UART monitor: 341 fields exact match PASS
+- monitor py_compile: PASS
+- decode_r3r10_flight_bin.py py_compile: PASS
+- synthetic V15/0xF10A decoder self-test: PASS
+
+Target limitations:
+- ARM/CubeIDE target build was NOT run in this environment.
+- Hardware validation is required before accepting the revision.

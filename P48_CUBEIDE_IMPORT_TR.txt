@@ -1,0 +1,21 @@
+P48 CubeIDE import / build
+==========================
+
+1. ZIP'i yeni ve bos bir klasore cikart.
+2. CubeIDE -> File -> Import -> Existing Projects into Workspace.
+3. Proje adi kesinlikle:
+   TGY_V8_19M_P48_GRAV_SPARSE_SD_STALL_BUFFER
+4. Project -> Clean...
+5. Build Project.
+6. Console: 0 errors.
+7. Linker Memory region overflow OLMAMALI. P48 normal SRAM'a P47'ye gore 18 KiB ek SD writer buffer ekler.
+8. Beklenen ELF:
+   Debug/TGY_V8_19M_P48_GRAV_SPARSE_SD_STALL_BUFFER.elf
+9. Karta bu ELF'i flash et.
+10. Reset sonrasi UART banner:
+    TGY UART FLIGHT DIAGNOSTICS V59
+    FW 8.19M-P48-GRAV-SPARSE-SD-STALL-BUFFER
+11. UART data prefix:
+    $TGY59
+
+Ilk testte aktuator/pyro/pnomatik enerji kapali tutulmalidir.

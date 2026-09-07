@@ -1,0 +1,8 @@
+upright phase=2 valid=0 upright=200
+plusX phase=4 xSamples=120 xTilt=16.00 valid=0
+wrongY phase=4 ySamples=0 xy=90.00 agree=-1.000
+plusY phase=6 valid=1 fault=0 ySamples=120 yTilt=15.00 xy=90.00 agree=1.0000 det=1.00000 ortho=0.000000 err=0.00000
+R= 0.95398 -0.29546 0.05132 / 0.29166 0.95393 0.07042 / -0.06976 -0.05221 0.99620
+roll corrected A/B=10.00/0.00 events=154/1/0/0
+pitch corrected A/B=-0.00/-11.00
+PASS R8R27 three-pose mount calibration + geometry rejection + rocket-frame transform

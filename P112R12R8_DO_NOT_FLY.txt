@@ -1,0 +1,14 @@
+P112R12R8 PRODUCTION CANDIDATE INERT DRY-RUN
+DO NOT FLY / NOT FLIGHT-QUALIFIED.
+
+Use only on a fully depressurized/inert bench. Propellant/gas/pressure,
+pyrotechnics/ignition/energetic hardware must be physically disconnected or
+isolated. RCS and vent physical loads remain software-hard-isolated in this
+profile and should also remain physically isolated for the test.
+
+The main needle motor IS enabled through the real production interlocks and may
+move if the real GeneratedFlightControl produces a nonzero command. Keep the
+mechanical travel clear/restrained and the valve/actuator depressurized.
+
+UART is read-only diagnostics and is not part of actuator authorization or
+flight logic.

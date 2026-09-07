@@ -1,0 +1,24 @@
+
+================ R8R32 OZET ================
+Valid/rejected              : 85/0
+Capture duration            : 22.840s
+CPU avg/max                 : 50.40% / 51.46%
+Ready healthy seen          : True
+Fixed matrix phase12 seen   : True
+Flight/PE9 separation seen  : False  first_ms=None
+Pre-flight PWM/motion       : False/False  (MUST False/False)
+FL real valid after flight  : False
+FL nonzero L after flight   : False
+Needle nonzero cmd after FL : False
+Needle PWM max              : 0
+P111 moves delta/max        : 0/0
+Needle ADC min/max          : 1022/1022
+Max target/actual travel    : 0/0 ADC (limit 585)
+L->needle relation samples  : 0; bad=0; max_err=0/10000
+P111/needle fault max       : 0/0
+Physical RCS seen           : False (MUST False)
+Miss delta I/B/L/N/E        : 0/0/0/0/0
+Scheduler realign delta     : 0
+
+SONUC: INCELE - R8R32 entegrasyon kosullari tamamlanmadi
+NOT: PE9/flight_active gorulmedi. READY sonrasi basincsiz duzende PE9 ayrilma testi yapilmadan fiziksel handoff test edilemez.

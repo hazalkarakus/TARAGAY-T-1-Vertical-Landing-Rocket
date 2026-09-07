@@ -1,0 +1,50 @@
+P51 VALIDATION
+==============
+
+P50 uploaded bench evidence:
+- UART firmware: TGY61 / 8.19M-P50-FAST-ZUPT-JOSEPH-SCHED-FIX
+- UART duration: ~336.7 s
+- FLIGHT.BIN decoded valid frames: 67,464
+- BIN bad CRC: 0
+- BIN sequence gaps: 0
+- State CSV rate: exactly 200.00 Hz
+- Fast IMU unique rate: 982.97 Hz
+- Fast IMU >40 ms gaps: 19
+- UART IMU recovery: 19/19 success, 0 failure
+- ESKF covariance faults/rollbacks/reinits: 0/0/0
+- Gravity Joseph faults: 0
+- ZUPT Joseph faults: 0
+- SD dropped/ring overrun/FIFO order fault: 0/0/0
+- SD ring high water: 45/127
+- UART DMA errors: 0
+- final vertical source mask: 3
+- final system_ok/fault: 1/0
+- scheduler: miss_imu=72, miss_baro=3, miss_eskf=1, realigns=76
+- all 72 observed IMU-miss increments occurred in UART intervals where
+  zupt_joseph_updates also increased.
+- task_eskf_max_us: 1770
+
+P51 source changes:
+1) Stationary maintenance batch is staggered:
+   one scalar correction per 200 Hz correction service call.
+2) 10 Hz batch start cadence preserved by the existing decimation counter.
+3) Post-origin stationary detector requires |vz| <= 0.15 m/s.
+4) If |vz| crosses the limit, stationary state + pending phase are released
+   immediately so ZUPT cannot pull an actual powered-descent velocity to zero.
+5) P50 fast masked-ZUPT Joseph, P48 gravity sparse Joseph, covariance rollback,
+   vertical recovery, SD FIFO/backpressure and public z/vz guards remain.
+6) SD format remains V14 / 384 B / 200 Hz.
+7) UART becomes TGY62 / V62 / 258 fields.
+
+Static / host checks:
+- validate_p51.py: PASS
+- stationary phase regression: max 1 scalar correction per call, batch period 20 calls
+- post-origin vz gate regression: +0.151 and -0.4 m/s rejected
+- full_state_eskf.c host syntax: PASS
+- uart_telemetry.c host syntax: PASS
+- monitor_uart_p51.py syntax: PASS
+- decode_flight_v14_p51.py syntax: PASS
+- UART C/header/Python contract: 258 fields
+- generated Ucus_Bilgisayari embedded-types build fix retained
+
+Target build still must be done in STM32CubeIDE with arm-none-eabi-gcc.

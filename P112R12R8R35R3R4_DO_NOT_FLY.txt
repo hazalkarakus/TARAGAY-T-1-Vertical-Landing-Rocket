@@ -1,0 +1,4 @@
+P112R12R8R35R3R4 — VALIDATION BUILD
+
+Do not treat this package as flight-qualified solely because it compiles or boots.
+First perform the requested pressureless/inert SD closure test and inspect the UART/SD results.

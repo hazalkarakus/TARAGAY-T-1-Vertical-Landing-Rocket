@@ -1,0 +1,18 @@
+R8R35R3R7R1 VALIDATION
+
+Changed: App/app.c, NRF24/nrf24.c, UART telemetry, app version/project, runtime_delay_guard.c/h, monitor/docs.
+Runtime rule: after App_Init, strong HAL_Delay override returns immediately and counts violations.
+
+Critical file hash comparison R3R7 -> R3R7R1:
+SAME  App/Services/NeedleValveAutonomousControl/needle_valve_autonomous_control.c  de7cdbdb668d9bb9e9f76b9710de8fd39ad6d6b8187ff7b78ea39a7b7c57c3ab
+SAME  App/Services/NeedleValveIntegrationTest/needle_valve_integration_test.c  e21c58cbcf5f751124d7e5dce82f21cf72b0c0a20686d4d041f612983918dbf6
+SAME  App/Modules/Control/TaragayFlightLogic/taragay_flight_logic.c  2bded646fbd07c16bebed9769c87b0a7011fcfd917b3d6a4363a45428d6103fc
+SAME  App/Services/SolenoidOutput/solenoid_output.c  cb580faa642181fc4dee3253684b8b7210108f665bf786e7d650f38779f03aa7
+SAME  App/Modules/Estimation/FullStateESKF/full_state_eskf.c  0586a0ffa7544b44303357a2f61e3570cc0282a0a0569ae6fb0cf2ad5f47e43e
+SAME  App/Services/SDLogger/sd_logger.c  7d7023b4461f286c9d16a362d26fa6b9c4ed8ae60b0a695638b9eddfed2822ad
+SAME  App/Core/Scheduler/scheduler.c  ab4f73a091ada9363c3fbe2690fd17d2ac5bb0866e7fec862e172093c641fe53
+SAME  FATFS/Target/bsp_driver_sd.c  ad08e3e5e6bcb17af6e11e84cc500585fca5dcf5986cefd7f8284e64032413df
+
+Host syntax: runtime_delay_guard.c PASS; nrf24.c PASS; uart_telemetry.c PASS; app.c PASS.
+Python monitor py_compile PASS; expected TGY73 fields=325.
+ARM/CubeIDE target build NOT run in this environment.

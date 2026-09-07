@@ -1,0 +1,21 @@
+P112 VALIDATION
+Firmware: 8.19M-P112-UART-INDEPENDENT-DETERMINISTIC-ADAPTIVE
+
+PASS: Cortex-M4 clang -Wall -Wextra -Werror syntax
+  - needle_valve_integration_test.c
+  - needle_valve_hw.c
+  - uart_telemetry.c
+PASS: App/app.c syntax (-Werror with pre-existing unused-function warning suppressed for NRF-disabled bench profile)
+PASS: Python monitor py_compile
+PASS: UART monitor field count = 493
+
+Architecture:
+- TIM7 1 kHz owns P110/P111 state decisions.
+- P83 dual ADC robust feedback sampled at deterministic 500 Hz in TIM7.
+- Hard powered-time cutoff enforced in ISR at 260 ms per adaptive move.
+- UART/SD background formatting/update suppressed during SEARCH/DRIVE/BRAKE.
+- Conservative initial coast = 20 ADC; stop-distance clamp = 8..48 ADC.
+- Near-target bounded PWM deceleration added.
+
+BENCH ONLY / DO NOT FLY / NO GAS / NO PRESSURE.
+Full CubeIDE link/build/flash still required on the target project.

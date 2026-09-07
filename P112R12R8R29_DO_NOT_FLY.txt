@@ -1,0 +1,5 @@
+P112R12R8R29 DO NOT FLY
+=======================
+INERT / DEPRESSURIZED BENCH CALIBRATION BUILD ONLY.
+Not flight-qualified. No pressurized pneumatic test with this package.
+Needle/motor authorization remains revoked for this calibration bench profile.

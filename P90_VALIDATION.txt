@@ -1,0 +1,35 @@
+TARAGAY-T1 P90 ADC-BYPASS + 5% AUTO MOTOR JOG VALIDATION
+========================================================
+Firmware: 8.19M-P90-ADC-BYPASS-5PCT-AUTO-JOG
+
+PURPOSE
+-------
+Verify motor/H-bridge/mechanical movement independently of the known PC1 ADC
+feedback fault while retaining P87 sweep telemetry.
+
+COMMAND
+-------
+PWM: 13/255 = 5.10% duty.
+Pulse: 100 ms.
+Direction: OPEN (PB0 / TIM3_CH3 / LPWM).
+Trigger: fixed 5 s delay; NO button and NO ADC/feedback gating.
+One pulse maximum per MCU boot.
+
+SAFETY
+------
+- DO-NOT-FLY / BENCH ONLY.
+- NO GAS / NO PRESSURE; RCS power off.
+- RCS forced safe; NRF and UART RX commands disabled.
+- Bridge armed only during the bounded pulse.
+- TIM7 ISR owns the exact 100 ms hard cutoff.
+- Fast service provides an independent 110 ms fallback.
+- Bridge disabled and jog arm cleared after pulse.
+- POWER-ON/RESET CAN CAUSE AUTOMATIC MOTOR MOTION after the fixed delay.
+- P83/P87 feedback is telemetry only; it does not authorize or stop this pulse.
+
+CubeIDE Clean + Build + link is required before flash.
+
+STATIC C CHECKS
+---------------
+PASS - NeedleValveIntegrationTest: clang arm-none-eabi Cortex-M4 -Wall -Wextra -Werror.
+PASS - NeedleValveHardware: clang arm-none-eabi Cortex-M4 -Wall -Wextra -Werror.

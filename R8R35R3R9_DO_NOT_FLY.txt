@@ -1,0 +1,9 @@
+R8R35R3R9 IS NOT FLIGHT-QUALIFIED.
+
+Required before any flight use:
+1) CubeIDE ARM target build must pass.
+2) Pressureless/inert powered-needle + RCS dry run must keep SD ready/logging 1/1.
+3) No R7 SDIO command-start failures or SD write errors.
+4) Actual telemetry CLKDIV must be 62.
+5) No scheduler regression, no runtime HAL_Delay violation.
+6) Long soak and UART-cable-removed independence checks remain pending.

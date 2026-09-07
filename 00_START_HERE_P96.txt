@@ -1,0 +1,41 @@
+P96 ACTIVE-BRAKE 100-ADC CLOSED-LOOP OPEN TEST - BENCH ONLY
+
+Purpose:
+- Repeat the replacement-pot 100-ADC OPEN test, but stop motor inertia with dynamic braking.
+- Verify that the actuator can settle inside a real +/-8 ADC target band instead of coasting past it.
+
+Automatic sequence, once per MCU reset:
+1) Wait 5 seconds.
+2) Require P83 feedback_valid=1 and mode=NORMAL.
+3) Capture START = p83_filtered_adc.
+4) TARGET = START - 100 ADC.
+5) Drive OPEN using 50.2% PWM short chunks.
+6) At every pulse end, PWM goes to 0/0 but BOTH bridge enable pins stay asserted.
+7) Hold dynamic brake for 100 ms.
+8) Re-check filtered ADC. If still above target band, issue the next bounded chunk.
+9) Success only after 5 consecutive fresh P83 samples remain inside TARGET +/-8 ADC.
+10) After success or fault, bridge is fully disabled.
+
+Adaptive chunk durations:
+- remaining >55 ADC: 20 ms
+- remaining >28 ADC: 12 ms
+- remaining >14 ADC: 8 ms
+- otherwise: 5 ms
+PWM remains 128/255 (~50.2%) to preserve breakaway torque.
+
+Hard limits:
+- max 8 chunks
+- max 100 ms cumulative motor-on time
+- max 3.0 s total sequence time
+- invalid feedback, wrong direction, or settled position below TARGET-8 aborts
+- one automatic sequence per reset
+
+Important P96 telemetry behavior:
+- needle_enabled=1 with LPWM=0 and RPWM=0 during the dynamic-brake hold.
+- needle_enabled=0 only after success/fault when the bridge is fully inhibited.
+
+RCS forced safe. NRF/UART RX command restrictions inherited from diagnostic profile.
+NO GAS. NO PRESSURE. Keep hands/tools clear of motor, gearbox, coupling and valve.
+
+UART monitor:
+python -u monitor_uart_p96_active_brake_100adc.py --port COM21 --log uart_p96_active_brake_100adc.txt

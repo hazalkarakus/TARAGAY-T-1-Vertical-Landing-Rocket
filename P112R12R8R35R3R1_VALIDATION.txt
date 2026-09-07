@@ -1,0 +1,7 @@
+P112R12R8R35R3R1 UART VISIBILITY HOTFIX
+- Based on R8R35R3 SD-only closure.
+- Control / ESKF / RCS / needle source authority unchanged.
+- UART 10 Hz diagnostic opportunity moved before the 1 kHz SD background slice.
+- UART still requires APP_P34_UART_MIN_SLACK_US = 600 us.
+- SD 200 Hz V14 logging policy and R8R35R3 SD slice unchanged.
+- Purpose: prevent UART starvation caused by background ordering while preserving hard IMU scheduling.

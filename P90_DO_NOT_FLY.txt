@@ -1,0 +1,20 @@
+TARAGAY-T1 P90 - DO NOT FLY
+===========================
+
+BENCH-ONLY MOTOR DIAGNOSTIC.
+NO GAS / NO PRESSURE. KEEP RCS POWER OFF.
+
+Behavior:
+- No PA0/button approval.
+- No P83 feedback-valid/mode/ADC-range approval.
+- 5 s fixed delay after diagnostic service initialization.
+- Exactly one OPEN pulse per boot.
+- PWM = 13/255 = 5.10% duty.
+- Pulse = 100 ms.
+- TIM7 1 kHz hard cutoff + 110 ms independent fast-service fallback.
+- Bridge disabled after pulse.
+- P87/P83 ADC data remain telemetry only.
+
+POWER-ON/RESET CAN CAUSE AUTOMATIC MOTOR MOTION.
+Keep hands/tools clear of motor, gearbox, coupler and valve shaft.
+Have a physical motor-power cutoff available.

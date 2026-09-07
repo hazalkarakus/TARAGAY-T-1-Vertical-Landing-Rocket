@@ -1,0 +1,17 @@
+In file included from /mnt/data/P112R12R8R22_REAL_ESKF_COMPUTE_ONLY_INERT/Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h:166,
+                 from /mnt/data/P112R12R8R22_REAL_ESKF_COMPUTE_ONLY_INERT/Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h:132,
+                 from /mnt/data/P112R12R8R22_REAL_ESKF_COMPUTE_ONLY_INERT/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h:29,
+                 from /mnt/data/P112R12R8R22_REAL_ESKF_COMPUTE_ONLY_INERT/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:27,
+                 from /mnt/data/P112R12R8R22_REAL_ESKF_COMPUTE_ONLY_INERT/Core/Inc/stm32f4xx_hal_conf.h:275,
+                 from /mnt/data/P112R12R8R22_REAL_ESKF_COMPUTE_ONLY_INERT/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:29,
+                 from /mnt/data/P112R12R8R22_REAL_ESKF_COMPUTE_ONLY_INERT/Core/Inc/main.h:30,
+                 from /mnt/data/P112R12R8R22_REAL_ESKF_COMPUTE_ONLY_INERT/App/Services/Timebase/timebase.h:4,
+                 from /mnt/data/P112R12R8R22_REAL_ESKF_COMPUTE_ONLY_INERT/App/Modules/Control/TaragayFlightLogic/taragay_flight_logic.c:6:
+/mnt/data/P112R12R8R22_REAL_ESKF_COMPUTE_ONLY_INERT/Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_SetVector':
+/mnt/data/P112R12R8R22_REAL_ESKF_COMPUTE_ONLY_INERT/Drivers/CMSIS/Include/core_cm4.h:1913:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1913 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^
+/mnt/data/P112R12R8R22_REAL_ESKF_COMPUTE_ONLY_INERT/Drivers/CMSIS/Include/core_cm4.h: In function '__NVIC_GetVector':
+/mnt/data/P112R12R8R22_REAL_ESKF_COMPUTE_ONLY_INERT/Drivers/CMSIS/Include/core_cm4.h:1929:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+ 1929 |   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+      |                       ^

@@ -1,0 +1,65 @@
+TARAGAY-T1 P78 NEEDLE BREAKAWAY TIMING VALIDATION
+
+P77 HARDWARE RESULT USED
+PASS - Uploaded P77 run reached final DONE/NO_THRESHOLD.
+PASS - PWM65 and PWM75 up to 20 ms produced 0 ADC movement.
+CONCLUSION - Breakaway time at PWM75 is >20 ms on this hardware, or PWM75 is still insufficient.
+
+PURPOSE
+PASS - P78 measures time-to-first measurable OPEN motion at fixed PWM75.
+PASS - P71 remains the flight/safety baseline; P78 is DO-NOT-FLY bench firmware only.
+PASS - Closed-loop needle control is not used for motion.
+
+P78 TEST BOUNDS
+PASS - Only one raw OPEN test exists.
+PASS - PWM fixed at 75/255.
+PASS - TIM7 absolute hard-stop = 80 ms.
+PASS - No DriveClose() call exists in the bench test.
+PASS - Motion detect threshold = >=3 ADC in OPEN direction.
+PASS - ADC pulse sampling occurs in main context, at most once per HAL 1 ms tick.
+PASS - First >=3 ADC correct-direction sample immediately applies dynamic brake and clears remaining pulse ticks.
+PASS - Records detect time, actual pulse time, detect ADC and brake ADC.
+PASS - Records +100 ms, +250 ms and +500 ms settle ADC values and max excursion.
+
+ISOLATION / SAFETY
+PASS - NRF compile-time disabled.
+PASS - UART RX commands disabled; UART remains TX-only diagnostics.
+PASS - Raw characterization mode compile-time enabled; normal needle automatic control disabled.
+PASS - RCS physical path is inhibited by the existing raw-characterization profile.
+PASS - SolenoidOutput_ForceSafe() is continuously called by bench supervisor.
+PASS - Any USER press during PULSE/SETTLE -> local abort + H-bridge disable.
+PASS - flight_active / preflight fault / SystemMonitor actuator fault / system_ok=0 prevent/abort motion.
+PASS - ADC <=3 aborts.
+PASS - Reference capture requires ADC >=1012.
+PASS - Fast travel guard = 30 ADC from captured reference.
+PASS - Wrong direction >=3 ADC immediately cuts PWM and aborts.
+PASS - No automatic CLOSE after breakaway or timeout.
+
+UNCHANGED CORE
+PASS - 15/15 audited sensor/estimator/control/hardware critical source files are byte-identical P71 -> P78.
+PASS - needle_valve_controller.c byte-identical P71 -> P78.
+PASS - needle_valve_hw.c byte-identical P71 -> P78.
+
+UART / MONITOR
+PASS - UART payload fields = 356; header columns including CRC = 357.
+PASS - P78 diagnostics include stage/result/button/phase/direction/PWM/max pulse/actual pulse/detect time/detect flag/reference/start/detect/brake/100/250/500/delta/max excursion/fast ADC sample count.
+PASS - Python monitor FIELDS = 356.
+PASS - Synthetic $TGY68 CRC frame decode PASS.
+PASS - monitor_uart_p78_breakaway_timing.py py_compile.
+
+STATIC CHECKS
+PASS - needle_valve_integration_test.c clang Cortex-M4 syntax (-Wall -Wextra -Werror).
+PASS - stm32f4xx_it.c clang Cortex-M4 syntax (-Wall -Wextra -Werror).
+PASS - uart_telemetry.c clang Cortex-M4 syntax (-Wall -Wextra -Werror).
+PASS - App/app.c clang Cortex-M4 syntax (unused-function warning suppressed only for intentionally disabled paths).
+
+USER HARDWARE BUILD / TEST STILL REQUIRED
+- CubeIDE: Clean Project -> Build Project -> Flash.
+- No gas / no pressure.
+- Keep RCS electrical power physically inhibited.
+- Wait system_ok=1.
+- USER #1 captures closed reference.
+- USER #2 starts the single PWM75 / max80ms OPEN test.
+- Do not touch USER during pulse or settle.
+- Stop when BREAKAWAY_FOUND or NO_MOTION_80MS appears.
+- Send uart_p78_breakaway_timing.txt.

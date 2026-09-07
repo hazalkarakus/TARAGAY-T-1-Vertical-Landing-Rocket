@@ -1,0 +1,11 @@
+=== App/Modules/Control/TaragayFlightLogic/taragay_flight_logic.c ===
+=== App/Core/Tasks/app_tasks.c ===
+=== App/Services/UARTTelemetry/uart_telemetry.c ===
+App/Services/UARTTelemetry/uart_telemetry.c: In function 'UARTTelemetry_Update10Hz':
+App/Services/UARTTelemetry/uart_telemetry.c:1756:23: warning: unused variable 'header' [-Wunused-variable]
+ 1756 |     static const char header[] =
+      |                       ^~~~~~
+App/Services/UARTTelemetry/uart_telemetry.c:1753:23: warning: unused variable 'banner' [-Wunused-variable]
+ 1753 |     static const char banner[] =
+      |                       ^~~~~~
+=== App/Services/SolenoidOutput/solenoid_output.c ===

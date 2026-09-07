@@ -1,0 +1,10 @@
+P112R12R8R32 BUILD NOTE
+
+Host GCC syntax validation:
+- 45 App/*.c files PASS
+- 0 FAIL
+- changed critical files individually PASS
+- Python monitor py_compile PASS
+
+arm-none-eabi-gcc is not installed in this environment, therefore the final STM32 target build was not executed here.
+Import/build in STM32CubeIDE before flashing.

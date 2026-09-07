@@ -1,0 +1,23 @@
+P112R12R8R32 SOURCE CONTRACT VALIDATION
+
+PASS R8R32 revision enabled
+PASS Commissioning disabled
+PASS RCS/vent isolation retained
+PASS Hover L max = 0.30
+PASS Needle limit contract = 585 ADC
+PASS Build-time 585 ADC guard
+PASS Mission starts from flight_active
+PASS Real flight logic physical helper present
+PASS L->normalized mapping present
+PASS Real input gates present
+PASS Fixed matrix gate present
+PASS 50ms source freshness gate present
+PASS P111 production submit used
+PASS Physical RCS forced safe
+PASS Legacy generated control held safe
+PASS R8R32 telemetry identifies non-compute-only authority
+PASS Project name updated
+PASS Version updated
+
+RESULT: PASS
+NOTE: Host source/syntax validation only. STM32CubeIDE target build/flash and hardware dry-run remain required.

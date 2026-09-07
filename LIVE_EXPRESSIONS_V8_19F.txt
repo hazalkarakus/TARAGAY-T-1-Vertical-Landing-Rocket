@@ -1,0 +1,36 @@
+V8.19F classic AttitudeEstimator source
+=======================================
+
+attitude_initialized
+attitude_healthy
+attitude_roll_deg
+attitude_pitch_deg
+attitude_yaw_deg
+attitude_q_w
+attitude_q_x
+attitude_q_y
+attitude_q_z
+attitude_update_count
+attitude_euler_update_count
+attitude_reset_count
+attitude_numerical_error_count
+
+gnc_v816_estimator_ok
+gnc_v816_attitude_state_ok
+gnc_v816_vertical_state_ok
+gnc_v816_roll_deg
+gnc_v816_pitch_deg
+gnc_v816_yaw_deg
+gnc_v816_roll_rate_dps
+gnc_v816_pitch_rate_dps
+
+v815_eskf_roll_deg
+v815_eskf_pitch_deg
+v815_eskf_yaw_deg
+
+BEKLENEN
+--------
+- attitude_* ve gnc_v816_* acilari ayni olmali.
+- v815_eskf_* acilari yalniz karsilastirma/ESKF teshisi olarak kalir.
+- Duz ve sabit durumda attitude_healthy=1, gnc_v816_attitude_state_ok=1.
+- 0x1000F100 flags bit16 her zaman 1 olmalidir.

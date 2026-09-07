@@ -1,0 +1,11 @@
+P42 VALIDATION
+PASS: P40 scheduler order restored (0,4,2,1,3,5,6)
+PASS: task-array indices/periods/phases unchanged
+PASS: P40 IMU 12-NOP + medium-slew + quick-retry hardening preserved
+PASS: non-blocking IMU recovery preserved
+PASS: fast_fault OR system_fault actuator inhibit preserved
+PASS: session-safe V14 decoder preserved
+PASS: UART schema remains 214 unique fields
+PASS: only App/Common/app_version.h and App/Core/Scheduler/scheduler.c changed under App/Core relative to P41
+PASS: Python monitor/decoder/validator compile
+NOTE: arm-none-eabi-gcc unavailable in this environment; target CubeIDE build/link still required.

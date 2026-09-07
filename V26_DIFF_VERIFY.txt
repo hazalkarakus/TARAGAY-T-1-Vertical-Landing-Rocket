@@ -1,0 +1,7 @@
+Changed relative to working V23:
+App/app.c
+App/Core/Tasks/app_tasks.c
+App/Modules/RemoteControl/remote_control.c
+
+Removed stale build artifacts (if present):
+

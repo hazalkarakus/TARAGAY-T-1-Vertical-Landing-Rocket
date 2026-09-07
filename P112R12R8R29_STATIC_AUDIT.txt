@@ -1,0 +1,22 @@
+P112R12R8R29 STATIC AUDIT
+=========================
+
+8:#define APP_VERSION_STRING                      "8.19M-P112R12R8R29-PAIRED-AXIS-DERIVED-Z-IMU-ROCKET-FRAME-CAL-RELAY-BENCH"
+507:#define APP_P112R12R8R29_PAIRED_AXIS_DERIVED_Z_FRAME_CAL_REV          1U
+535:#define APP_R8R29_CAL_UPRIGHT_Z_AGREE_MIN                            0.970f
+536:#define APP_R8R29_CAL_OPPOSITE_SEPARATION_MIN_DEG                    18.0f
+588:#define APP_P112R12_INERT_OUTPUT_ISOLATION_MODE                     1U
+543:#define APP_R8R19_FLIGHT_LOGIC_SYNTHETIC_TEST                0U
+541:#define APP_LEGACY_VERTICAL_LANDING_RETIRED                       1U
+15:#define NV_ADC_PER_TURN                    195U
+16:#define NV_MAX_TURNS                       3.0f
+17:#define NV_MAX_TRAVEL_ADC                  (3U * NV_ADC_PER_TURN)
+12:#define P112R5_MAX_TRAVEL_ADC                  585U
+
+Solver checks:
+545:    /* Upright is validation only. Never blend it into the solved Z. */
+516:    tfl_vec3_cross(up_py, up_my, x_from_y_pair);
+409:    tfl_vec3_cross(up_px, up_mx, y_from_x_pair);
+435:    tfl_vec3_cross(up_px, up_mx, y_from_x_pair);
+528:    tfl_vec3_cross(up_px, up_mx, y_from_x_pair);
+542:    tfl_vec3_cross(x_from_y_pair, y_from_x_pair, z_from_pairs);

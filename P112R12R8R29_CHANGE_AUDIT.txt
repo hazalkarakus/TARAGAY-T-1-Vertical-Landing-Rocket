@@ -1,0 +1,11 @@
+P112R12R8R29 CHANGE AUDIT
+=========================
+App changes against R8R28:
+Files /mnt/data/P112R12R8R28_FIVE_POSE_IMU_ROCKET_FRAME_CAL_RELAY_BENCH/App/Common/app_config.h and /mnt/data/P112R12R8R29_PAIRED_AXIS_DERIVED_Z_IMU_ROCKET_FRAME_CAL_RELAY_BENCH/App/Common/app_config.h differ
+Files /mnt/data/P112R12R8R28_FIVE_POSE_IMU_ROCKET_FRAME_CAL_RELAY_BENCH/App/Common/app_version.h and /mnt/data/P112R12R8R29_PAIRED_AXIS_DERIVED_Z_IMU_ROCKET_FRAME_CAL_RELAY_BENCH/App/Common/app_version.h differ
+Files /mnt/data/P112R12R8R28_FIVE_POSE_IMU_ROCKET_FRAME_CAL_RELAY_BENCH/App/Modules/Control/TaragayFlightLogic/taragay_flight_logic.c and /mnt/data/P112R12R8R29_PAIRED_AXIS_DERIVED_Z_IMU_ROCKET_FRAME_CAL_RELAY_BENCH/App/Modules/Control/TaragayFlightLogic/taragay_flight_logic.c differ
+
+Expected changed App files only:
+- App/Common/app_config.h
+- App/Common/app_version.h
+- App/Modules/Control/TaragayFlightLogic/taragay_flight_logic.c

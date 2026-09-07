@@ -1,0 +1,34 @@
+R8R35R3R6 - NEEDLE MOTOR / SD EMI DONANIM AKSIYONLARI
+
+Testlerin gosterdigi ayrim:
+- RCS fiziksel aktivitesi SD'yi dusurmuyor.
+- Needle kontrol yazilimi tek basina SD'yi dusurmuyor.
+- Needle motor guc yolu enerjiliyken SDIO DMA start glitch goruluyor.
+
+Oncelikli donanim duzenlemeleri:
+1) Motor surucusunun besleme donusunu avionik/SD donus yolundan ayir; ortak nokta
+   gerekiyorsa tek-yildiz noktada birlestir. Motor akimi kart GND izinden gecmesin.
+2) Motor surucusunun kendi besleme girisine, surucuye fiziksel olarak yakin, uygun
+   voltaj sinifinda bulk elektrolitik + 100 nF seramik decoupling ekle.
+3) SD soketi/karti beslemesine sokete yakin 100 nF + yerel bulk decoupling ekle.
+4) Fircalı DC motor ise motor terminallerine dogrudan EMI bastirma seramigi
+   kullan; bidirectional H-kopru oldugu icin motora tek yonlu flyback diyotu
+   paralel baglama. H-koprunun kendi serbest-dolasim yolunu koru.
+5) Motor kablolarini birbirine bur, SDIO/IMU/NRF hatlarindan fiziksel olarak uzak
+   tut. Uzun paralel kosudan kacın. Gerekirse ferrit iletken bastirma ekle.
+6) Motor gucu ve avionik gucu ayni bataryadan geliyorsa ayri regulator/buck yolu
+   ve yildiz topraklama tercih et; 3.3 V/5 V avionik regulatorunu motor surucusu
+   darbelerinden koru.
+
+Deger secimi:
+Kapasitor/TVS/ferrit degerlerini motor gerilimi, surucu ve kablo uzunluguna gore
+sec. Gerilim rating'i raya marjli olmalidir. Rastgele TVS veya buyuk kondansator
+baglamak yerine once osiloskopla motor-surucu beslemesi ile 3.3 V/5 V rayini
+PE9/needle hareketi sirasinda olc.
+
+Test sirasi basincsız/inert:
+A) R3R6 flash, needle motor gucu bagli, PE9 ayir, 35 s UART monitor.
+B) SD ready/logging 1/1 kalmali; drop/overrun/write_error 0 olmali.
+C) sd_dma_start_errors_r4 artabilir; artip logger hayatta kalirsa retry calisiyor.
+D) Sonra 5-10 dk soak; motor hareketleri ve RCS tekrarli tetiklenirken ayni
+   kriterleri koru.

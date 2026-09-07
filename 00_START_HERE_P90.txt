@@ -1,0 +1,32 @@
+TARAGAY-T1 P90 - ADC BYPASS + 5% AUTO MOTOR JOG (BENCH ONLY)
+============================================================
+Firmware: 8.19M-P90-ADC-BYPASS-5PCT-AUTO-JOG
+
+WHAT IT DOES
+------------
+- Keeps P87/P83 ADC sweep telemetry running.
+- Does NOT wait for PA0/button confirmation.
+- Does NOT require feedback_valid, P83 NORMAL, or ADC 150..900.
+- Five seconds after NeedleValveIntegrationTest initializes, automatically
+  arms the bridge and commands OPEN at 13/255 PWM (~5.10%) for 100 ms.
+- Exactly one motor pulse per MCU boot/reset.
+- TIM7 1 kHz ISR is the hard 100 ms cutoff.
+- Fast service independently stops the bridge at ~110 ms if required.
+- After the pulse the bridge is disabled and the jog arm is cleared.
+
+IMPORTANT
+---------
+5.10% is PWM duty, NOT 5% valve position. This image intentionally bypasses
+ADC authorization because it is only for isolating the motor/H-bridge/mechanics
+from the known PC1 feedback problem.
+
+POWER-ON/RESET CAN CAUSE AUTOMATIC MOTOR MOTION AFTER ~5 s.
+NO GAS / NO PRESSURE. RCS POWER OFF. KEEP HANDS/TOOLS CLEAR.
+HAVE A PHYSICAL MOTOR-POWER CUTOFF AVAILABLE.
+DO NOT FLY THIS IMAGE.
+
+BUILD
+-----
+STM32CubeIDE: Clean Project -> Build Project -> Flash.
+Expected UART firmware banner:
+  8.19M-P90-ADC-BYPASS-5PCT-AUTO-JOG

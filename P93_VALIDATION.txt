@@ -1,0 +1,7 @@
+P93 change summary:
+- Based on P92.
+- Initial breakaway pulse increased from 60/255 for 20 ms to 128/255 for 40 ms.
+- Subsequent pulses remain 60/255 for 20 ms.
+- Upper-rail no-response abort remains after the first boosted pulse.
+- RCS safe, NRF/UART RX diagnostic restrictions inherited from P92.
+- BENCH ONLY, NO GAS / NO PRESSURE.

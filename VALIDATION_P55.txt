@@ -1,0 +1,64 @@
+TARAGAY-T1 P55 VALIDATION
+=========================
+Identity
+--------
+Project : TGY_V8_19M_P55_IMU_FAST_CONFIG_REPAIR
+FW      : 8.19M-P55-IMU-FAST-CONFIG-REPAIR
+UART    : $TGY66 / V66 / 303 fields + CRC16
+SD      : V14 / 384 bytes per state frame / format unchanged
+
+Automated/static validation
+---------------------------
+P55 validator: PASS
+- P54 barometer time/rate guard retained
+- P53 ground-reference/preflight behavior retained through unchanged modules
+- P52/P51 ESKF protections retained through unchanged modules
+- P49 SD FIFO protections retained through unchanged SD logger
+- first repeated-word event still quarantined
+- P44 soft SPI resync still runs before deferred retry
+- P55 WHO_AM_I + CTRL1/2/3/4 pre-repair snapshot present
+- P55 fast config repair writes CTRL3=0x44, CTRL4|=0x04, CTRL1=0x8C, CTRL2=0x88
+- post-write register verification present
+- verify success returns to deferred triplet retry without sensor reset
+- WHO_AM_I/verify failure escalates to existing bounded full recovery
+- full reset + 40 ms settle safety path retained
+- UART C/header/Python contract: 303/303 PASS
+- synthetic $TGY66 CRC decode: PASS
+
+Python syntax
+-------------
+monitor_uart_p55.py: PASS
+tools/monitor_uart_p55.py: PASS
+tools/validate_p55.py: PASS
+
+ARM-target C syntax checks (clang -target arm-none-eabi)
+--------------------------------------------------------
+App/Modules/Sensors/IMU/imu.c: PASS
+App/Services/UARTTelemetry/uart_telemetry.c: PASS
+App/Modules/Sensors/Barometer/barometer.c: PASS
+
+P54 unchanged-module byte comparison
+------------------------------------
+App/Services/SDLogger/sd_logger.c: UNCHANGED
+App/Modules/Sensors/Barometer/barometer.c: UNCHANGED
+App/Common/app_config.h: UNCHANGED
+App/Modules/Estimation/FullStateESKF/full_state_eskf.c: UNCHANGED
+App/Core/Scheduler/scheduler.c: UNCHANGED
+
+Important limitation
+--------------------
+The assistant environment does not contain the STM32CubeIDE GNU ARM linker/build
+system, so a final CubeIDE clean build + link on the target project is still
+required before flashing.
+
+P55 bench acceptance intent
+---------------------------
+1. Actuator/pneumatic power OFF; PE9 CLOSED.
+2. Run at least 10 minutes.
+3. If repeated patterns occur, inspect pre-repair regs and fastCfg counters.
+4. fast_cfg_success should rise when config drift is detected and repaired.
+5. fast_cfg_failures should remain 0 in the normal fault class.
+6. imu_recovery_count should fall sharply versus P54.
+7. imu_recovery_failures should remain 0.
+8. miss_imu should remain as close to 0 as practical.
+9. fast_cfg_max_us should remain in the intended few-ms envelope.

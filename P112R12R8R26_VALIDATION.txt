@@ -1,0 +1,32 @@
+P112R12R8R26 VALIDATION
+========================
+
+Purpose:
+- Bench-calibrate fixed IMU/SensorManager body frame -> physical rocket frame.
+- Use corrected rocket-frame tilt and gyro-X/Y for RCS V7.13.4.
+- Keep needle/motor physically revoked.
+- Permit RCS relay outputs only after calibration and existing bench safety gates.
+
+Host calibration regression:
+after upright phase=2 valid=0 upright=200
+after tilt phase=4 valid=1 fault=0 tilt=16.00 err=0.00000
+R= 0.95398 -0.29546 0.05132 / 0.29166 0.95393 0.07042 / -0.06976 -0.05221 0.99620
+roll test corrected A/B=10.00/-0.00 events=0/57/0/99
+pitch test corrected A/B=-0.00/-11.00
+PASS R8R26 mount calibration + rocket-frame tilt transform
+
+Static syntax checks:
+- taragay_flight_logic.c PASS
+- app_tasks.c PASS
+- uart_telemetry.c PASS (host-only pre-existing unused banner/header warnings)
+- solenoid_output.c PASS
+- CMSIS host pointer-width warnings are expected on x86 host.
+
+Frozen-core audit vs R8R25:
+- FullStateESKF full_state_eskf.c byte-identical PASS
+- SensorManager sensor_manager.c byte-identical PASS
+- scheduler.c byte-identical PASS
+- SD logger core byte-identical PASS
+
+No ARM/CubeIDE target compiler is installed in assistant environment.
+Required user-side target check: Clean -> Build -> Flash.

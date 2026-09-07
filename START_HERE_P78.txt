@@ -1,0 +1,9 @@
+P78 START HERE
+1) GAZ/BASINC YOK. RCS ELEKTRIK GUCUNU FIZIKSEL OLARAK INHIBIT ET.
+2) P78 CubeIDE projesini Clean -> Build -> Flash.
+3) python -u monitor_uart_p78_breakaway_timing.py --port COM21 --log uart_p78_breakaway_timing.txt
+4) SYS=1/0 bekle.
+5) USER #1 = kapali referans (motor hareket etmez).
+6) READY/IDLE gorunce USER #2 = PWM75, max80ms tek OPEN testi.
+7) PULSE/SETTLE boyunca butona dokunma.
+8) BREAKAWAY_FOUND veya NO_MOTION_80MS gorunce DUR ve logu gonder.

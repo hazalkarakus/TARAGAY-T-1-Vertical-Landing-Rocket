@@ -1,0 +1,16 @@
+P112R12R8R22 VALIDATION
+- Synthetic input disabled: PASS
+- Real Full-State ESKF input path enabled: PASS
+- Pitch/yaw source unified to Full-State ESKF: PASS
+- Direct filtered IMU gyro rates retained for RCS: PASS
+- ESKF age gate 20 ms / IMU age gate 10 ms: IMPLEMENTED
+- Vertical validity/covariance/origin/output-inhibit gates: IMPLEMENTED
+- Horizontal position validity exposed, not used as flight qualification: PASS
+- Compute-only RCS applied mask remains zero by construction: PASS
+- Legacy vertical/landing owners remain retired: PASS
+- 3-turn / 585 ADC needle travel limit retained: PASS
+- Host real-input test: PASS
+- Host stale-ESKF safe-hold test: PASS
+- UART telemetry syntax-only host compile: PASS
+- Python monitor py_compile: PASS
+- ARM/CubeIDE target compiler not available in assistant environment; user must Clean/Build/Flash in CubeIDE.

@@ -1,0 +1,5 @@
+P81 IS DO-NOT-FLY BENCH FIRMWARE.
+Needle motor output is compile-time locked OFF.
+RCS is forced safe.
+Purpose: validate dual-ADC robust position-feedback filtering only.
+Do not enable pneumatic pressure for this test.

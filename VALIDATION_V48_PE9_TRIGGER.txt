@@ -1,0 +1,31 @@
+V48 PE9 PREFLIGHT / SEPARATION TRIGGER VALIDATION
+================================================
+
+PIN CONFLICT SEARCH
+- PE9 application use before integration: NONE
+- PC9 SDIO D1 use is unrelated and unchanged.
+
+POLARITY
+- PE9 internal pull-up
+- Connected harness: LOW / short to GND
+- Separated harness: HIGH / open
+
+SAFETY RULES
+- Must observe connected LOW for 100 ms before arming: PASS
+- Boot with PE9 already open cannot auto-trigger: PASS
+- Minimum preflight calibration time 3000 ms: PASS
+- Sensor/attitude/ESKF/LIDAR/needle readiness gate: PASS
+- HIGH debounce 10 ms: PASS
+- Short HIGH glitch rejected: PASS
+- Early separation before readiness latches fault: PASS
+- Separation event is one-shot and flight clock starts at T=0: PASS
+- RCS forced safe before flight_active: PASS
+- Generated controller held safe before flight_active: PASS
+
+HOST TEST RESULT
+state=3 flight=1 t0=3020 flight_ms=50
+
+BUILD CHECKS
+- Host C syntax for modified integration units: PASS
+- CubeIDE make dependency discovery: PASS
+- ARM link/on-target electrical test: NOT RUN (toolchain/hardware unavailable)

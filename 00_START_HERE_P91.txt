@@ -1,0 +1,30 @@
+P91 - 400 ADC CLOSED-LOOP BENCH JOG (DO NOT FLY)
+
+NO GAS / NO PRESSURE. RCS POWER OFF.
+Hands/tools clear of motor, gearbox, coupling and valve shaft.
+Keep a physical motor-power cutoff available.
+
+WHAT IT DOES
+- Waits 5 s after diagnostic service init.
+- Requires P83 feedback VALID + NORMAL.
+- Requires starting filtered ADC 450..900.
+- OPEN direction target = start ADC - 400 ADC.
+- Drives in 20 ms chunks at PWM 60/255 (~23.5%).
+- Waits 30 ms between chunks and re-checks feedback.
+- Stops within +5 ADC of target.
+
+HARD STOPS
+- feedback invalid / not NORMAL
+- >20 ADC wrong-direction movement
+- 400 ms cumulative motor-on time
+- 2500 ms total sequence time
+- one sequence maximum per reset
+
+IMPORTANT
+If ADC is stuck at 1023, P91 WILL NOT MOVE. That is intentional. Exact
+400-ADC motion is impossible to control safely until feedback is measurable.
+
+UART
+Use monitor_uart_p87_adc_sweep.py or monitor_uart_p91_400adc.py.
+Recommended:
+  python -u monitor_uart_p91_400adc.py --port COM21 --log uart_p91_400adc.txt

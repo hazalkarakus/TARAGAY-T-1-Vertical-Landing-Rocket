@@ -1,0 +1,2 @@
+V55 validation: PASS (149 UART fields)
+P33 validation: PASS (fast SW-SPI + forced SDIO 1-bit + 149 UART fields)

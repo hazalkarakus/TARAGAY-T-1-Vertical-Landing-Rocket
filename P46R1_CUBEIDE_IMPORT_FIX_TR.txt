@@ -1,0 +1,40 @@
+P46R1 - CubeIDE project-name/build-path fix
+==============================================
+
+NEDEN BU REVIZYON VAR?
+P46 kaynak kodunda UART telemetry gercekten $TGY57 olarak ayarliydi.
+Ancak P46 ZIP icindeki Eclipse/CubeIDE metadata'si eski proje adini tasiyordu:
+
+    TGY_V8_19M_V55_FLIGHT_INTERLOCK
+
+Bu nedenle ayni workspace'te eski proje ile isim cakismasi olabiliyor ve
+CubeIDE eski Debug/ELF hedefini build/flash edebiliyordu. Bunun belirtisi:
+P46 karta atildigi sanilirken P45 monitorunun $TGY56 verisini okumaya devam etmesi.
+
+P46R1 DUZELTMELERI
+- .project internal project name:
+    TGY_V8_19M_P46_COV_ROOTCAUSE_STATE_PRESERVE
+- .cproject build path yeni proje adina tasindi.
+- Eski Debug/ generated makefile klasoru ZIP'ten silindi.
+- Launch configuration yeni proje/ELF adina guncellendi.
+- Kaynak UART frame etiketi $TGY57 olarak korundu.
+
+KULLANIM
+1. CubeIDE'yi kapat.
+2. Bu ZIP'i YENI ve BOS bir klasore cikart.
+3. CubeIDE -> File -> Import -> Existing Projects into Workspace.
+4. Bu P46R1 klasorunu sec.
+5. Project -> Clean...
+6. Build Project.
+7. Console'da build edilen proje adinin:
+       TGY_V8_19M_P46_COV_ROOTCAUSE_STATE_PRESERVE
+   oldugunu dogrula.
+8. Debug klasorunde olusacak ELF:
+       Debug/TGY_V8_19M_P46_COV_ROOTCAUSE_STATE_PRESERVE.elf
+9. Bu ELF'i karta flash et.
+10. Reset at ve P46 monitoru calistir.
+
+BEKLENEN UART
+    $TGY57
+
+Eger monitor hala $TGY56 gorurse kartta P46R1 binary'si yoktur.

@@ -1,0 +1,62 @@
+TARAGAY T1 NRF RX-ONLY / GROUND 100HZ CHANGE AUDIT
+================================================
+
+app_config.h diff:
+--- /mnt/data/rocket_src/TARAGAY_T1_R8R35R3R10R4R3_REL3M_CEIL4M_2TURN_FLIGHT/App/Common/app_config.h	2026-09-05 14:51:01.000000000 +0000
++++ /mnt/data/rocket_txonly100/App/Common/app_config.h	2026-09-05 15:24:23.032631760 +0000
+@@ -121,19 +121,17 @@
+ 
+ #define APP_REMOTE_POLL_PERIOD_MS               5UL
+ #define APP_REMOTE_LINK_TIMEOUT_MS              500UL
+-/* R8R35R3R10R4 flight RF policy.
+- * The final R3R10R3 test showed that completely suppressing rocket downlink in
+- * flight starved the existing ground-station TDD state machine: with switches
+- * OFF only three fresh commands were accepted in ~15 s, while STOP emergency
+- * retransmission still arrived. Keep command reception dominant, but answer
+- * every accepted command with exactly ONE proven 32-byte FAST frame after the
+- * existing 4.5 ms TDD delay. No duplicate and no detail-page rotation in flight.
+- * This gives the ground station the response it expects so it can immediately
+- * return to its 20 Hz command heartbeat, while the rocket spends only one short
+- * bounded TX slot per accepted command and returns to 4-byte PRX. */
+-#define APP_NRF_FLIGHT_COMMAND_PRIORITY_RX_ONLY        0U
+-#define APP_NRF_FLIGHT_MINIMAL_FAST_TDD                1U
+-#define APP_NRF_FLIGHT_RX_REARM_PERIOD_MS           1000UL
++/* TX-ONLY GROUND LINK / RX-ONLY ROCKET POLICY.
++ * RF direction is intentionally ONE WAY: ground station -> rocket only.
++ * The rocket never schedules nRF telemetry/downlink packets in any phase.
++ * Remote command reception stays at 5 ms polling (200 Hz), while the ground
++ * transmitter may send its 4-byte command heartbeat at 100 Hz.
++ * Hardware Auto-ACK remains disabled, so the rocket emits no RF acknowledgement.
++ */
++#define APP_NRF_ROCKET_DOWNLINK_ENABLED                 0U
++#define APP_NRF_FLIGHT_COMMAND_PRIORITY_RX_ONLY         1U
++#define APP_NRF_FLIGHT_MINIMAL_FAST_TDD                 0U
++#define APP_NRF_FLIGHT_RX_REARM_PERIOD_MS            1000UL
+ /* Reject brief 0/1 command chatter without weakening RF link timeout. */
+ #define APP_REMOTE_COMMAND_DEGLITCH_MS           40UL
+ #define APP_REMOTE_LED_BLINK_PERIOD_MS          250UL
+
+app.c diff:
+--- /mnt/data/rocket_src/TARAGAY_T1_R8R35R3R10R4R3_REL3M_CEIL4M_2TURN_FLIGHT/App/app.c	2026-09-05 14:50:59.000000000 +0000
++++ /mnt/data/rocket_txonly100/App/app.c	2026-09-05 15:24:23.032827300 +0000
+@@ -835,8 +835,10 @@
+      */
+ #if (APP_NRF24_ENABLED != 0U)
+     RemoteControl_Init();
++#if (APP_NRF_ROCKET_DOWNLINK_ENABLED != 0U)
+     NRFTelemetry_Init();
+ #endif
++#endif
+ 
+     NeedleValveController_Init();
+     PreflightTrigger_Init();
+@@ -1099,7 +1101,9 @@
+         t0 = micros();
+ #if (APP_NRF24_ENABLED != 0U)
+         RemoteControl_Update();
++#if (APP_NRF_ROCKET_DOWNLINK_ENABLED != 0U)
+         NRFTelemetry_Service();
++#endif
+         V30_UpdateRemoteSafety();
+         ServoOutput_Update(
+             RemoteControl_GetCommand(),

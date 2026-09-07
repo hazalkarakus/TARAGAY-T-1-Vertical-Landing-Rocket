@@ -1,0 +1,37 @@
+P112R12R8R29 VALIDATION
+========================
+
+Purpose:
+- Remove R8R28 final-matrix dependence on manually captured upright Z.
+- Solve +X/+Y from the two opposite-pose planes and derive +Z = X x Y.
+- Use upright capture only for sign/quality validation.
+
+Host regression:
+- Deliberately wrong upright capture: +4 deg roll / -3 deg pitch.
+- +X=14 deg, -X=19 deg, +Y=17 deg, -Y=12 deg.
+- Same-sign -X and -Y attempts rejected.
+- Final phase 10, valid=1, fault=0.
+- X opposition 0.9726, Y opposition 1.0000.
+- XY angle 90.00 deg, axis agreement 1.0000.
+- Upright-vs-derived-Z agreement 0.9962.
+- determinant 1.00000, orthogonality error 0.000000.
+- recovered synthetic mount matrix max element error 0.00000 despite bad upright capture.
+- corrected +10 deg lateral-A and -11 deg lateral-B attitude tests PASS.
+
+Key result:
+R8R29 solved matrix is mathematically independent of the manual upright vector; upright is only a validation gate.
+
+Safety/core:
+- FullStateESKF, SensorManager, scheduler, SD logger, nRF, remote-control and needle-control frozen core files remain byte-identical to R8R28.
+- Existing single flight authority, E-STOP behavior, 3-turn / 585 ADC needle limit and inert output isolation retained.
+- R8R29 compile guard enabled.
+
+Host syntax:
+- taragay_flight_logic.c PASS
+- app_tasks.c PASS
+- solenoid_output.c PASS
+- uart_telemetry.c PASS
+- only expected x86 CMSIS pointer-width warnings and pre-existing UART unused banner/header warnings.
+
+No ARM/CubeIDE target compiler is available in assistant environment.
+Required user-side target check: Clean -> Build -> Flash.

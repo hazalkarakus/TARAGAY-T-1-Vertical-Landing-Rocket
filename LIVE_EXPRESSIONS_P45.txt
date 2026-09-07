@@ -1,0 +1,54 @@
+P45 Live Expressions — önerilen kısa liste
+
+ESKF / public guard
+-------------------
+full_eskf_reset_reason
+full_eskf_reset_count
+full_eskf_numerical_error_count
+full_eskf_public_output_reject_count
+full_eskf_public_z_jump_reject_count
+full_eskf_public_vz_jump_reject_count
+full_eskf_covariance_integrity_ok
+full_eskf_covariance_integrity_check_count
+full_eskf_covariance_fault_count
+full_eskf_covariance_reinit_count
+full_eskf_covariance_diag_min
+full_eskf_covariance_diag_max
+full_eskf_covariance_symmetry_error_max
+full_eskf_position_z_m
+full_eskf_velocity_z_mps
+full_eskf_public_output_count
+full_eskf_last_public_output_timestamp_us
+
+Reset reason
+------------
+0 NONE
+1 MANUAL
+2 STATE_NUMERICAL
+3 COV_NONFINITE
+4 COV_DIAGONAL
+5 COV_ASYMMETRY
+6 PUBLIC_Z_JUMP
+7 PUBLIC_VZ_JUMP
+8 PUBLIC_Z_VZ_JUMP
+
+IMU
+---
+imu_pattern_error_count
+imu_pattern_retry_count
+imu_pattern_retry_success_count
+imu_pattern_recovery_escalation_count
+imu_recovery_state
+imu_recovery_step_debug
+imu_recovery_count
+imu_recovery_failure_count
+imu_sample_valid
+
+Scheduler / SD
+--------------
+scheduler_fast_tier_fault
+scheduler_realign_count
+sd_logger_logging
+sd_logger_dropped_frame_count
+sd_logger_ring_overrun_count
+sd_logger_async_timeout_count

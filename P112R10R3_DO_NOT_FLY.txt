@@ -1,0 +1,5 @@
+P112R10R3 IS BENCH-ONLY. DO NOT FLY.
+Use only on a fully depressurized, inert actuator bench.
+Physically isolate gas/propulsion, RCS and vent loads.
+This build intentionally injects a deterministic GNC stimulus.
+The P111 same-target settled-hold change is not production-qualified.

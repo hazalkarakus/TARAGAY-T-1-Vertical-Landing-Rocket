@@ -1,0 +1,21 @@
+P47 LIVE EXPRESSIONS
+====================
+full_eskf_gravity_joseph_update_count
+full_eskf_gravity_joseph_fault_count
+full_eskf_covariance_fault_count
+full_eskf_covariance_fault_stage
+full_eskf_covariance_fault_state_index
+full_eskf_covariance_fault_raw_value
+full_eskf_covariance_state_preserving_recovery_count
+sd_logger_ring_count
+sd_logger_ring_high_watermark
+sd_logger_ring_overrun_count
+sd_logger_dropped_frame_count
+sd_logger_backpressure_level
+sd_logger_backpressure_entry_count
+sd_logger_backpressure_critical_entry_count
+sd_logger_guard_pending
+sd_logger_guard_deferred_count
+sd_logger_async_card_busy_poll_count
+sd_logger_max_write_duration_us
+sd_logger_max_guard_write_duration_us

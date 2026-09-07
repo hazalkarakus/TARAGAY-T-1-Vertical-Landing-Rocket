@@ -1,0 +1,8 @@
+PASS - App/Common/app_config.h: #define APP_R8R32_NEEDLE_MAX_TRAVEL_ADC                              390U
+PASS - App/Services/NeedleValveAutonomousControl/needle_valve_autonomous_control.c: #define P112R5_MAX_TRAVEL_ADC                  390U
+PASS - App/Modules/Control/NeedleValve/needle_valve_controller.c: #define NV_MAX_TRAVEL_ADC                  (2U * NV_ADC_PER_TURN)
+PASS - no legacy 3-turn runtime constant in App/Common/app_config.h
+PASS - no legacy 3-turn runtime constant in App/Services/NeedleValveAutonomousControl/needle_valve_autonomous_control.c
+PASS - no legacy 3-turn runtime constant in App/Modules/Control/NeedleValve/needle_valve_controller.c
+PASS - 390 ADC / 195 ADC-per-turn = 2.000 turns
+RESULT: PASS

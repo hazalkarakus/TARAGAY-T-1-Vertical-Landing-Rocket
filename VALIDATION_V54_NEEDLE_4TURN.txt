@@ -1,0 +1,45 @@
+V54 NEEDLE 4 TURN + UART FLIGHT DIAGNOSTICS VALIDATION
+======================================================
+
+Needle travel/speed configuration inspection:
+  PASS - Position controller remains 1000 Hz (1 ms).
+  PASS - Software travel is 4.0 turns / 780 ADC / 195 ADC per turn.
+  PASS - Minimum target is 232 ADC for the 1012 ADC safe ZERO boundary.
+  PASS - Opening slew is +0.9625/s: 0.00 -> 1.00 in about 1039 ms.
+  PASS - Closing slew is -0.8250/s: 1.00 -> 0.00 in about 1212 ms.
+  PASS - V53 physical targets remain 3.85 turns/s open and 3.30 turns/s close.
+  PASS - PD gains, PWM limits, active brake, direction dead-time, homing,
+         ADC validity and stall protection are unchanged from V53.
+
+Configuration inspection:
+  PASS - USART2 TX is PA2 / AF7.
+  PASS - USART2 RX is PA3 / AF7.
+  PASS - 115200 baud, 8N1, no hardware flow control.
+  PASS - TX uses DMA1 Stream6 / Channel4 with transfer-complete/error IRQ.
+  PASS - UART RX actuator commands are compile-time disabled.
+
+Integration inspection:
+  PASS - App_Init initializes one V54 telemetry owner.
+  PASS - App_Run services the rate-limited UART path without delay/polling TX.
+  PASS - Legacy V40 multiline dump is not scheduled into the CSV stream.
+  PASS - V50 Lidar/barometer source mask and ESKF accept/reject counters are sent.
+  PASS - PE9, RCS signed-PD, main calculation, needle, NRF/STOP and SD state are sent.
+  PASS - Sequence counter and CRC-16/CCITT-FALSE protect receiver diagnostics.
+  PASS - Generated main-motor physical output remains disabled.
+  PASS - V49 physical RCS and NRF paths remain enabled.
+
+Host verification:
+  PASS - 62 application/Core/FATFS/USB C files pass host syntax checking.
+  PASS - V54 UART formatter retains the 78-field CRC-protected frame.
+  PASS - V54 worst integer-width frame remains below the 1280 B buffer.
+  PASS - 446 B at 10 Hz is below 115200-8N1 line capacity.
+  PASS - monitor_uart_v54.py uses the $TGY54 prefix and CRC decoder.
+  PASS - V49 signed-PD RCS host regression test.
+  PASS - V50 vertical sensor policy host regression test.
+  PASS - V50 generated vertical fallback host regression test.
+  PASS - .project, .cproject and V54 launch XML parse successfully.
+
+Target build note:
+  The execution environment does not contain arm-none-eabi-gcc. Import this
+  project into STM32CubeIDE, run Clean Project, then Build Project to generate
+  the matching V54 ELF/HEX. Do not flash an older V53/V52/V51/V50/V49 HEX for this tree.

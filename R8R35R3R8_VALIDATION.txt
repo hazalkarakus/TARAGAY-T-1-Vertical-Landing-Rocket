@@ -1,0 +1,41 @@
+R8R35R3R8 MOTOR-AWARE SD 30HZ VALIDATION
+
+Purpose: reduce SD logging to ~30 Hz and avoid new SDIO command launches during powered needle activity, while preserving control timing.
+
+Structural checks:
+- TIM5 capture period = 33332 at 1 MHz tick (~30.0003 Hz).
+- APP_SDLOGGER_SAMPLE_PERIOD_US = 33333.
+- SDIO ClockDiv = 30 (~1.5 MHz from 48 MHz source).
+- New write launches held 2.5 s at flight entry, during P110/PWM activity, and 500 ms after motor activity.
+- RAM capture continues during hold; no HAL_Delay/blocking wait added.
+- Existing R3R6 bounded start retry + R3R7 low-level SDIO diagnostics retained.
+- Existing no-runtime-HAL_Delay guard retained.
+- TGY73 field count unchanged (325); sd_suppressed_total now also shows motor-aware launch suppressions.
+
+Host checks:
+- All 46 App C files host gcc -fsyntax-only: PASS.
+- Modified tim.c/sdio.c syntax-only: PASS (CMSIS host-size warnings only).
+- Modified app_tasks.c syntax-only: PASS.
+- Modified sdio.c syntax-only: PASS.
+- R3R8 monitor py_compile: PASS.
+
+Frozen control source comparison vs R3R7R1R1:
+- App/Services/NeedleValveAutonomousControl/needle_valve_autonomous_control.c: SAME SHA256 de7cdbdb668d9bb9e9f76b9710de8fd39ad6d6b8187ff7b78ea39a7b7c57c3ab
+- App/Modules/Control/TaragayFlightLogic/taragay_flight_logic.c: SAME SHA256 2bded646fbd07c16bebed9769c87b0a7011fcfd917b3d6a4363a45428d6103fc
+- App/Services/SolenoidOutput/solenoid_output.c: SAME SHA256 cb580faa642181fc4dee3253684b8b7210108f665bf786e7d650f38779f03aa7
+- App/Modules/Estimation/FullStateESKF/full_state_eskf.c: SAME SHA256 0586a0ffa7544b44303357a2f61e3570cc0282a0a0569ae6fb0cf2ad5f47e43e
+- App/Core/Scheduler/scheduler.c: SAME SHA256 ab4f73a091ada9363c3fbe2690fd17d2ac5bb0866e7fec862e172093c641fe53
+- App/Modules/Control/NeedleValve/needle_valve_controller.c: SAME SHA256 11d17fa548233757016b92b36ef78de2d502335e50ef5dc2915ab130b4f8aa31
+
+Intentional changed source files:
+- App/Services/SDLogger/sd_logger.c
+- App/Common/app_config.h
+- Core/Src/tim.c
+- Core/Src/sdio.c
+- App/Core/Tasks/app_tasks.c (SD health-rate thresholds/accounting only)
+- App/Services/UARTTelemetry/uart_telemetry.c (banner only)
+- App/Common/app_version.h
+- .project
+
+NOTE: ARM/CubeIDE target build was not run here and is NOT claimed PASS.
+Hardware validation required: pressureless/inert, powered needle path connected, 35 s run.

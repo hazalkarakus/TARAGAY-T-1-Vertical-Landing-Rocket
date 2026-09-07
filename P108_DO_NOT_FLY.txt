@@ -1,0 +1,27 @@
+P108 PRE-BRAKE + COAST CHARACTERIZATION - DO NOT FLY
+
+BENCH ONLY. NO GAS. NO PRESSURE.
+
+Purpose:
+P107 showed loaded motion with PWM144 boost + PWM128 sustain, but a 50 ADC
+command overshot. P108 keeps the same power and characterizes how far the
+mechanism continues moving after an intentionally early active-brake command.
+
+Automatic sequence:
+- start gate: 850..1023 ADC
+- target = start - 50 ADC
+- pre-brake threshold = target + 20 = start - 30 ADC
+- 20 ms PWM144 OPEN boost
+- immediate PWM128 sustain, maximum 60 ms
+- active dynamic brake when pre-brake threshold is reached
+- record filtered ADC at brake entry, +100 ms, +250 ms, +500 ms
+- then bridge completely OFF
+- NO automatic CLOSE/return
+
+Hard safety limits:
+- PWM never exceeds 144/255 (~56.5%)
+- total powered OPEN time <= 80 ms
+- hard overshoot / wrong direction / feedback loss aborts
+- keep a physical motor-power cutoff immediately available
+- if motor hard-stalls, coupler twists/slips, alignment binds or a hard stop is
+  contacted, cut motor power immediately and do not repeat

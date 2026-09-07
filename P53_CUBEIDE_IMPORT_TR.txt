@@ -1,0 +1,21 @@
+P53 CubeIDE import / build
+
+Project:
+TGY_V8_19M_P53_BARO_REF_TRACK_IMU_PATTERN_DIAG
+
+Expected ELF:
+Debug/TGY_V8_19M_P53_BARO_REF_TRACK_IMU_PATTERN_DIAG.elf
+
+UART:
+$TGY64
+TGY UART FLIGHT DIAGNOSTICS V64
+FW 8.19M-P53-BARO-REF-TRACK-IMU-PATTERN-DIAG
+
+Adimlar:
+1. ZIP'i yeni/bos bir klasore cikar.
+2. CubeIDE > File > Import > Existing Projects into Workspace.
+3. Proje klasorunu sec.
+4. Project > Clean.
+5. Build Project.
+6. 0 error ve linker/RAM overflow olmadigini kontrol et.
+7. Yeni P53 ELF'i flash et.

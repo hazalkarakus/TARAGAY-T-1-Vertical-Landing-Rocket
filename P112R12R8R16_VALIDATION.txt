@@ -1,0 +1,17 @@
+P112R12R8R16 E-STOP EMERGENCY-CLOSE STATIC/HOST VALIDATION
+=========================================================
+PASS version/project identity updated to R8R16
+PASS R8R15 physical-log root cause reproduced: prior LOW_LEVEL/STALL blocked safe-close
+PASS already-CLOSED + prior transient fault -> COMPLETE, motor safe
+PASS OPEN + prior LOW_LEVEL/STALL -> exactly one emergency fault override -> CLOSED request
+PASS repeated/non-overridable fault path remains bounded and de-energized
+PASS feedback invalid remains non-bypassable
+PASS reference invalid remains non-bypassable
+PASS P112R5 autonomous supervisor regression
+PASS P112R12R1 same-target guard regression
+PASS P112R12R6R2 fault-cause regression
+PASS Python monitor py_compile
+
+REAL TARGET NOTE:
+CubeIDE Clean Project -> Build Project -> Flash is still required.
+This remains an INERT/DEPRESSURIZED bench validation build.

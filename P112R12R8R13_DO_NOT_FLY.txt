@@ -1,0 +1,3 @@
+P112R12R8R13 P73 FAST/REDUNDANT NRF COEXISTENCE — INERT BENCH QUALIFICATION ONLY.
+Gas/pressure and actuator energy path must remain safe/inhibited during first RF test.
+Do not treat this build as flight-qualified.

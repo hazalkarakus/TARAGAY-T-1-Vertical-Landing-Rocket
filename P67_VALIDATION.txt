@@ -1,0 +1,10 @@
+P67 validation
+Rocket nrf_telemetry identical to P64: PASS
+Rocket remote_control identical to P64: PASS
+Rocket app.c identical to P64: PASS
+Rocket app_tasks.c identical to P64: PASS
+Rocket NRF driver identical to P64: PASS
+Ground heartbeat 50 ms: PASS
+Ground RX window 30 ms: PASS
+P67 version: PASS
+Ground project name: PASS

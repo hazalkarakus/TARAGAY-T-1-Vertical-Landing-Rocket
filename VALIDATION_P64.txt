@@ -1,0 +1,25 @@
+P64 critical P63 baseline audit
+PASS App/Modules/RemoteControl/remote_control.c
+PASS App/Modules/RemoteControl/remote_control.h
+PASS App/Services/NRFTelemetry/nrf_telemetry.c
+PASS App/Services/NRFTelemetry/nrf_telemetry.h
+PASS App/Modules/Sensors/IMU/imu.c
+PASS App/Modules/Sensors/SensorManager/sensor_manager.c
+PASS App/Modules/Sensors/Barometer/barometer.c
+PASS App/Modules/Sensors/Lidar/Lidar.c
+PASS App/Modules/Estimation/FullStateESKF/full_state_eskf.c
+PASS App/Modules/Estimation/AttitudeEstimator/attitude_estimator.c
+PASS App/Services/SDLogger/sd_logger.c
+PASS App/Modules/Control/NeedleValve/needle_valve_controller.c
+PASS App/Services/SolenoidOutput/solenoid_output.c
+PASS App/app.c
+PASS App/Core/Tasks/app_tasks.c
+
+PASS rocket EN_AA=0
+PASS rocket SETUP_RETR=0
+PASS rocket verify EN_AA=0
+PASS ground EN_AA=0
+PASS ground SETUP_RETR=0
+PASS ground FEATURE=0
+PASS ground DYNPD=0
+PASS ground TDD opens after no-ACK TX_DS

@@ -1,0 +1,27 @@
+TARAGAY-T1 R8R35R3R5 - P71 KNOWN-GOOD SD RESTORE
+
+Purpose:
+Restore the SD/FatFs/SDIO path proven on P71 instead of adding more HAL-side admission patches.
+
+Restored verbatim from P71:
+- App/Services/SDLogger/sd_logger.c/.h
+- FATFS/App/fatfs.c/.h
+- FATFS/Target/sd_diskio.c/.h
+- FATFS/Target/bsp_driver_sd.c/.h
+- FATFS/Target/ffconf.h
+- Core/Src/sdio.c + Core/Inc/sdio.h
+
+Restored SD-specific P71 config:
+- APP_P34_SD_MIN_SLACK_US = 220 us
+- normal drain 4 frames / 320 us
+- high drain 8 frames / 520 us
+- critical drain 12 frames / 760 us
+
+Preserved from current full-system firmware:
+- R3R3 main-loop phase-retry behavior (failed slack admission does not advance last_sd_service_us)
+- SD service before nRF/remote, needed by current heavier full-system load
+- 200 Hz capture, 9216-byte buffers, 128-frame ring, 4 DMA buffers
+- all ESKF/fixed matrix/Hover/RCS/needle/PE9/nRF safety logic
+
+R3R4 host/context gate removed by restoring the P71 SDLogger source.
+Do not use pressure for this software test.

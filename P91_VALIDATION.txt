@@ -1,0 +1,16 @@
+P91 VALIDATION
+- Based on P90 diagnostic project.
+- P83/P87 robust ADC diagnostics retained.
+- P91 target: OPEN relative movement = 400 ADC counts.
+- Start gate: feedback valid + NORMAL + filtered ADC 450..900.
+- Chunked motor drive: PWM 60/255 (~23.5%), 20 ms ON, 30 ms settle.
+- Stop tolerance: target +5 ADC.
+- Wrong-direction stop: >20 ADC above start.
+- Cumulative motor-on timeout: 400 ms.
+- Total sequence timeout: 2500 ms.
+- RCS safe, NRF off, UART RX off.
+- Cortex-M4 clang -Wall -Wextra -Werror syntax check passed for:
+  * needle_valve_integration_test.c
+  * needle_valve_hw.c
+- Python monitor py_compile passed.
+- Final STM32CubeIDE Clean + Build + Link is still required before flash.

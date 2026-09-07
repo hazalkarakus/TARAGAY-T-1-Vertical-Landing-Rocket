@@ -1,0 +1,12 @@
+P112R8 PRODUCTION AUTONOMOUS INTEGRATION
+
+NOT FLIGHT QUALIFIED YET.
+
+This build restores production GNC ownership after P112R7 actuator bench validation.
+Before flight use, complete at minimum:
+- STM32CubeIDE target build and flash verification
+- dry preflight + PE9 transition test
+- HIL non-zero GNC valve-command test
+- authorization-loss / feedback-fault / command-watchdog tests
+- SD logging + timing verification
+- full system integration with physical RCS/vent outputs managed safely

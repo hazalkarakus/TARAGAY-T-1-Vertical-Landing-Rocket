@@ -1,0 +1,112 @@
+TARAGAY-T1 P83 BOOT ACQUISITION + SAFE RE-ACQUISITION VALIDATION
+=================================================================
+Firmware: 8.19M-P83-BOOT-SAFE-REACQUIRE-FEEDBACK
+Purpose : Fix P82 bad-start-anchor / non-recovering quarantine failure
+
+1) ROOT CAUSE ADDRESSED
+-----------------------
+P82 could initialize filtered position from an early transient. If the real PC1
+signal later settled far from that bad anchor, quarantine recovery required the
+median to return within +/-25 ADC of the bad last-good and could stay invalid
+forever.
+
+P83 removes direct startup initialization. The first anchor requires a compact
+median cluster for ~200 ms. Quarantine recovery also tracks a stable cluster
+independent of last-good and, in this motor-locked diagnostic image only, can
+re-anchor after ~500 ms of stability.
+
+2) SAFETY
+---------
+PASS - APP_NEEDLE_ADC_DIAGNOSTIC_MODE remains 1.
+PASS - NeedleValveHW_SetEnabled() forces enable=0 in diagnostic mode.
+PASS - DriveOpen()/DriveClose() remain no-ops in diagnostic mode.
+PASS - Integration service continuously Stop()+SetEnabled(0).
+PASS - RCS SolenoidOutput_ForceSafe() remains continuous.
+PASS - PA0 creates no motion command in this service.
+PASS - NRF remains disabled; UART RX commands remain disabled.
+IMPORTANT - Far re-acquisition is bench-only because motor output is locked OFF.
+            Do not copy unconditional far re-anchor into motor-enabled/flight code.
+
+3) P83 BOOT ACQUISITION
+-----------------------
+PASS - ADC1 + ADC2 PC1 robust path remains ~500 Hz.
+PASS - 7-sample median retained.
+PASS - No filtered anchor is created immediately after reset.
+PASS - Initial median cluster must stay within 24 ADC total spread.
+PASS - Per-median acquisition step must stay <=10 ADC.
+PASS - 100 stable medians (~200 ms) required before initial anchor.
+PASS - Pair/rate violations before first anchor reset acquisition instead of
+       creating a quarantine around a nonexistent/invalid last-good.
+
+4) P83 NORMAL / QUARANTINE PATH
+-------------------------------
+PASS - Pair hard reject: |ADC1-ADC2| >30 ADC10.
+PASS - 3 consecutive pair rejects -> quarantine after a valid anchor exists.
+PASS - Raw common-mode physical-rate reject: >80 ADC / 2 ms.
+PASS - Median physical-rate reject: >20 ADC / 2 ms.
+PASS - >24 ADC excursion requires 8 direction-consistent samples (~16 ms).
+PASS - Normal published output: 3 ADC deadband + 1/4 IIR + max 6 ADC/sample.
+PASS - Rate violation -> quarantine, last-good hold, feedback_valid=0.
+PASS - Near-last-good recovery remains available after >=100 ms quarantine.
+PASS - Independent recovery cluster uses <=24 ADC spread and <=10 ADC step.
+PASS - Far stable cluster needs 250 medians (~500 ms) before bench-only re-anchor.
+PASS - Re-anchor increments p83_reacquire_count and sets SAFE_REACQUIRE sticky flag.
+
+5) UART / MONITOR
+-----------------
+PASS - Exactly 20 P83 tail fields; total monitor FIELDS = 356.
+PASS - monitor_uart_p83_boot_safe_reacquire.py py_compile.
+PASS - Compact status rendering tested.
+New diagnostics include:
+  p83_reacquire_count
+  p83_mode               (0 acquire, 1 normal, 2 quarantine, 3 trajectory)
+  p83_acq_progress_pct
+
+6) STATIC C CHECKS
+------------------
+Tool: clang, target arm-none-eabi, Cortex-M4, USE_HAL_DRIVER, STM32F407xx.
+PASS - NeedleValveIntegrationTest (-Wall -Wextra -Werror).
+PASS - NeedleValveHardware (-Wall -Wextra -Werror).
+PASS - UARTTelemetry (-Wall -Wextra -Werror).
+NOTE - Final STM32CubeIDE Clean + Build + link is still required before flash.
+
+7) HOST THRESHOLD-MIRROR TESTS
+------------------------------
+PASS - Startup transient 849 followed by stable ~582 cluster:
+       anchor=582; transient did not become the initial position.
+PASS - Stable startup around 600:
+       anchor=600.
+PASS - Stale last-good 849 with stable far cluster around 585:
+       500 ms recovery cluster qualifies for bench-only re-anchor at ~585.
+PASS - Short false plateau lasting ~120 ms:
+       does NOT qualify for the 500 ms far re-anchor.
+
+8) MAIN-SYSTEM CHANGE AUDIT
+---------------------------
+PASS - P82 -> P83 byte-identical for SDLogger, NeedleValveHardware,
+       SystemMonitor, PreflightTrigger, FullStateESKF, Barometer, Lidar, IMU,
+       AttitudeControl and Scheduler source/header files.
+Intended App changes only:
+- App/Common/app_config.h          (P83 isolation guard text only)
+- App/Common/app_version.h         (P83 version/patch)
+- NeedleValveIntegrationTest .c/.h (P83 algorithm/telemetry)
+- UARTTelemetry uart_telemetry.c   (20-field P83 tail)
+
+9) REQUIRED BENCH RUN
+---------------------
+NO GAS / NO PRESSURE.
+Prefer motor and RCS electrical power physically OFF.
+Clean -> Build -> Flash.
+Verify banner: 8.19M-P83-BOOT-SAFE-REACQUIRE-FEEDBACK
+Run:
+  python -u monitor_uart_p83_boot_safe_reacquire.py --port COM21 --log uart_p83_boot_safe_reacquire.txt
+Run 60-120 s without touching pot/shaft/cables.
+
+Expected startup:
+  BOOT_ACQ progress -> 100% -> NORMAL -> VALID=1
+
+Expected large glitch:
+  reject/quarantine -> VALID=0 -> filtered last-good hold -> recovery/re-acquire
+
+OFFLINE VALIDATION RESULT: PASS
+HARDWARE RESULT          : PENDING USER CUBEIDE BUILD + BENCH RUN

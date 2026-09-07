@@ -1,0 +1,40 @@
+TARAGAY-T1 P49 VALIDATION
+=========================
+Date: 2026-08-27
+
+P49 validator:
+PASS masked Joseph ZUPT + live vertical recovery + chronological 4-buffer SD FIFO + P48 guards + TGY60/258 + V14 unchanged
+
+Host regression tests:
+PASS V49/P40 RCS signed-PD host tests
+PASS V50 vertical sensor policy host tests
+PASS V50 generated vertical fallback host tests
+PASS P44 scheduler host tests
+
+Python syntax:
+PASS tools/monitor_uart_p49.py
+PASS tools/decode_flight_v14_p49.py
+PASS tools/validate_p49.py
+
+Modified C syntax-only checks (native GCC + STM32 headers):
+PASS App/Modules/Estimation/FullStateESKF/full_state_eskf.c
+PASS App/Services/SDLogger/sd_logger.c
+PASS App/Services/UARTTelemetry/uart_telemetry.c
+
+Validator numeric regressions:
+PASS masked-ZUPT Joseph randomized matrix equivalence
+PASS BGX/BGY/BGZ diagonal remains unchanged by masked ZUPT
+PASS chronological READY-ticket selector regression
+PASS P48 index-order failure scenario reproduced and P49 ticket-order selector chooses oldest buffer
+PASS UART header/data/monitor 258-field contract and synthetic CRC
+
+Wire/binary:
+UART $TGY60 / V60 / 258 data fields
+SD V14 / 384 byte frame unchanged
+128 MiB preallocation, 96 MiB fallback unchanged
+
+arm-none-eabi-gcc:
+NOT AVAILABLE in this environment. Final Cortex-M4 compile/link/RAM check MUST be done in STM32CubeIDE before flashing.
+
+P49 status:
+SOURCE/HOST VALIDATED FLIGHT CANDIDATE — NOT FLIGHT-APPROVED UNTIL BENCH, SOAK AND FAULT-INJECTION TESTS PASS.

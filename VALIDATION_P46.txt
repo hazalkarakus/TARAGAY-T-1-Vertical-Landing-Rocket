@@ -1,0 +1,74 @@
+P46 VALIDATION REPORT
+=====================
+Firmware: 8.19M-P46-COV-ROOTCAUSE-STATE-PRESERVE
+Scope: covariance fault stage/state/raw root-cause capture; tiny-negative
+       roundoff separation; state-preserving last-good covariance rollback;
+       TGY57 diagnostics. P45 public guard + IMU recovery and P44 scheduler/SD
+       baseline are preserved.
+
+1) P46 source/protocol validator
+   Command: python3 tools/validate_p46.py
+   Result : PASS
+   Checks :
+   - P44 scheduler/LiDAR timing invariants preserved
+   - P45 128/96 MiB SD and public z/vz guard preserved
+   - covariance stage/state/raw diagnostics exist before clamp/rollback
+   - tiny negatives >= -1e-7 use separate roundoff path
+   - structural covariance faults use P-only last-good rollback
+   - covariance-only recovery does NOT call FullStateESKF_Init()
+   - nominal/public state is not reset by covariance-only recovery
+   - bad covariance measurement update cannot inject its error state
+   - state/public numerical faults retain full safe reinitialize
+   - P45 IMU second-bad full non-blocking recovery preserved
+   - TGY57 C emission/header/Python decoder agree at 241 data fields
+   - synthetic TGY57 CRC/decode round-trip succeeds
+   - V14 SD decoder contract unchanged
+
+2) P44 scheduler host regression
+   Sources: tools/p44_scheduler_host_test.c + App/Core/Scheduler/scheduler.c
+   Result : PASS
+   Output : P44 scheduler host tests: PASS
+
+3) V50 vertical sensor policy host regression
+   Source : tools/v50_vertical_sensor_policy_host_test.c
+   Result : PASS
+   Output : V50 vertical sensor policy host tests: PASS
+
+4) V50 generated vertical fallback host regression
+   Sources: tools/v50_generated_vertical_fallback_host_test.c +
+            App/Modules/Control/GeneratedFlightControl/generated_flight_control.c
+   Result : PASS
+   Output : V50 generated vertical fallback host tests: PASS
+
+5) Host GCC syntax-only checks for P46-modified C sources
+   Files:
+   - App/Modules/Estimation/FullStateESKF/full_state_eskf.c
+   - App/Services/UARTTelemetry/uart_telemetry.c
+   Result : PASS (no syntax errors)
+   Note   : Host-x86 CMSIS pointer-width warnings are expected and are not
+            STM32 target compile errors.
+
+6) Python syntax checks
+   Files:
+   - monitor_uart_p46.py
+   - decode_flight_v14_p46.py
+   - tools/validate_p46.py
+   Result : PASS
+
+7) UART static contract
+   Data fields      : 241
+   Header incl. CRC : 242
+   Duplicate header : 0
+   Result            : PASS
+
+8) STM32 target build
+   arm-none-eabi-gcc is not installed in this execution environment.
+   Therefore a real Cortex-M4 link/build was NOT performed here.
+   REQUIRED BEFORE FLASHING:
+   CubeIDE -> Project -> Clean -> Build Project -> verify zero errors.
+
+Hardware status
+---------------
+P46 hardware run has NOT been executed in this environment.
+First run must be a power-safe avionics bench test (actuator/pressure power off).
+Use monitor_uart_p46.py and inspect structural fault + roundoff stage/state/raw.

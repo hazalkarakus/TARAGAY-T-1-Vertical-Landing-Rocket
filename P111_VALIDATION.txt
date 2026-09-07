@@ -1,0 +1,15 @@
+P111 VALIDATION
+================
+Firmware: 8.19M-P111-5CYCLE-ADAPTIVE-LEARNING
+Monitor fields: 482
+C UART header fields excluding CRC: 482
+Header/monitor exact order match: PASS
+Synthetic CRC decode: PASS
+Python py_compile: PASS
+Cortex-M4 clang -Wall -Wextra -Werror: see P111_CLANG_SYNTAX.txt (RETURN_CODE=0)
+CubeIDE project name: PASS
+P111 supervisor symbols: PASS
+UART buffer: 5120 bytes
+
+Expected final successful supervisor state:
+p111_state=5, p111_result=1, p111_completed=5, p111_moves_completed=10, p111_pass_mask=31, p111_abort_reason=0

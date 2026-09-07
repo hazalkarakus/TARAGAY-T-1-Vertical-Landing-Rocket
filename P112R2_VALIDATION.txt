@@ -1,0 +1,22 @@
+P112R2 VALIDATION
+Firmware: 8.19M-P112R2-STATIC-BURST-FEEDBACK-QUALIFIER
+
+PASS: Cortex-M4 clang -Wall -Wextra -Werror syntax
+  - needle_valve_integration_test.c
+  - needle_valve_hw.c
+  - uart_telemetry.c
+  - stm32f4xx_it.c
+PASS: App/app.c syntax (-Werror, pre-existing unused-function warning suppressed)
+PASS: Python monitor py_compile
+PASS: monitor UART field count = 493 (unchanged from P112R1)
+
+Bench architecture:
+- TIM7 1 kHz owns all ADC activity.
+- PC1 P83 sample at 500 Hz.
+- ADC1 median-of-3 long-sample burst.
+- ADC2 median-of-3 long-sample burst.
+- VREF probe 20 Hz serialized in same TIM7 context.
+- P110/P111 motion state machines are not called in this image.
+- Bridge is forced OFF every TIM7 tick.
+
+BENCH ONLY / DO NOT FLY / NO GAS / NO PRESSURE.

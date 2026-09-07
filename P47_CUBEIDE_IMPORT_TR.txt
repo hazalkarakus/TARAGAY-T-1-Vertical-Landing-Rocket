@@ -1,0 +1,8 @@
+P47 CubeIDE
+===========
+Proje: TGY_V8_19M_P47_GRAV_JOSEPH_SD_BACKPRESSURE
+1. Yeni bos klasore cikart.
+2. File > Import > Existing Projects into Workspace.
+3. Project > Clean > Build Project.
+4. Beklenen ELF: Debug/TGY_V8_19M_P47_GRAV_JOSEPH_SD_BACKPRESSURE.elf
+5. Karta yukle. UART frame: $TGY58

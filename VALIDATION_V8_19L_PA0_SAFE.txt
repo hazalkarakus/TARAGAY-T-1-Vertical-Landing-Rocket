@@ -1,0 +1,48 @@
+TGY V8.19L PA0 SAFETY VALIDATION
+================================
+
+PA0 SERVICE HOST TESTS: PASS
+-----------------------------
+1. No-touch boot + successful homing:
+   - state remains READY_DISABLED
+   - driver enable count remains 0
+   - accepted button count remains 0
+
+2. 100 ms false HIGH pulse after READY:
+   - rejected as glitch
+   - state remains READY_DISABLED
+   - driver remains disabled
+
+3. PA0 held HIGH from startup:
+   - button never arms
+   - driver cannot enter MANUAL_ACTIVE
+   - release must remain LOW for 1000 ms before arming
+
+4. Intentional stable press:
+   - 500 ms continuous HIGH is accepted once
+   - first accepted press only enables the driver
+   - no position command is issued by the enable press
+
+5. Manual command and emergency stop:
+   - next stable press submits 0.10 command
+   - after release/re-arm, a new rising edge during motion causes ABORT
+   - driver is disabled by ABORT
+
+NEEDLE CONTROLLER HOST TESTS: PASS
+---------------------------------
+1. Automatic closing reference from 500 ADC
+2. ZERO capture in 1015..1023 ADC region
+3. Full 878 ADC / 4.5 turn opening travel
+4. Return to ZERO
+5. Wrong homing direction fault
+6. No-progress/stall fault
+7. Already-closed homing
+
+PROJECT CHECKS: PASS
+--------------------
+- .project XML valid
+- .cproject XML valid
+- Unique project name: TGY_V8_19L_NEEDLE_BUTTON_SAFE
+- App version: 8.19L
+- GNC physical needle command remains disabled
+- RCS physical outputs remain dry-run/safe

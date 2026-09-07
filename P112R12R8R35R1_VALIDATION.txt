@@ -1,0 +1,10 @@
+P112R12R8R35R1 DIAGNOSTIC CLOSURE VALIDATION
+=============================================
+PASS - R8R35 control/safety authority preserved; changes are append-only telemetry/provenance/monitor.
+PASS - P83 feedback diagnostics appended to compact $TGY73 frame.
+PASS - SD runtime diagnostics appended to compact $TGY73 frame.
+PASS - compact monitor field contract = 287 fields.
+PASS - monitor py_compile.
+PASS - monitor synthetic parser self-test: 20 valid / 0 rejected.
+PASS - 45/45 App/*.c host GCC -fsyntax-only.
+NOTE - arm-none-eabi target compiler unavailable in this container; STM32CubeIDE target build is still required before flash.

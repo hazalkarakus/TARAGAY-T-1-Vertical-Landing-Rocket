@@ -1,0 +1,40 @@
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/barometer.c:719:     * BMP585 is read directly at 200 Hz. Filtering and altitude calculations
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:6: *  BMP585 SPI surucusu
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:9: *  UYUMLULUK icin korunmustur. Sensor artik Bosch BMP585'tir.
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:37:    /* MS5611 uyumluluk alanlari: BMP585'te PROM yok, connected ile 1 tutulur */
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:48:    /* MS5611 PROM alani; BMP585'te kullanilmaz, chip id vb. tutulabilir */
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:51:    /* Ham 24-bit basinc / sicaklik ADC degerleri (BMP585 register cikisi) */
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:79:/* BMP585 V8.19E register-level and 200 Hz direct-read diagnostics */
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:80:extern volatile uint8_t  bmp585_chip_id;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:81:extern volatile uint8_t  bmp585_config_ok;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:82:extern volatile uint8_t  bmp585_status_reg;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:83:extern volatile uint8_t  bmp585_osr_eff;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:84:extern volatile uint8_t  bmp585_int_status;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:85:extern volatile uint32_t bmp585_drdy_count;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:86:extern volatile uint8_t  bmp585_int_config_reg;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:87:extern volatile uint8_t  bmp585_int_config_ok;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:88:extern volatile uint8_t  bmp585_int_config_before_reg;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:89:extern volatile uint8_t  bmp585_int_config_written_reg;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:90:extern volatile uint8_t  bmp585_standby_config_reg;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:91:extern volatile uint8_t  bmp585_config_stage;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:92:extern volatile uint8_t  bmp585_int_source_reg;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:93:extern volatile uint8_t  bmp585_drdy_source_ok;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:94:extern volatile uint8_t  bmp585_odr_config_reg;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:95:extern volatile uint8_t  bmp585_osr_config_reg;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:96:extern volatile uint8_t  bmp585_register_readback_ok;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:97:extern volatile uint8_t  bmp585_direct_read_mode_ok;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:99:extern volatile uint32_t bmp585_service_call_count;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:100:extern volatile uint32_t bmp585_int_status_poll_count;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:101:extern volatile uint32_t bmp585_int_status_read_error_count;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:102:extern volatile uint32_t bmp585_no_drdy_poll_count;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:103:extern volatile uint32_t bmp585_measurement_read_count;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:104:extern volatile uint32_t bmp585_measurement_read_error_count;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:105:extern volatile uint32_t bmp585_fresh_sample_count;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:106:extern volatile uint32_t bmp585_duplicate_raw_count;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:107:extern volatile uint32_t bmp585_register_snapshot_count;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:108:extern volatile uint32_t bmp585_register_snapshot_error_count;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:109:extern volatile uint32_t bmp585_register_mismatch_count;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:110:extern volatile uint32_t bmp585_last_register_snapshot_us;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:112:extern volatile uint32_t bmp585_last_service_interval_us;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:113:extern volatile uint32_t bmp585_min_service_interval_us;
+/mnt/data/P112R12R8R24_TILT_AXIS_SOURCE_FIX_INERT/App/Modules/Sensors/Barometer/ms5611_spi.h:114:extern volatile uint32_t bmp585_max_service_interval_us;

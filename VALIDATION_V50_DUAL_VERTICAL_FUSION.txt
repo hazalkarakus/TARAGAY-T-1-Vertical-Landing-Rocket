@@ -1,0 +1,46 @@
+V50 DUAL VERTICAL FUSION VALIDATION
+
+DESIGN
+PASS - LIDAR DMA service remains unconditional in Task_Lidar_Service_1kHz.
+PASS - Full-State ESKF vertical validity accepts fresh LIDAR OR fresh barometer.
+PASS - Main-motor 200 Hz outer loop no longer requires live lidar_fresh.
+PASS - Startup still requires a valid LIDAR AGL datum.
+PASS - Preflight now also requires a fresh barometer reference.
+PASS - LIDAR-only and barometer-only modes are explicitly diagnosed.
+PASS - Neither-source mode forces vertical command and PI integral to zero.
+PASS - Main-motor physical output remains disabled.
+PASS - V49 physical RCS and NRF STOP paths remain enabled.
+
+HOST TEST
+Run:
+gcc -std=gnu11 -Wall -Wextra -Werror -IApp \
+  tools/v50_vertical_sensor_policy_host_test.c \
+  -o /tmp/v50_vertical_sensor_policy_host_test
+/tmp/v50_vertical_sensor_policy_host_test
+
+Expected:
+V50 vertical sensor policy host tests: PASS
+
+Run end-to-end wrapper fallback test:
+gcc -std=gnu11 -Wall -Wextra -Werror -IApp \
+  tools/v50_generated_vertical_fallback_host_test.c \
+  App/Modules/Control/GeneratedFlightControl/generated_flight_control.c \
+  -lm -o /tmp/v50_generated_vertical_fallback_host_test
+/tmp/v50_generated_vertical_fallback_host_test
+
+Expected:
+V50 generated vertical fallback host tests: PASS
+
+TARGET BUILD
+No ARM cross-compiler is installed in the delivery environment. Import the
+project into STM32CubeIDE, clean it, and use Build Project to create the V50
+ELF/HEX. Never flash an older V49 HEX for this V50 source tree.
+
+REQUIRED HIL
+1. Verify source mask 3 with both sensors healthy.
+2. Obscure LIDAR while keeping its service alive; source mask must become 2.
+3. Confirm the vertical command does not fall to zero solely from LIDAR loss.
+4. Restore four consistent LIDAR samples and verify mask returns to 3.
+5. Disconnect barometer with LIDAR healthy; source mask must become 1.
+6. Invalidate both aids; source mask must become 0 and command must be safe.
+7. Repeat during a real ignition transient while logging all listed counters.

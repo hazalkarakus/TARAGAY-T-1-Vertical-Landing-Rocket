@@ -1,0 +1,3 @@
+P80 IS A DO-NOT-FLY BENCH DIAGNOSTIC IMAGE.
+Motor outputs are compile-time locked OFF. RCS is forced safe.
+Use with NO GAS / NO PRESSURE and preferably with motor/RCS power physically inhibited.

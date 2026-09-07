@@ -1,0 +1,12 @@
+P112R12R8R28 FROZEN CORE AUDIT
+================================
+Compared byte-for-byte against R8R27 source baseline.
+
+PASS App/Modules/Estimation/FullStateESKF/full_state_eskf.c 0586a0ffa7544b44303357a2f61e3570cc0282a0a0569ae6fb0cf2ad5f47e43e
+PASS App/Modules/Sensors/SensorManager/sensor_manager.c 367021da06f9b3bcc94c5f19e13efca858c8bac572de02c3b849473e0ac157ac
+PASS App/Core/Scheduler/scheduler.c ab4f73a091ada9363c3fbe2690fd17d2ac5bb0866e7fec862e172093c641fe53
+PASS App/Services/SDLogger/sd_logger.c adbaf9a64eb91148a9ac8e3367c5b10b9242e61d2e9aba328657f6a0bcfa7b20
+PASS App/Modules/NRF24/nrf24.c 7e00ab5529245211fc31e7e3f96441db5956f075690e45196e1b6d587160fd32
+PASS App/Modules/RemoteControl/remote_control.c 03588e5f5c60e1e4e50c74807fc901e5b8fc22cce3ef025b2c24a97ee4226f37
+PASS App/Services/NeedleValveAutonomousControl/needle_valve_autonomous_control.c 06ffd08ca04c7077a8b831edd9f86fe79518de76edd81a334c0010c9ccc3d6db
+PASS App/Modules/Control/NeedleValve/needle_valve_controller.c 11d17fa548233757016b92b36ef78de2d502335e50ef5dc2915ab130b4f8aa31

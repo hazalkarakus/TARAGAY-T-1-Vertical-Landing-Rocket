@@ -1,0 +1,24 @@
+V49 ESKF RCS SIGNED-PD VALIDATION
+================================
+
+PASS - Physical RCS input changed from classic attitude to Full-State ESKF.
+PASS - ESKF public sample is consumed once at 200 Hz.
+PASS - Gyro rate is corrected with the ESKF gyro-bias estimate.
+PASS - Signed PD law uses Kp=2.50 and Kd=3.55.
+PASS - 3 deg + 10 deg/s produces 43 ms in the host controller test.
+PASS - Sub-20 ms demand produces zero physical output.
+PASS - Demand above 60 ms saturates at 60 ms.
+PASS - Signed derivative action selects the opposite valve for active damping.
+PASS - TIM7 supplies independent 1 ms roll/pitch pulse countdown.
+PASS - Per-axis 100 ms cooldown blocks chatter without blocking the scheduler.
+PASS - PE9 and NRF STOP use AttitudeControl_ForceSafe(), clearing live timers.
+PASS - Active-LOW four-relay mapping and same-axis opposing-valve interlock kept.
+PASS - NRF remains enabled.
+PASS - Full source-tree host syntax check completed with no errors.
+PASS - tools/v49_rcs_controller_host_test.c completed successfully.
+
+ARM BUILD NOTE
+--------------
+The scratch environment does not contain arm-none-eabi-gcc, so a new STM32
+ELF/HEX could not be generated here. Build the included Debug configuration in
+STM32CubeIDE before flashing. Do not flash an older V48 HEX for this V49 logic.

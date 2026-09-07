@@ -1,0 +1,45 @@
+In file included from /mnt/data/P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_DRYRUN_INERT/App/Modules/Control/GeneratedFlightControl/generated_flight_control.c:8:
+/mnt/data/P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_DRYRUN_INERT/App/Modules/Control/GeneratedFlightControl/Generated/Ucus_Bilgisayari.h:110:10: fatal error: 'string.h' file not found
+  110 | #include <string.h>
+      |          ^~~~~~~~~~
+1 error generated.
+/mnt/data/P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_DRYRUN_INERT/App/Modules/Control/GNCActiveControl/gnc_active_control.c:22:10: fatal error: 'math.h' file not found
+   22 | #include <math.h>
+      |          ^~~~~~~~
+1 error generated.
+/mnt/data/P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_DRYRUN_INERT/App/Modules/Control/TaragayFlightLogic/taragay_flight_logic.c:8:10: fatal error: 'math.h' file not found
+    8 | #include <math.h>
+      |          ^~~~~~~~
+1 error generated.
+/mnt/data/P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_DRYRUN_INERT/App/Core/Tasks/app_tasks.c:40:10: fatal error: 'math.h' file not found
+   40 | #include <math.h>
+      |          ^~~~~~~~
+1 error generated.
+/mnt/data/P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_DRYRUN_INERT/App/Services/UARTTelemetry/uart_telemetry.c:585:16: error: unknown attribute 'optimize' ignored [-Werror,-Wunknown-attributes]
+  585 | __attribute__((optimize("O2")))
+      |                ^~~~~~~~~~~~~~
+/mnt/data/P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_DRYRUN_INERT/App/Services/UARTTelemetry/uart_telemetry.c:599:16: error: unknown attribute 'optimize' ignored [-Werror,-Wunknown-attributes]
+  599 | __attribute__((optimize("O2")))
+      |                ^~~~~~~~~~~~~~
+/mnt/data/P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_DRYRUN_INERT/App/Services/UARTTelemetry/uart_telemetry.c:617:16: error: unknown attribute 'optimize' ignored [-Werror,-Wunknown-attributes]
+  617 | __attribute__((optimize("O2")))
+      |                ^~~~~~~~~~~~~~
+/mnt/data/P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_DRYRUN_INERT/App/Services/UARTTelemetry/uart_telemetry.c:653:16: error: unknown attribute 'optimize' ignored [-Werror,-Wunknown-attributes]
+  653 | __attribute__((optimize("O2")))
+      |                ^~~~~~~~~~~~~~
+/mnt/data/P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_DRYRUN_INERT/App/Services/UARTTelemetry/uart_telemetry.c:677:16: error: unknown attribute 'optimize' ignored [-Werror,-Wunknown-attributes]
+  677 | __attribute__((optimize("O2")))
+      |                ^~~~~~~~~~~~~~
+/mnt/data/P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_DRYRUN_INERT/App/Services/UARTTelemetry/uart_telemetry.c:736:16: error: unknown attribute 'optimize' ignored [-Werror,-Wunknown-attributes]
+  736 | __attribute__((optimize("O2")))
+      |                ^~~~~~~~~~~~~~
+/mnt/data/P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_DRYRUN_INERT/App/Services/UARTTelemetry/uart_telemetry.c:1398:16: error: unknown attribute 'optimize' ignored [-Werror,-Wunknown-attributes]
+ 1398 | __attribute__((optimize("O2")))
+      |                ^~~~~~~~~~~~~~
+/mnt/data/P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_DRYRUN_INERT/App/Services/UARTTelemetry/uart_telemetry.c:1697:23: error: unused variable 'banner' [-Werror,-Wunused-variable]
+ 1697 |     static const char banner[] =
+      |                       ^~~~~~
+/mnt/data/P112R12R8R21_SINGLE_FLIGHT_AUTHORITY_DRYRUN_INERT/App/Services/UARTTelemetry/uart_telemetry.c:1700:23: error: unused variable 'header' [-Werror,-Wunused-variable]
+ 1700 |     static const char header[] =
+      |                       ^~~~~~
+9 errors generated.

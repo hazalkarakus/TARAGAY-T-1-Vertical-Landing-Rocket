@@ -1,0 +1,12 @@
+P112R11R2 950+ NEEDLE VALVE MECHANICAL COMMISSIONING
+
+DO NOT FLY.
+Use only on a depressurized/inert bench with PE9 physically connected.
+Main propulsion pressure/gas/propellant/ignition/energetics must remain physically isolated.
+RCS and ground vent remain software hard-locked OFF; keep their physical loads disconnected.
+UART is diagnostic TX only.
+
+R11R2 change: CLOSED reference capture is accepted from 950..1023 ADC.
+The 78 ADC commissioning stroke remains relative to the captured CLOSED reference.
+Examples: CLOSED=950 -> OPEN target=872; CLOSED=1014 -> OPEN target=936.
+OPEN direction must continue to DECREASE ADC.

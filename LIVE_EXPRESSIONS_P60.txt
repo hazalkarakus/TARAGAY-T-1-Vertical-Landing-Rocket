@@ -1,0 +1,24 @@
+P60 FIRST BENCH LIVE EXPRESSIONS
+================================
+v30_stop_latched
+v30_stop_latch_count
+v30_switch1_vent_request
+v30_switch2_stop_request
+v30_vent_override_active
+v30_vent_applied_mask
+v30_vent_pulse_count
+remote_rx_last_packet_age_ms
+nrf24_rx_count
+remote_rx_invalid_packet_count
+v23_rcs_requested_mask
+v23_rcs_applied_mask
+needle_valve_rpwm
+needle_valve_lpwm
+imu_recovery_count
+imu_recovery_failures
+
+UART field to watch:
+actuator_authorized
+
+Main P60 invariant:
+stop_latched == 1  => actuator_authorized == 0

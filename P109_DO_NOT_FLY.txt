@@ -1,0 +1,1 @@
+P109 BENCH ONLY / DO NOT FLY. No gas, no pressure. Loaded needle-valve diagnostic with bounded 20 ms PWM144 boost + max 120 ms PWM128 sustain and 500 ms active brake. No automatic return.

@@ -1,0 +1,5 @@
+P112R12R1 - DO NOT FLY
+
+INERT / DEPRESSURIZED BENCH VALIDATION ONLY.
+No live pressure, propellant, ignition, pyrotechnics or energetic hardware.
+RCS / ground vent / vent servo remain software-isolated and must also remain physically isolated.

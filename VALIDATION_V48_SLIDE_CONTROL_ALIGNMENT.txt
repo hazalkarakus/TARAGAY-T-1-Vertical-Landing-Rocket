@@ -1,0 +1,27 @@
+V48 SLIDE CONTROL ALIGNMENT - SOURCE VALIDATION
+Date: 2026-08-25
+
+PASS  PE9 input remains PE9, pull-up, connected LOW, separated HIGH.
+PASS  Separation debounce is 10 ms and T0 is one-shot.
+PASS  NRF24 is explicitly enabled; SPI3 init, RX service and 200 Hz diagnostics remain present.
+PASS  Attitude Euler/control decimation is 5 at 1 kHz = 200 Hz.
+PASS  RCS PD pulse lower/upper bounds are 20/60 ms.
+PASS  RCS opposite-valve brake is bounded to 20 ms.
+PASS  RCS re-arm/anti-chatter interval is 200 ms.
+PASS  Full-state ESKF correction service remains 200 Hz.
+PASS  ESKF adaptive vibration R multiplier is bounded 1x..25x.
+PASS  Vertical overlay executes on every 200 Hz correction callback.
+PASS  Suicide-burn equation is V^2/(2*a_max).
+PASS  Vertical feedforward is 335 N; no live pressure sensor is consumed.
+PASS  Needle TIM7 ARR=999 at 1 MHz = 1000 Hz.
+PASS  Needle ADC filter is EMA, alpha=0.20.
+PASS  Needle control is PD PWM with 0..255 saturation.
+PASS  Needle maximum travel is 2.2 turns / 429 ADC at 195 ADC/turn.
+PASS  Needle active lock tolerance is +/-15 ADC.
+PASS  Modified C sources pass host GCC -std=gnu11 -Wall -Wextra syntax check.
+
+LIMITATION
+The ARM GNU toolchain is not installed in this execution environment, so a new
+STM32 ELF/HEX could not be linked. Old binaries are intentionally excluded from
+the updated deliverable to prevent accidental flashing of pre-change firmware.
+Hardware-in-the-loop validation is still mandatory before pressurised testing.

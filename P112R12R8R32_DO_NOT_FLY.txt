@@ -1,0 +1,8 @@
+P112R12R8R32 DO NOT FLY
+
+Purpose: real Hover V19.6 -> physical main-needle integration validation only.
+RCS/vent physical outputs remain isolated.
+Known open items:
+- 3.5 mm thrust map is still provisional (scaled from 4.5 mm reference).
+- no absolute horizontal X/Y aiding; position hold remains gated.
+- final unified physical RCS authority and end-to-end flight qualification not completed.

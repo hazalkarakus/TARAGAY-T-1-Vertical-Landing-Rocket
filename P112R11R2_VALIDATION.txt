@@ -1,0 +1,41 @@
+P112R11R2 950+ MECHANICAL COMMISSIONING VALIDATION
+
+Static validator:
+PASS: version
+PASS: profile
+PASS: R11R1 motion safety retained
+PASS: R11R2 950+ revision
+PASS: closed reference floor 950
+PASS: host stub floor 950
+PASS: short travel 78
+PASS: UART RX remains off guard
+PASS: RCS hard-lock retained
+PASS: full preflight still required before arming
+PASS: PE9/connector abort retained
+PASS: flight-active abort retained
+PASS: P83 feedback abort retained
+PASS: needle-fault abort retained
+PASS: operator abort retained
+PASS: timeout abort retained
+PASS: exact commissioning telemetry appended
+PASS: generated private header
+PASS: motion safety ignores unrelated sensor/reference/SD readiness
+PASS: UART old indices stable + five fields appended
+PASS: low-level hash unchanged: App/Services/NeedleValveIntegrationTest/needle_valve_integration_test.c
+PASS: low-level hash unchanged: App/Services/NeedleValveHardware/needle_valve_hw.c
+PASS: low-level hash unchanged: App/app.c
+PASS: low-level hash unchanged: Core/Src/stm32f4xx_it.c
+PASS: low-level hash unchanged: App/Services/SDLogger/sd_logger.c
+P112R11R2 950+ static commissioning safety/regression checks: PASS
+
+Host behavior test:
+P112R11R2 CLOSED floor 949 reject / 950 accept: PASS
+P112R11R2 baseline 950 + sensor/reference readiness flicker -> CLOSE completion: PASS
+P112R11R2 PE9 separation hard-safe abort: PASS
+P112R11R2 P83 feedback-loss hard-safe abort: PASS
+
+ARM target compiler not available locally; CubeIDE/Cortex-M4 target build NOT claimed.
+
+Scope: DO NOT FLY; depressurized/inert mechanical commissioning only.
+CLOSED reference capture floor: 950 ADC inclusive.
+Short OPEN travel: 78 ADC relative to captured CLOSED reference.

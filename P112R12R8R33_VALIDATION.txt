@@ -1,0 +1,23 @@
+P112R12R8R33 SOURCE CONTRACT VALIDATION
+
+PASS R8R33 revision enabled
+PASS R8R32 physical needle authority retained
+PASS RCS V7.13.4 is physical command authority
+PASS Legacy V49/AttitudeControl physical ownership blocked in 200 Hz path
+PASS Legacy 1 kHz V49 cannot erase R8R33 pulse; 1 kHz safety-cut retained
+PASS PE9 flight_active gate required for nonzero RCS output
+PASS System/STOP/preflight/actuator/RCS-fault gates present
+PASS Real ESKF + fixed matrix gates present
+PASS 50 ms flight-logic freshness gate present
+PASS Opposing-pair sanitizer retained
+PASS Ground vent remains isolated by P112R12 inert-isolation flag
+PASS Servo output remains isolated by P112R12 inert-isolation flag
+PASS UART banner updated for physical RCS
+PASS Project name/version updated
+PASS 45/45 App C files host GCC -fsyntax-only
+PASS R8R33 monitor py_compile
+PASS R8R33 monitor rejects previous R8R32 log because physical RCS was absent
+
+RESULT: PASS
+NOTE: Host/source validation only. STM32CubeIDE target build/flash and
+pressureless hardware relay validation remain required.

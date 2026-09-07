@@ -1,0 +1,10 @@
+P112R12R8R32 CHANGE AUDIT
+
+1. Preserved R8R30 fixed IMU->rocket matrix.
+2. Added real TaragayFlightLogic/Hover V19.6 physical main-needle authority.
+3. Mission starts on flight_active/PE9 separation, not preflight READY.
+4. Maps Hover L domain 0.00..0.30 to production actuator normalized 0..1.
+5. Existing P111/P110/P112 585 ADC / 3-turn travel limit remains authoritative.
+6. Legacy GeneratedFlightControl and AttitudeControl held safe.
+7. Physical RCS forced safe/off in this revision.
+8. Existing stop/authorization/feedback/ESKF guards preserved.

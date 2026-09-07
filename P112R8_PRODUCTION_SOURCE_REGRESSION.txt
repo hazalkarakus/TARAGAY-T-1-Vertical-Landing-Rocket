@@ -1,0 +1,8 @@
+App/app.c: BYTE_IDENTICAL_TO_P112R5_FIXED
+App/Core/Tasks/app_tasks.c: BYTE_IDENTICAL_TO_P112R5_FIXED
+App/Services/NeedleValveAutonomousControl/needle_valve_autonomous_control.c: BYTE_IDENTICAL_TO_P112R5_FIXED
+App/Services/NeedleValveAutonomousControl/needle_valve_autonomous_control.h: BYTE_IDENTICAL_TO_P112R5_FIXED
+App/Services/NeedleValveIntegrationTest/needle_valve_integration_test.c: BYTE_IDENTICAL_TO_P112R5_FIXED
+App/Services/NeedleValveIntegrationTest/needle_valve_integration_test.h: BYTE_IDENTICAL_TO_P112R5_FIXED
+Core/Src/stm32f4xx_it.c: BYTE_IDENTICAL_TO_P112R5_FIXED
+App/Services/SDLogger/sd_logger.c: BYTE_IDENTICAL_TO_P112R5_FIXED

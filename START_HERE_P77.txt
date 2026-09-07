@@ -1,0 +1,12 @@
+P77 START HERE
+
+1) GAS/PRESSURE OFF. RCS electrical load physically inhibited.
+2) Import/flash P77 CubeIDE project.
+3) Run:
+   python -u monitor_uart_p77_breakaway.py --port COM21 --log uart_p77_breakaway.txt
+4) Wait SYS=1/0.
+5) USER #1: capture closed reference only.
+6) Follow monitor. Each next press runs ONE bounded OPEN pulse.
+7) During PULSE/SETTLE do not press the button.
+8) When THRESHOLD_FOUND appears, STOP. Do not press again.
+9) Send uart_p77_breakaway.txt.

@@ -1,0 +1,12 @@
+# Build artifacts
+Debug/**/*.o
+Debug/**/*.d
+Debug/**/*.elf
+Debug/**/*.bin
+Debug/**/*.map
+Debug/**/*.list
+
+# IDE / OS
+.metadata/
+*.log
+Thumbs.db

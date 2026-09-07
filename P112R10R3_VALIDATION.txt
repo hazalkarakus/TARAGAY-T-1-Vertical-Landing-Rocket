@@ -1,0 +1,16 @@
+P112R10R3 VALIDATION
+====================
+Generated UTC: 2026-09-01 20:56:12
+
+P112R5 autonomous supervisor host test: PASS
+P112R10R3 same-target settled hold host test: PASS
+requests=3 retargets=0 force_safe=1 moves=2
+P112R10R3 static settled-target hold architecture: PASS
+R10R2 P110 adaptive correction layer byte-identical: PASS
+Repeated same GNC target after P110 PASS -> no retrigger: PASS
+Genuine target change -> normal CLOSE request: PASS
+Settled-position drift >8 ADC -> closed-loop hold releases: PASS
+RCS + vent hard-lock and SD/TIM7 regression: PASS
+Generated Ucus_Bilgisayari_private.h packaged: PASS
+
+arm-none-eabi-gcc: NOT AVAILABLE - STM32CubeIDE Clean/Build required on user machine

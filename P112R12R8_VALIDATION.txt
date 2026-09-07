@@ -1,0 +1,91 @@
+P112R12R8 PRODUCTION CANDIDATE INERT DRY-RUN VALIDATION
+========================================================
+
+P112R5 autonomous supervisor host test: PASS
+P112R12R1 same-target mechanical guard host test: PASS
+hold<=12 deadband<=20 confirm=200ms requests=2 retargets=0 force_safe=3
+P112R12R6R2 feedback root-cause propagation host test: PASS
+PASS: version
+PASS: project name
+PASS: R12 clean production retained
+PASS: R6R2 propagation retained
+PASS: R12R8 candidate rev
+PASS: freshness guard enabled
+PASS: freshness max 50ms
+PASS: inert output isolation
+PASS: UART RX disabled
+PASS: R10 stimulus disabled
+PASS: R11 commissioning disabled
+PASS: no R12R5 stimulus macro
+PASS: no R12R6 injection macro
+PASS: no R12R7 test macro
+PASS: no virtual GNC stimulus source
+PASS: no R12R7 GFC freeze state
+PASS: no R12R6 fault injection state
+PASS: production step-count freshness
+PASS: production stale age gate
+PASS: freshness reset on revoke
+PASS: production submit route
+PASS: public feedback abort code
+PASS: P111 feedback abort mapping
+PASS: P111 FEEDBACK latch
+PASS: other P110 failures low-level
+PASS: 950 floor
+PASS: no 255 kick
+PASS: RCS hard isolation
+PASS: vent hard isolation
+PASS: do not fly
+PASS: start doc
+PASS: monitor
+PASS: unchanged core: App/Services/NeedleValveIntegrationTest/needle_valve_integration_test.c
+PASS: unchanged core: App/Services/NeedleValveHardware/needle_valve_hw.c
+PASS: unchanged core: App/Modules/Control/GeneratedFlightControl/generated_flight_control.c
+PASS: unchanged core: App/app.c
+PASS: unchanged core: Core/Src/stm32f4xx_it.c
+PASS: unchanged core: App/Services/SDLogger/sd_logger.c
+PASS: unchanged core: App/Services/UARTTelemetry/uart_telemetry.c
+PASS: unchanged core: App/Services/SolenoidOutput/solenoid_output.c
+PASS: unchanged core: App/Services/ServoOutput/servo_output.c
+PASS: R12R8 production freshness model (fresh -> stale safe0 -> recover -> invalid safe0)
+PASS: P111 regressions + feedback root-cause propagation
+PASS: monitor py_compile
+NOTE: ARM/Cortex-M4 target compiler/CubeIDE target build unavailable here; target build is NOT claimed.
+P112R12R8 production-candidate inert static/host validation: PASS
+
+PASS: R12R8 monitor offline parser/regression replay against previously captured R12R3 physical safe-zero log.
+Preflight ready      : True
+SD ready seen        : True
+PE9 open seen        : True
+Authorization seen   : True
+GNC valid/source seen: True / True
+Healthy auth frame   : True
+Max GNC / request    : 0.0 / 0.0
+Max target dev ADC   : 0
+Max moves            : 0
+RCS applied != 0     : False
+STOP latched seen    : False
+Hard-off max         : 0
+ISR max us           : 199
+Final baseline/ADC   : 1023 / 1022
+Final P111/P110      : HOLD / RUNNING
+Fault needle/P111    : 0 0
+
+SONUC: PASS - CLEAN PRODUCTION CANDIDATE SAFE-ZERO DRY-RUN
+
+Change audit versus R12R3 clean production base:
+Files /mnt/data/p112r12r3_work/P112R12R3_PROD_AUTO_950PLUS_INERT_CLEAN/.project and /mnt/data/p112r12r8_work/P112R12R8_PRODUCTION_CANDIDATE_INERT_DRYRUN/.project differ
+Only in /mnt/data/p112r12r8_work/P112R12R8_PRODUCTION_CANDIDATE_INERT_DRYRUN: 00_START_HERE_P112R12R8_TR.md
+Files /mnt/data/p112r12r3_work/P112R12R3_PROD_AUTO_950PLUS_INERT_CLEAN/App/Common/app_config.h and /mnt/data/p112r12r8_work/P112R12R8_PRODUCTION_CANDIDATE_INERT_DRYRUN/App/Common/app_config.h differ
+Files /mnt/data/p112r12r3_work/P112R12R3_PROD_AUTO_950PLUS_INERT_CLEAN/App/Common/app_version.h and /mnt/data/p112r12r8_work/P112R12R8_PRODUCTION_CANDIDATE_INERT_DRYRUN/App/Common/app_version.h differ
+Files /mnt/data/p112r12r3_work/P112R12R3_PROD_AUTO_950PLUS_INERT_CLEAN/App/Core/Tasks/app_tasks.c and /mnt/data/p112r12r8_work/P112R12R8_PRODUCTION_CANDIDATE_INERT_DRYRUN/App/Core/Tasks/app_tasks.c differ
+Files /mnt/data/p112r12r3_work/P112R12R3_PROD_AUTO_950PLUS_INERT_CLEAN/App/Services/NeedleValveAutonomousControl/needle_valve_autonomous_control.c and /mnt/data/p112r12r8_work/P112R12R8_PRODUCTION_CANDIDATE_INERT_DRYRUN/App/Services/NeedleValveAutonomousControl/needle_valve_autonomous_control.c differ
+Files /mnt/data/p112r12r3_work/P112R12R3_PROD_AUTO_950PLUS_INERT_CLEAN/App/Services/NeedleValveIntegrationTest/needle_valve_integration_test.h and /mnt/data/p112r12r8_work/P112R12R8_PRODUCTION_CANDIDATE_INERT_DRYRUN/App/Services/NeedleValveIntegrationTest/needle_valve_integration_test.h differ
+Only in /mnt/data/p112r12r8_work/P112R12R8_PRODUCTION_CANDIDATE_INERT_DRYRUN: P112R12R8_DO_NOT_FLY.txt
+Only in /mnt/data/p112r12r8_work/P112R12R8_PRODUCTION_CANDIDATE_INERT_DRYRUN: P112R12R8_VALIDATION.txt
+Only in /mnt/data/p112r12r8_work/P112R12R8_PRODUCTION_CANDIDATE_INERT_DRYRUN: monitor_uart_p112r12r8_production_candidate_inert.py
+Files /mnt/data/p112r12r3_work/P112R12R3_PROD_AUTO_950PLUS_INERT_CLEAN/tools/p112r12_host_stub/Services/NeedleValveIntegrationTest/needle_valve_integration_test.h and /mnt/data/p112r12r8_work/P112R12R8_PRODUCTION_CANDIDATE_INERT_DRYRUN/tools/p112r12_host_stub/Services/NeedleValveIntegrationTest/needle_valve_integration_test.h differ
+Only in /mnt/data/p112r12r8_work/P112R12R8_PRODUCTION_CANDIDATE_INERT_DRYRUN/tools: p112r12r6r2_fault_cause_host_test.c
+Only in /mnt/data/p112r12r8_work/P112R12R8_PRODUCTION_CANDIDATE_INERT_DRYRUN/tools: validate_p112r12r8.py
+
+IMPORTANT: replay above validates monitor compatibility only; it is NOT a physical R12R8 run.
+arm-none-eabi-gcc: NOT AVAILABLE; Cortex-M4/CubeIDE target build is NOT claimed.

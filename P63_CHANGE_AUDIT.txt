@@ -1,0 +1,28 @@
+P64 CHANGE AUDIT
+================
+Base: P60 E-STOP AUTH HARDENING
+
+Expected modified/new areas:
+- App/Common/app_version.h
+- App/Modules/NRF24/nrf24.c/.h (non-blocking explicit 32-byte downlink)
+- App/Services/NRFTelemetry/* (new, read-only telemetry snapshot + TDD scheduler)
+- App/app.c/.h (telemetry init/service + read-only stop getter)
+- App/Services/SolenoidOutput/* (read-only mask getters)
+- Eclipse project/launch naming
+
+Unexpected changed files: 0
+NONE
+Missing baseline files: 0
+NONE
+
+Critical baseline:
+UNCHANGED  ea896a917b7296495437db24e86e23c7270f7d2f93d144ab123a43197398767f  App/Modules/Sensors/IMU/imu.c
+UNCHANGED  367021da06f9b3bcc94c5f19e13efca858c8bac572de02c3b849473e0ac157ac  App/Modules/Sensors/SensorManager/sensor_manager.c
+UNCHANGED  7d058c7a38c67981bdd2cef54f1b377d43e6a03633e6ae577db2cc1c595592e2  App/Modules/Sensors/Barometer/barometer.c
+UNCHANGED  0ade78bd8190f0d3ac61f852cb548c8bca6c21775307dbc5fec030cb2fa48399  App/Modules/Sensors/Lidar/Lidar.c
+UNCHANGED  e10c9880de0a6836a59d8d1be241b344221636bfb080749068cac793fb6d0b4d  App/Modules/Estimation/FullStateESKF/full_state_eskf.c
+UNCHANGED  574f166d5299fb55c3940e4193afaed21ca20c5146c825bb9c109620c8e41a99  App/Modules/Estimation/AttitudeEstimator/attitude_estimator.c
+UNCHANGED  9fcbf3d9685cdece8d9c2b386aef5d061e98d9cd2b1b16010edd159c6680dc4f  App/Services/SDLogger/sd_logger.c
+UNCHANGED  e9aafb3e4b72c6b892202a4d7f51dd6726c34604be6a9e746f91be219d69832f  App/Modules/Control/NeedleValve/needle_valve_controller.c
+UNCHANGED  03588e5f5c60e1e4e50c74807fc901e5b8fc22cce3ef025b2c24a97ee4226f37  App/Modules/RemoteControl/remote_control.c
+UNCHANGED  6f8e67d7091ef223ff6b21f5b335f93ee3e4bfd5f537cd0491d8f82cfe2b89a5  App/Core/Tasks/app_tasks.c

@@ -1,0 +1,13 @@
+P60 changed-source syntax validation
+====================================
+Tool: clang 17, target arm-none-eabi, Cortex-M4, USE_HAL_DRIVER, STM32F407xx.
+GNU ARM / STM32CubeIDE linker toolchain is not installed in this environment,
+so no ELF/HEX is packaged. CubeIDE Clean + Build is still required before flash.
+
+PASS App/app.c
+PASS App/Core/Tasks/app_tasks.c
+     (syntax-only with a minimal math.h declaration stub because the container
+      does not provide ARM libc math headers; project source was not altered)
+PASS App/Services/UARTTelemetry/uart_telemetry.c
+
+No syntax errors were reported in the P60 modified C translation units.

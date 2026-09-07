@@ -1,0 +1,12 @@
+R8R35R3R10R1 60S ENDURANCE — STATIC VALIDATION
+
+Design:
+- TIM5 remains 30 Hz.
+- Ground/preflight SD frame rate remains 30 Hz.
+- Flight RAM compact storage decimation = 4 -> 7.5 Hz.
+- 512 x 96 B fixed CCM overlay -> 68.27 s nominal capacity.
+- Flight SDIO launch prohibition inherited unchanged from R3R10.
+- SD health in RAM mode uses 30 Hz TIM5 heartbeat and RAM overflow=0.
+- Control/ESKF/RCS/needle rates intentionally unchanged.
+
+ARM/CubeIDE target build: NOT RUN in this environment.

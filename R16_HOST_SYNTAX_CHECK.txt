@@ -1,0 +1,10 @@
+TARAGAY-T1 R16 STM32 HOST SYNTAX CHECK
+
+clang -std=gnu11 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F407xx -fsyntax-only:
+[PASS] App/Modules/Control/TaragayFlightLogic/taragay_flight_logic.c
+[PASS] App/Core/Tasks/app_tasks.c
+[PASS] App/Services/PreflightTrigger/preflight_trigger.c
+
+STM32 target build:
+[NOT RUN] arm-none-eabi-gcc is not installed in this environment.
+CubeIDE target compile/link is still required before hardware use.

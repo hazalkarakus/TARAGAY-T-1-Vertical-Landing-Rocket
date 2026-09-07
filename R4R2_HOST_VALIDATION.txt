@@ -1,0 +1,11 @@
+R4R2 REL3M/CEIL4M host validation
+=================================
+GCC object compile: PASS
+Warnings: CMSIS host pointer-size warnings; pre-existing dormant mount_cal_step unused warning.
+
+Behavior harness:
+sep=1 target=4.000 state=1 valve=0.0100
+ceiling z=5 target=4.000 force=0.00 valve=0.0000
+hyst z=4.9 force=0.00 valve=0.0000
+release z=4.79 force=261.43 valve=0.0100
+RESULT: PASS

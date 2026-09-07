@@ -1,0 +1,8 @@
+P112R12R8R35R3 SD SERVICE CLOSURE
+- SD-only source change.
+- 200 Hz V14 format preserved.
+- APP_P34_SD_MIN_SLACK_US = 320 us.
+- one-frame bounded drain per SDLogger_Update.
+- SD no longer suppressed by needle timing-critical state.
+- R8R35R2 needle/RCS/ESKF/safety code otherwise unchanged.
+- SD throughput telemetry appended to TGY73.

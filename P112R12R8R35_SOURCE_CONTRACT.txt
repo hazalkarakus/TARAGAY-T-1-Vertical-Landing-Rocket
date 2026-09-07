@@ -1,0 +1,9 @@
+R8R35 SOURCE CONTRACT VALIDATION
+PASS R8R35 config rev enabled
+PASS global inert isolation retained
+PASS legacy no-output safe API implemented
+PASS 200Hz R8R33 uses no-output safe
+PASS flight applied telemetry uses physical mask
+PASS pulse duration telemetry implemented
+PASS needle root diagnostics appended
+PASS R8R35 banner

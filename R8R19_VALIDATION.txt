@@ -1,0 +1,26 @@
+P112R12R8R19 VALIDATION
+
+Host flight-logic test:
+  states=11111
+  final=4
+  step=1300
+  elapsed=13000 ms
+  max valve cmd=0.1180
+  RCS request seen=1
+  max RCS fault=0
+  hover best=8.000 s
+  RESULT=PASS
+
+Host syntax:
+  TaragayFlightLogic: PASS (-Wall -Wextra -Werror)
+  app_tasks.c: PASS with STM32F407xx target define (CMSIS host pointer-size warnings only)
+  uart_telemetry.c: PASS with STM32F407xx target define (CMSIS host pointer-size warnings only)
+  monitor py_compile: PASS
+  monitor fake-frame decoder: PASS, 180 fields
+
+Frozen core audit:
+  PASS
+
+IMPORTANT:
+  ARM/CubeIDE target Clean+Build has not been executed in this environment.
+  User must Clean -> Build -> Flash in STM32CubeIDE.

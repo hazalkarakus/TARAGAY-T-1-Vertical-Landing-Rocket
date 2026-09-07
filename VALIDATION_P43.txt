@@ -1,0 +1,20 @@
+P43 VALIDATION
+
+PASS: P42 scheduler priority preserved (IMU -> ESKF -> LiDAR -> BARO -> NRF -> MON -> COV)
+PASS: ESKF 200 Hz correction/public and 25 Hz covariance configuration unchanged
+PASS: LiDAR is explicitly handled as best-effort 1 kHz state-machine service
+PASS: LiDAR intentional carry is bounded to one IMU generation
+PASS: carried LiDAR release cannot hide unbounded missed service opportunities
+PASS: LiDAR best-effort skips do not increment hard deadline_miss_count
+PASS: IMU repeated-word retry is deferred to the next 1 ms task slot
+PASS: immediate second 3-burst IMU transaction removed
+PASS: second deferred integrity failure still requests non-blocking recovery
+PASS: P40 12-NOP / medium-slew software-SPI hardening preserved
+PASS: fast_fault OR system_fault physical actuator inhibit preserved
+PASS: UART schema remains 214 unique fields; P43 monitor/decoder protocol-compatible
+PASS: session-safe V14 decoder preserved
+PASS: modified C files pass host GCC syntax-only check
+PASS: actual scheduler.c carry/skip/re-anchor host behavior test
+PASS: Python monitor/decoder/P43 validator compile
+
+NOTE: arm-none-eabi-gcc is unavailable in this environment; target CubeIDE Clean/Build/link is still required.

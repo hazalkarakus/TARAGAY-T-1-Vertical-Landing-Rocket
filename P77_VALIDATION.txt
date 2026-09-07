@@ -1,0 +1,66 @@
+TARAGAY-T1 P77 NEEDLE BREAKAWAY THRESHOLD VALIDATION
+
+P76 HARDWARE RESULT USED
+PASS - Uploaded P76 run completed the full 6-step sequence.
+PASS - PWM35/45/55 at 10 ms produced 0 ADC movement in both commanded directions.
+PASS - P76 final state was DONE with needle_adc=1023 and needle_fault=0.
+CONCLUSION - P76 found that <=PWM55 / 10 ms is below the breakaway threshold on this hardware.
+
+PURPOSE
+PASS - P77 searches only for the first measurable OPEN breakaway point.
+PASS - P71 remains the flight/safety baseline; P77 is DO-NOT-FLY bench firmware only.
+PASS - Closed-loop needle control is not used for motion.
+
+ISOLATION / SAFETY
+PASS - NRF compile-time disabled (same isolated P76 profile).
+PASS - UART RX commands disabled; UART remains TX-only diagnostics.
+PASS - RCS physical path compile-time inhibited in raw characterization mode.
+PASS - SolenoidOutput_ForceSafe() continuously called by bench supervisor.
+PASS - Pulse ownership isolated to NeedleValveIntegrationTest + TIM7 1 kHz hard-stop.
+PASS - Any USER press during PULSE/SETTLE -> local abort + H-bridge disable.
+PASS - flight_active / preflight fault / SystemMonitor actuator fault / system_ok=0 prevent/abort motion.
+PASS - ADC <=3 aborts.
+PASS - Reference capture requires ADC >=1012.
+PASS - Absolute travel guard reduced from 120 ADC (P76) to 60 ADC in P77.
+PASS - Wrong-direction guard: OPEN must not increase ADC by >=3 after settle.
+PASS - No automatic CLOSE pulse is issued at the closed hard-stop or after threshold discovery.
+
+P77 SEARCH LADDER
+PASS - OPEN PWM65 / 10 ms.
+PASS - OPEN PWM65 / 15 ms.
+PASS - OPEN PWM65 / 20 ms.
+PASS - OPEN PWM75 / 10 ms.
+PASS - OPEN PWM75 / 15 ms.
+PASS - OPEN PWM75 / 20 ms.
+PASS - No P77 raw pulse exceeds PWM75 or 20 TIM7 ticks.
+PASS - Search stops immediately after first correct-direction >=3 ADC settled motion.
+PASS - If all six steps have <=2 ADC movement, result DONE_NO_THRESHOLD.
+
+DIAGNOSTICS
+PASS - Captures start, post-pulse, +100 ms, +250 ms, +500 ms, signed OPEN delta and max excursion.
+PASS - Final threshold-found frame retains the PWM and pulse duration that caused motion.
+PASS - UART header=352 columns including CRC.
+PASS - Python monitor=351 payload fields.
+PASS - Synthetic CRC frame decode PASS.
+
+UNCHANGED CORE
+PASS - 15/15 audited sensor/estimator/control/hardware critical source files are byte-identical P71 -> P77.
+PASS - needle_valve_controller.c byte-identical P71 -> P77.
+PASS - needle_valve_hw.c byte-identical P71 -> P77.
+
+STATIC CHECKS
+PASS - needle_valve_integration_test.c clang Cortex-M4 syntax (-Wall -Wextra -Werror).
+PASS - stm32f4xx_it.c clang Cortex-M4 syntax (-Wall -Wextra -Werror).
+PASS - App/app.c clang Cortex-M4 syntax (unused-function warning suppressed only for intentionally disabled NRF path).
+PASS - UARTTelemetry uart_telemetry.c clang Cortex-M4 syntax (-Wall -Wextra -Werror).
+PASS - monitor_uart_p77_breakaway.py py_compile.
+
+USER HARDWARE BUILD / TEST STILL REQUIRED
+- CubeIDE: Clean Project -> Build Project -> Flash.
+- No gas / no pressure.
+- Keep RCS electrical power physically inhibited.
+- Wait system_ok=1.
+- USER #1 captures closed reference.
+- Then press USER only when monitor says IDLE and follow the next suggested step.
+- Stop immediately when THRESHOLD_FOUND / DONE appears; do not press USER again.
+- Send uart_p77_breakaway.txt.

@@ -1,0 +1,19 @@
+P112R12R8R35R2 CLOSURE FIXES VALIDATION
+
+Source contract:
+- R8R35R2 macro enabled
+- APP version/project/banner updated
+- SD order = Scheduler -> Freshness/Preflight -> SD -> nRF/Remote
+- APP_P34_SD_MIN_SLACK_US unchanged (520 us)
+- 1 kHz Scheduler_Run hard rule preserved
+- P110_HARD_OVERSHOOT_ADC unchanged at 12 ADC
+- same-target dynamic stop-distance guard added, margin 4 ADC, cap 48 ADC
+- real GNC retarget bypass preserved
+- hold-only P83 recovery window = 500 ms
+- active P110 feedback-invalid abort path unchanged
+- RCS V7.13.4 / R8R34 anti-chatter / fixed matrix / physical mapping unchanged
+
+Host validation:
+- 45/45 App C files gcc -fsyntax-only PASS
+- monitor py_compile PASS
+- R8R35R1 hardware log replay remains FAIL as expected (needle overshoot + SD drop)

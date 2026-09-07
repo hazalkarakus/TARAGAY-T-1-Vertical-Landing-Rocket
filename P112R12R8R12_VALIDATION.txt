@@ -1,0 +1,19 @@
+P112R12R8R12 NRF COEXISTENCE INERT VALIDATION
+==============================================
+PASS - project renamed P112R12R8R12_NRF_COEXISTENCE_INERT
+PASS - APP_VERSION_STRING = 8.19M-P112R12R8R12-NRF-COEXISTENCE-INERT
+PASS - APP_OPTIONAL_NRF24_ENABLED = 1
+PASS - APP_P112R12_INERT_OUTPUT_ISOLATION_MODE remains 1
+PASS - UART compact frame upgraded TGY71 -> TGY72 with NRF coexistence diagnostics
+PASS - TGY72 static field count = 134
+PASS - Python monitor field count = 134
+PASS - Python synthetic CRC/frame decode
+PASS - Python monitor py_compile
+PASS - frozen hash audit: scheduler/app_tasks/IMU/BARO/LiDAR/FullStateESKF/SDLogger/app.c unchanged
+PASS - nrf24.c/.h unchanged
+PASS - remote_control.c/.h unchanged
+PASS - nrf_telemetry.c/.h unchanged
+PASS - GeneratedFlightControl unchanged
+PASS - host Clang syntax: uart_telemetry.c, nrf24.c, remote_control.c, nrf_telemetry.c, app.c
+NOTE - host Clang ignores GCC optimize("O2") attributes in syntax-only validation; target GCC uses them.
+NOTE - ARM GNU/CubeIDE linker/compiler is not available here; CubeIDE Clean+Build is still required on target toolchain.

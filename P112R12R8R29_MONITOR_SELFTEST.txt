@@ -1,0 +1,63 @@
+
+>>> CAL PHASE: 0 WAIT_SOURCE
+
+>>> CAL PHASE: 1 HOLD_UPRIGHT
+>>> ROKETI OLABILDIGINCE DIK VE SABIT TUT. Bu poz sadece dogrulama; final Z +/- ciftlerden cikacak.
+
+>>> CAL PHASE: 2 TILT_TOP_TO_PLUS_X
+>>> SIMDI USTU FIZIKSEL/CAD +X YONUNE 12-20 DEG EG.
+
+>>> CAL PHASE: 3 HOLD_PLUS_X_TILT
+>>> +X EGIMINI SABIT TUT. Yaklasik 1.2 saniye.
+
+>>> CAL PHASE: 4 TILT_TOP_TO_MINUS_X
+>>> +X KAYDEDILDI. DIK'E DON; SIMDI USTU -X YONUNE 12-20 DEG EG.
+
+>>> CAL PHASE: 5 HOLD_MINUS_X_TILT
+>>> -X EGIMINI SABIT TUT. Yaklasik 1.2 saniye.
+
+>>> CAL PHASE: 6 TILT_TOP_TO_PLUS_Y
+>>> X CIFTI KAYDEDILDI. DIK'E DON; SIMDI USTU +Y YONUNE 12-20 DEG EG.
+
+>>> CAL PHASE: 7 HOLD_PLUS_Y_TILT
+>>> +Y EGIMINI SABIT TUT. Yaklasik 1.2 saniye.
+
+>>> CAL PHASE: 8 TILT_TOP_TO_MINUS_Y
+>>> +Y KAYDEDILDI. DIK'E DON; SIMDI USTU -Y YONUNE 12-20 DEG EG.
+
+>>> CAL PHASE: 9 HOLD_MINUS_Y_TILT
+>>> -Y EGIMINI SABIT TUT. Yaklasik 1.2 saniye.
+
+>>> CAL PHASE: 10 CALIBRATED
+>>> R8R29 COZUMU TAMAM. +Z, +/-X ve +/-Y ciftlerinden turetildi. DIK KONUMA DON VE +/-X +/-Y ROLE TESTINI YAP.
+>>> R_rocket_from_imu =
+     -0.9905 -0.1376 +0.0006
+     +0.1376 -0.9905 +0.0000
+     +0.0006 +0.0001 +1.0000
+>>> QUALITY oppX/Y=0.9998/0.9999 XY=89.95deg agree=1.0000 zAgree=1.0000 det=1.0000 ortho=0.00000
+
+================ R8R29 OZET ================
+Valid/rejected             : 270/0
+Capture duration           : 64.930s
+CPU avg/max                : 48.89% / 50.90%
+Calibration phases seen    : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+Calibration valid/fault    : 1/0
+Calibration tilt +X/-X     : 18.93 / 15.90 deg
+Calibration tilt +Y/-Y     : 13.71 / 14.48 deg
+Pair opposition X/Y        : 0.9998 / 0.9999
+XY angle / axis agreement  : 89.95 deg / 1.0000
+Z agreement                : 1.0000
+det / ortho error          : 1.00000 / 0.00000
+R_rocket_from_imu:
+   -0.99050 -0.13760 +0.00060
+   +0.13760 -0.99050 +0.00000
+   +0.00060 +0.00010 +1.00000
+RCS events V1/V3/V5/V7    : 4/31/3/2
+Physical RCS seen          : False
+RCS fault max              : 0
+Needle PWM max/move delta  : 0/0  (MUST 0/0)
+Miss delta I/B/L/N/E       : 0/0/0/0/0
+Scheduler realign delta    : 0
+Ready/system/ESKF final    : 1/1/1
+
+SONUC: PASS - R8R29 PAIRED-AXIS-DERIVED-Z CALIBRATION

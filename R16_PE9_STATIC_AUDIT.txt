@@ -1,0 +1,20 @@
+TARAGAY-T1 R16 STM32 PE9 MISSION-START STATIC AUDIT
+
+[PASS] PE9 polarity LOW=installed HIGH=separated
+[PASS] PE9 debounce = 10 ms
+[PASS] flight_active only after preflight_ready path
+[PASS] early separation before readiness latches fault
+[PASS] R16 mission service gated by pf.flight_active
+[PASS] pre-release needle bypass removed
+[PASS] physical main needle hard-gated by flight_active
+[PASS] canonical actuator auth hard-gated by flight_active
+[PASS] physical RCS hard-gated by flight_active
+[PASS] release_event no longer faults INIT/SELF_CHECK
+[PASS] R16 +3m target
+[PASS] R16 +/-4m latched safety
+[PASS] b_hat down/up 0.050/0.015
+[PASS] 3-turn command map config
+[PASS] Needle low-level 3 turns
+[PASS] Autonomous actuator 585 ADC
+
+RESULT: PASS (16/16)

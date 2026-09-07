@@ -1,0 +1,11 @@
+P93 IS A BENCH-ONLY NEEDLE ACTUATOR DIAGNOSTIC. DO NOT FLY.
+NO GAS / NO PRESSURE.
+
+Startup torque boost:
+- First OPEN pulse: 128/255 PWM = ~50.2% for 40 ms.
+- If feedback responds and remains valid: later OPEN pulses are 60/255 = ~23.5% for 20 ms.
+- 30 ms settle between pulses.
+- If start is 1023 and filtered ADC is still exactly 1023 after the boosted pulse + settle, sequence aborts before a second pulse.
+- Existing total motor-on and sequence time limits remain active.
+
+The boost raises average motor voltage/current during breakaway, but does not prove mechanical torque or repair the PC1/pot feedback path.

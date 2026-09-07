@@ -1,0 +1,31 @@
+P112R8 CHANGE AUDIT
+
+Base:
+  TGY_V8_19M_SMALLBOARD_FULLSYSTEM_P112R5_SD_BOOT_TIM7_FIXED.zip
+
+Purpose:
+  Restore production full-autonomous GNC -> adaptive actuator integration after
+  successful P112R7 single-shot bench validation.
+
+Production control changes vs fixed P112R5 base:
+  NONE.
+
+Package identity changes:
+  - CubeIDE project renamed to P112R8_PRODUCTION_AUTONOMOUS_INTEGRATION
+  - firmware version string bumped to P112R8
+  - package-facing documentation updated
+  - validator updated for P112R8 identity and architecture
+
+Explicitly absent:
+  - P112R7 PA0 bench command path
+  - P112R7 single-shot sequencer
+  - bench-only RCS/remote-vent suppression
+
+Explicitly preserved:
+  - P110/P111/P112 adaptive controller
+  - 50 ms P112 command watchdog
+  - GeneratedFlightControl 200 Hz production command route
+  - UART TX-only actuator safety policy
+  - PE9/preflight/common authorization gates
+  - SD boot TIM7 isolation fix
+  - runtime SD DMA/defer structure

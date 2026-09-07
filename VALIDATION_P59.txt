@@ -1,0 +1,34 @@
+P59 VALIDATION
+[PASS] version P59
+[PASS] receiver address TGY01
+[PASS] receiver channel 76
+[PASS] receiver payload 4
+[PASS] receiver 1Mbps 0dBm
+[PASS] receiver protocol magic/checksum
+[PASS] invalid reason counters
+[PASS] vent physical enabled
+[PASS] vent ground only
+[PASS] vent hold confirm
+[PASS] vent fast RF freshness
+[PASS] vent one-hot sequential masks
+[PASS] vent one-hot enforcement
+[PASS] vent fault/flight fail closed
+[PASS] vent override protects ownership
+[PASS] STOP latch
+[PASS] STOP forces RCS safe
+[PASS] STOP stops needle
+[PASS] STOP gates 1k/200Hz
+[PASS] STOP priority before vent
+[PASS] LED PD12/13/14
+[PASS] Core GPIO initializes LEDs safe
+[PASS] P57 critical sources byte-identical (16 files)
+[PASS] TX vent PA1
+[PASS] TX estop PA0
+[PASS] TX semantic bit mapping
+[PASS] TX address TGY01
+[PASS] TX channel/payload
+[PASS] TX RF setup/CRC/autoack
+[PASS] TX packet matches receiver
+[PASS] TX GPIO pullups
+[PASS] TX IOC pin mapping
+PASS=32 SKIP=0 FAIL=0

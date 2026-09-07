@@ -1,0 +1,12 @@
+P112R12R8R28 STATIC SAFETY AUDIT
+=================================
+/mnt/data/P112R12R8R28_FIVE_POSE_IMU_ROCKET_FRAME_CAL_RELAY_BENCH/App/Services/NeedleValveAutonomousControl/needle_valve_autonomous_control.c:12:#define P112R5_MAX_TRAVEL_ADC                  585U
+/mnt/data/P112R12R8R28_FIVE_POSE_IMU_ROCKET_FRAME_CAL_RELAY_BENCH/App/Modules/Control/NeedleValve/needle_valve_controller.c:15:#define NV_ADC_PER_TURN                    195U
+/mnt/data/P112R12R8R28_FIVE_POSE_IMU_ROCKET_FRAME_CAL_RELAY_BENCH/App/Modules/Control/NeedleValve/needle_valve_controller.c:16:#define NV_MAX_TURNS                       3.0f
+/mnt/data/P112R12R8R28_FIVE_POSE_IMU_ROCKET_FRAME_CAL_RELAY_BENCH/App/Modules/Control/NeedleValve/needle_valve_controller.c:17:#define NV_MAX_TRAVEL_ADC                  (3U * NV_ADC_PER_TURN)
+495: * to their safe states by APP_P112R12_INERT_OUTPUT_ISOLATION_MODE. UART remains
+583:#define APP_P112R12_INERT_OUTPUT_ISOLATION_MODE                     1U
+643:     (APP_P112R12_INERT_OUTPUT_ISOLATION_MODE != 1U))
+663:    (((APP_P112R12_INERT_OUTPUT_ISOLATION_MODE != 0U) || \
+506:#define APP_P112R12R8R28_FIVE_POSE_FRAME_CAL_REV                     1U
+630:     (APP_P112R12R8R28_FIVE_POSE_FRAME_CAL_REV != 1U) || \

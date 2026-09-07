@@ -1,0 +1,4 @@
+PASS syntax: App/Modules/NRF24/nrf24.c
+PASS syntax: App/Services/NRFTelemetry/nrf_telemetry.c
+PASS syntax: App/app.c
+PASS syntax: App/Services/SolenoidOutput/solenoid_output.c

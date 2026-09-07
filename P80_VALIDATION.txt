@@ -1,0 +1,86 @@
+TARAGAY-T1 P80 ADC1 / ADC2 / VREFINT DIAGNOSTIC VALIDATION
+============================================================
+Firmware: 8.19M-P80-ADC1-ADC2-VREF-DIAGNOSTIC
+Purpose : DO-NOT-FLY software-only fault isolation with zero motor motion
+
+1) WHY P80
+----------
+P79 user capture showed strong PC1 instability while needle_enabled=0 and
+needle_rpwm/needle_lpwm=0. P80 adds a second ADC peripheral and VREFINT so the
+next bench run requires no wiring changes.
+
+2) MOTOR / RCS SAFETY
+---------------------
+PASS - APP_NEEDLE_ADC_DIAGNOSTIC_MODE remains 1.
+PASS - NeedleValveHW_SetEnabled() forces enable=0 in diagnostic mode.
+PASS - NeedleValveHW_DriveOpen()/DriveClose() are no-ops in diagnostic mode.
+PASS - Integration service continuously Stop()+SetEnabled(0).
+PASS - RCS SolenoidOutput_ForceSafe() remains continuous.
+PASS - USER/PA0 has no motion action in P80 integration service.
+PASS - NRF remains disabled by existing bench profile guards.
+PASS - UART RX commands remain disabled by existing bench profile guards.
+
+3) ADC CROSS-CHECK DESIGN
+-------------------------
+PASS - PC1 is read by ADC1 channel 11 with 480-cycle sample time.
+PASS - PC1 is independently read by ADC2 channel 11 with 480-cycle sample time.
+PASS - Pair sampling period = 2 ms (~500 Hz).
+PASS - >=25 ADC10 adjacent-step correlation classified as both/ADC1-only/ADC2-only.
+PASS - ADC1-vs-ADC2 instantaneous difference and 1 s maximum are exposed.
+PASS - Every 50 ms ADC1 reads VREFINT channel 17.
+PASS - VREFINT 1 s peak-to-peak is exposed.
+PASS - VREFINT is followed by PC1 3-cycle short sample and PC1 480-cycle recovery sample.
+PASS - Short-vs-long difference and 1 s maximum are exposed.
+PASS - ADC1, ADC2 and VREF timeout counters are exposed.
+PASS - vdda_mv_est is diagnostic-only, based on typical VREFINT=1.210 V; relative stability is the intended use.
+
+4) UART / PYTHON
+----------------
+PASS - Replaced exactly the previous 20 P79 diagnostic payload fields with 20 P80 fields.
+PASS - monitor_uart_p80_adc_crosscheck.py FIELDS = 356.
+PASS - Python py_compile.
+PASS - Synthetic 356-field $TGY68 CRC frame decode.
+PASS - Synthetic compact status rendering.
+
+P80 tail fields:
+p80_diag_flags,p80_samples_total,p80_adc1_long10,p80_adc2_long10,
+p80_adc1_short10,p80_adc12_diff,p80_short_long_diff,p80_win_adc1_pp,
+p80_win_adc2_pp,p80_win_pair_diff_max,p80_win_short_long_max,
+p80_both_jump_count,p80_adc1_only_jump_count,p80_adc2_only_jump_count,
+p80_vref_raw12,p80_vdda_mv_est,p80_vref_win_pp_raw12,
+p80_adc1_timeout_count,p80_adc2_timeout_count,p80_vref_timeout_count
+
+5) STATIC C CHECKS
+------------------
+Tool: clang, target arm-none-eabi, Cortex-M4, USE_HAL_DRIVER, STM32F407xx.
+PASS - App/Services/NeedleValveHardware/needle_valve_hw.c (-Wall -Wextra -Werror).
+PASS - App/Services/NeedleValveIntegrationTest/needle_valve_integration_test.c (-Wall -Wextra -Werror).
+PASS - App/Services/UARTTelemetry/uart_telemetry.c (-Wall -Wextra -Werror).
+NOTE - arm-none-eabi-gcc / STM32CubeIDE linker is not installed in this sandbox;
+       final CubeIDE Clean + Build + link is still required before flash.
+
+6) CRITICAL REGRESSION AUDIT
+----------------------------
+PASS - IMU source byte-identical P79 -> P80.
+PASS - Barometer source byte-identical P79 -> P80.
+PASS - Lidar source byte-identical P79 -> P80.
+PASS - FullStateESKF source byte-identical P79 -> P80.
+PASS - SDLogger source byte-identical P79 -> P80.
+PASS - PreflightTrigger source byte-identical P79 -> P80.
+PASS - SystemMonitor source byte-identical P79 -> P80.
+PASS - AttitudeControl source byte-identical P79 -> P80.
+PASS - NeedleValveController source byte-identical P79 -> P80.
+PASS - Scheduler source byte-identical P79 -> P80.
+
+7) REQUIRED BENCH RUN
+---------------------
+- NO GAS / NO PRESSURE.
+- Physically inhibit RCS electrical power.
+- Preferably keep motor power physically off as a second layer.
+- CubeIDE Clean -> Build -> Flash.
+- Run monitor_uart_p80_adc_crosscheck.py.
+- Do not touch pot/shaft/cables for 20-30 seconds.
+- Send uart_p80_adc_crosscheck.txt.
+
+VALIDATION RESULT: OFFLINE STATIC VALIDATION PASS
+HARDWARE RESULT   : PENDING USER CUBEIDE BUILD + BENCH RUN

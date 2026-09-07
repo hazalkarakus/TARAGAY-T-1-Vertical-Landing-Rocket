@@ -1,0 +1,12 @@
+P57 validation checklist
+========================
+- P55 repeated-pattern fast repair retained.
+- P56 stale pre-write register snapshot and register-only repair retained.
+- P57 stale repair success arms non-blocking STATUS_REG warmup.
+- Both XLDA (bit0) and GDA (bit1) required before retry.
+- Warmup timeout is bounded to 40 ms.
+- Unchanged sample may retry during the bounded warmup; repeated-pattern corruption still escalates.
+- Existing full software-reset recovery remains final safety net.
+- No HAL_Delay in runtime P57 short path.
+- SD V14 / 384-byte format unchanged.
+- UART $TGY68 / V68 / 329 fields + CRC16.

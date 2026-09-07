@@ -1,0 +1,100 @@
+TARAGAY-T1 P79 NEEDLE ADC DIAGNOSTIC VALIDATION
+================================================
+Firmware: 8.19M-P79-NEEDLE-ADC-DIAGNOSTIC
+Purpose : DO-NOT-FLY PC1 / ADC1_IN11 fault isolation with zero motor motion
+
+1) INPUT P78 LOG EVIDENCE
+-------------------------
+PASS - uart_p78_breakaway_timing.txt parsed as 179 decoded telemetry rows.
+PASS - Capture span ~21.411 s.
+PASS - All rows report needle_enabled=0, needle_rpwm=0, needle_lpwm=0.
+PASS - needle_adc observed min=12 and max=1023.
+PASS - Full-scale wandering is present in the motor-off capture.
+NOTE - This indicates a feedback/ADC path problem only if the shaft/pot was not intentionally moved during the affected interval.
+
+2) P79 MOTOR / RCS SAFETY DESIGN
+--------------------------------
+PASS - APP_NEEDLE_ADC_DIAGNOSTIC_MODE=1 compile-time guard.
+PASS - NeedleValveHW_SetEnabled() forces requested enable to 0 in P79.
+PASS - NeedleValveHW_DriveOpen() is a no-op and forces PWM stop in P79.
+PASS - NeedleValveHW_DriveClose() is a no-op and forces PWM stop in P79.
+PASS - Integration service continuously calls Stop()+SetEnabled(0).
+PASS - Existing TIM7 dispatch additionally writes PWM stop only; no ADC polling in ISR.
+PASS - USER/PA0 has no motion action in P79.
+PASS - No DriveOpen/DriveClose call exists in P79 integration source.
+PASS - SolenoidOutput_ForceSafe() remains continuous.
+PASS - Existing raw characterization profile keeps physical RCS path inhibited.
+PASS - APP_OPTIONAL_NRF24_ENABLED=0.
+PASS - APP_V55_UART_RX_COMMANDS_ENABLED=0.
+
+3) ADC DIAGNOSTIC DESIGN
+------------------------
+PASS - PC1 / ADC1_IN11 uses existing proven 12-bit single-shot ADC path.
+PASS - Main sample period = 2 ms (~500 Hz).
+PASS - Statistics window = 1000 ms.
+PASS - Window diagnostics: min/max/mean/stddev/p-p/max adjacent step/jump count.
+PASS - Large jump threshold = 25 ADC10 counts.
+PASS - Extreme-low <=20, extreme-high >=1003 cumulative counters.
+PASS - 8 back-to-back ADC conversions every 50 ms for burst-spread test.
+PASS - ADC timeout counter exposed.
+PASS - raw12, adc10 and approximate mV exposed together.
+PASS - Diagnostic flags are sticky; window values remain per-window.
+
+4) UART / PYTHON MONITOR
+------------------------
+PASS - Firmware payload numeric fields = 355 + frame field = 356.
+PASS - P79 Python FIELDS = 356.
+PASS - Last 20 fields are P79 ADC diagnostics.
+PASS - monitor_uart_p79_adc_diagnostic.py py_compile.
+PASS - Synthetic $TGY68 356-field CRC frame decode.
+PASS - Synthetic compact status rendering.
+
+P79 tail fields:
+p79_diag_flags,p79_samples_total,p79_window_id,p79_window_samples,
+p79_adc10,p79_raw12,p79_mv,p79_win_min_adc,p79_win_max_adc,
+p79_win_mean_x100,p79_win_std_x100,p79_win_pp_adc,p79_win_max_step_adc,
+p79_win_jump_count,p79_total_jump_count,p79_extreme_low_count,
+p79_extreme_high_count,p79_burst_spread_adc,p79_burst_max_spread_adc,
+p79_adc_timeout_count
+
+5) STATIC C CHECKS
+------------------
+Tool: clang, target arm-none-eabi, Cortex-M4, USE_HAL_DRIVER, STM32F407xx.
+PASS - App/Services/NeedleValveIntegrationTest/needle_valve_integration_test.c (-Wall -Wextra -Werror).
+PASS - App/Services/NeedleValveHardware/needle_valve_hw.c (-Wall -Wextra -Werror).
+PASS - App/Services/UARTTelemetry/uart_telemetry.c (-Wall -Wextra -Werror).
+PASS - Core/Src/stm32f4xx_it.c (-Wall -Wextra -Werror).
+PASS - App/app.c syntax (existing disabled-path unused helper warning suppressed for validation).
+NOTE - arm-none-eabi-gcc / STM32CubeIDE linker toolchain is not installed in this sandbox; final CubeIDE Clean + Build is still required.
+
+6) CRITICAL SOURCE REGRESSION AUDIT
+-----------------------------------
+See P79_MAIN_SYSTEM_AUDIT_SHA256.txt.
+PASS - 14/15 audited critical source files byte-identical P78 -> P79.
+INTENTIONAL - NeedleValveHardware changed only to add the P79 compile-time motor hard lock.
+PASS - Sensor, ESKF, SD, preflight, system monitor, RCS control and needle controller sources remain byte-identical.
+
+Existing P78 project files intentionally changed: 8
+- .project
+- App/app.c (comment only)
+- App/Common/app_config.h
+- App/Common/app_version.h
+- App/Services/UARTTelemetry/uart_telemetry.c
+- App/Services/NeedleValveHardware/needle_valve_hw.c
+- App/Services/NeedleValveIntegrationTest/needle_valve_integration_test.h
+- App/Services/NeedleValveIntegrationTest/needle_valve_integration_test.c
+
+7) REQUIRED BENCH PROCEDURE
+---------------------------
+- NO GAS / NO PRESSURE.
+- Physically inhibit RCS electrical power.
+- Preferably disconnect/disable motor power as a second physical layer.
+- CubeIDE Clean -> Build -> Flash.
+- Run monitor_uart_p79_adc_diagnostic.py.
+- Keep pot/shaft in mid range (~400..800 ADC) and untouched for 15-20 s.
+- Then lightly touch/wiggle connector/wiper cable for ~10 s while logging.
+- Measure wiper/PC1-to-GND voltage simultaneously with a multimeter if possible.
+- Send uart_p79_adc_diagnostic.txt before any close/open motion test.
+
+VALIDATION RESULT: OFFLINE STATIC VALIDATION PASS
+HARDWARE RESULT   : PENDING USER CUBEIDE BUILD + BENCH RUN

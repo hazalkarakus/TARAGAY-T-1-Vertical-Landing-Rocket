@@ -1,0 +1,9 @@
+R8R26 STATIC AUDIT
+15:#define NV_ADC_PER_TURN                    195U
+16:#define NV_MAX_TURNS                       3.0f
+17:#define NV_MAX_TRAVEL_ADC                  (3U * NV_ADC_PER_TURN)
+12:#define P112R5_MAX_TRAVEL_ADC                  585U
+517:#define APP_LEGACY_VERTICAL_LANDING_RETIRED                       1U
+610:     (APP_LEGACY_VERTICAL_LANDING_RETIRED != 1U) || \
+504:#define APP_P112R12R8R26_IMU_ROCKET_FRAME_CAL_REV                  1U
+609:     (APP_P112R12R8R26_IMU_ROCKET_FRAME_CAL_REV != 1U) || \

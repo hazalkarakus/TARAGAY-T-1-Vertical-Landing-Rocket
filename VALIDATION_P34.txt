@@ -1,0 +1,12 @@
+P34 validation summary
+- validate_p34.py: PASS
+- validate_v55.py: PASS (167 UART fields)
+- Python monitor/decode py_compile: PASS
+- Host GCC syntax-only, modified C files: PASS
+  App/app.c
+  App/Core/Scheduler/scheduler.c
+  App/Modules/Sensors/IMU/imu.c
+  App/Modules/Estimation/FullStateESKF/full_state_eskf.c
+  App/Services/SDLogger/sd_logger.c
+  App/Services/UARTTelemetry/uart_telemetry.c
+- Full arm-none-eabi CubeIDE link/build not run in this runtime because the ARM GNU toolchain is not installed here.

@@ -1,0 +1,8 @@
+PASS R8R24 rev enabled
+PASS synthetic off
+PASS compute only
+PASS legacy landing retired
+PASS inert output isolation
+PASS hpos zero-ref gate
+PASS event counters
+PASS 3-turn revision

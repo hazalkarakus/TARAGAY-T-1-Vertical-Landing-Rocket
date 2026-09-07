@@ -1,0 +1,43 @@
+P39 FUSION / IMU / RCS HARDENING VALIDATION
+============================================
+
+SOURCE / STATIC VALIDATION
+PASS - App version patch 39 and P39 version string.
+PASS - IMU task 1 kHz, LIDAR service 1 kHz, ESKF correction 200 Hz.
+PASS - Covariance scheduler period remains 40 ms / 25 Hz; readiness threshold 32 IMU samples.
+PASS - Normal LIDAR innovation gate remains 0.25 m.
+PASS - Bounded LIDAR innovation reacquisition: 6 confirms, <=1.0 m, 5 cm / 0.5 m/s per-update limits, 8-sample exit <=0.12 m.
+PASS - IMU exact-six-axis repeat timeout reduced from 100 ms to 20 ms.
+PASS - IMU runtime recovery remains non-blocking; no HAL_Delay in IMU_ServiceRecovery.
+PASS - Barometer >50 Pa one-frame raw-step guard with two-sample persistent-step confirmation.
+PASS - RCS SolenoidOutput hard-gated by current fast system fault.
+PASS - Active RCS pulse is aborted and ForceSafe is applied on the next 1 ms TIM7 tick after a fast fault.
+PASS - Needle and generated physical control paths are also fast-fault gated.
+PASS - Intentional LIDAR scheduler defers are carried across the protected IMU slot instead of discarded.
+PASS - P38 non-blocking LIDAR recovery/watchdog-rearm behavior preserved.
+PASS - P35/P37 1-bit SDIO + fast CRC + 200 Hz V14 logger path preserved.
+
+UART
+PASS - $TGY55 CRC-protected format retained.
+PASS - P39 monitor and firmware header/order match at 212 unique fields.
+PASS - Added fast_fault, baro raw-spike diagnostics, and bounded LIDAR-reacquisition diagnostics.
+
+HOST COMPILE / TESTS
+PASS - 9 modified/critical application C files pass GCC gnu11 syntax + -Wall -Wextra -Wpedantic with STM32F407xx/HAL headers.
+PASS - Python monitors/validators/decoder py_compile.
+PASS - V49 signed-PD RCS host regression test.
+PASS - P39 added test: live RCS pulse is zeroed in one 1 ms tick when fast fault becomes active.
+PASS - V50 vertical sensor policy host regression test.
+PASS - V50 generated vertical fallback host regression test.
+PASS - tools/validate_p39.py.
+PASS - tools/validate_v55.py (212 UART fields).
+PASS - .project and .cproject XML parse.
+
+NOT RUN
+- ARM Cortex-M4 compile/link/ELF/HEX generation: arm-none-eabi-gcc is not installed in this environment.
+- On-target HIL, relay load, motor load, pressurised gas, hot-fire, or flight qualification.
+
+REQUIRED BEFORE ACTUATION
+- CubeIDE Clean Project -> Build Project -> Flash.
+- First run must be unpressurised with gas isolated and physical actuators disconnected.
+- Verify any fast_fault != 0 forces rcs_applied_mask == 0 and needle/main physical outputs safe.

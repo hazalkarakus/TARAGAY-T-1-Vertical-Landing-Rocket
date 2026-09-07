@@ -1,0 +1,3 @@
+P112R12R8R11 BOUNDED BACKGROUND INERT
+DO NOT FLY.
+Actuator/RCS outputs remain isolated. This revision is for bench timing qualification only.

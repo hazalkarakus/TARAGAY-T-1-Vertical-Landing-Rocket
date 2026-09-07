@@ -1,0 +1,6 @@
+IMPORT THIS FOLDER AS THE CUBEIDE PROJECT:
+P112R12R8R35_FINAL_FULL_SYSTEM_DRYRUN
+
+R8R35 is a PRESSURELESS / DEPRESSURIZED final full-system dry-run candidate.
+It is NOT flight-qualified by packaging alone.
+Run monitor_uart_p112r12r8r35_final_full_system_dryrun.py and require PASS.

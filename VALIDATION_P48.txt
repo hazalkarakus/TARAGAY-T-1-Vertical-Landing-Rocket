@@ -1,0 +1,27 @@
+TARAGAY-T1 P48 VALIDATION
+=========================
+UTC: 2026-08-27T18:27:19Z
+
+P48 validation: PASS (attitude-only sparse Joseph + P46 rollback + 4x SD writer buffering + early backpressure + TGY59/253 + V14 unchanged)
+
+P44 scheduler host tests: PASS
+V50 vertical sensor policy host tests: PASS
+V50 generated vertical fallback host tests: PASS
+
+Python syntax:
+PASS
+
+Modified C syntax-only checks:
+PASS App/Modules/Estimation/FullStateESKF/full_state_eskf.c
+PASS App/Services/SDLogger/sd_logger.c
+PASS App/Services/SystemMonitor/system_monitor.c
+PASS App/Services/PreflightTrigger/preflight_trigger.c
+PASS App/Services/UARTTelemetry/uart_telemetry.c
+PASS App/Core/Tasks/app_tasks.c
+
+arm-none-eabi-gcc: NOT AVAILABLE in this environment; final Cortex-M4 link/RAM check must be done in STM32CubeIDE.
+
+Project metadata:
+	<name>TGY_V8_19M_P48_GRAV_SPARSE_SD_STALL_BUFFER</name>
+PASS no P47 build path
+PASS no stale Debug directory

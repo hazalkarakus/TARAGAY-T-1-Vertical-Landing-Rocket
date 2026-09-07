@@ -1,0 +1,48 @@
+R8R35R3R9 SDIO 750KHZ + ACTUATOR QUIET VALIDATION
+
+Purpose
+- Keep 30 Hz RAM logging from R3R8.
+- Make the slower SDIO clock real in both CubeMX and BSP host-reset paths.
+- Fix R3R8 hold-deadline shortening bug.
+- Avoid new SDIO command launches for 350 ms after RCS activity/pulse completion.
+
+Static configuration
+- APP_SDLOGGER_CAPTURE_TIMER_HZ = 30
+- APP_SDLOGGER_SAMPLE_PERIOD_US = 33333
+- APP_SDIO_RUNTIME_CLOCK_DIV = 62
+- SDIO clock nominal = 48 MHz / (62+2) = 750 kHz
+- APP_SDLOGGER_FLIGHT_ENTRY_HOLD_MS = 2500
+- APP_SDLOGGER_MOTOR_WRITE_COOLDOWN_MS = 500
+- APP_SDLOGGER_RCS_WRITE_COOLDOWN_MS = 350
+- TGY73 fields = 329
+
+R3R8 bug fixed
+- OLD: flight-entry deadline = now+2500, then same-cycle motor-active could overwrite it with now+500.
+- NEW: SDLogger_ExtendWriteHoldUntil() only extends a deadline; shorter cooldowns cannot reduce it.
+
+SDIO clock-path fix
+- tgy.ioc SDIO.ClockDiv = 62.
+- Core/Src/sdio.c uses APP_SDIO_RUNTIME_CLOCK_DIV.
+- FATFS/Target/bsp_driver_sd.c host reset/re-init also uses APP_SDIO_RUNTIME_CLOCK_DIV.
+- R3R8 BSP ClockDiv=10 overwrite removed.
+
+Host checks
+- All 46 App C files gcc -fsyntax-only: PASS.
+- Modified Core/Src/sdio.c: PASS (CMSIS host-size warnings only).
+- Modified FATFS/Target/bsp_driver_sd.c: PASS (CMSIS host-size warnings only).
+- Modified UART/SDLogger: PASS.
+- R3R9 monitor py_compile: PASS.
+- Synthetic 329-field TGY73 CRC parse: PASS.
+
+Frozen control comparison vs R3R8
+- NeedleValveAutonomousControl: SAME
+- TaragayFlightLogic: SAME
+- SolenoidOutput: SAME
+- FullStateESKF: SAME
+- Scheduler: SAME
+- NeedleValve low-level controller: SAME
+- App/app.c: SAME
+- App/Core/Tasks/app_tasks.c: SAME
+
+ARM/CubeIDE target build was NOT run here and is NOT claimed PASS.
+Hardware validation required: pressureless/inert, powered needle path connected, 35 s run.
