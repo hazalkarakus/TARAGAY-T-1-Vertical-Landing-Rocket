@@ -82,37 +82,37 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := TARAGAY_T1_R4R3_NRF_RX_ONLY_GROUND100HZ
+BUILD_ARTIFACT_NAME := TARAGAY_T1_R16_STM_PE9_START
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-TARAGAY_T1_R4R3_NRF_RX_ONLY_GROUND100HZ.elf \
+TARAGAY_T1_R16_STM_PE9_START.elf \
 
 MAP_FILES += \
-TARAGAY_T1_R4R3_NRF_RX_ONLY_GROUND100HZ.map \
+TARAGAY_T1_R16_STM_PE9_START.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-TARAGAY_T1_R4R3_NRF_RX_ONLY_GROUND100HZ.list \
+TARAGAY_T1_R16_STM_PE9_START.list \
 
 OBJCOPY_HEX += \
-TARAGAY_T1_R4R3_NRF_RX_ONLY_GROUND100HZ.hex \
+TARAGAY_T1_R16_STM_PE9_START.hex \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: TARAGAY_T1_R4R3_NRF_RX_ONLY_GROUND100HZ.elf secondary-outputs
+main-build: TARAGAY_T1_R16_STM_PE9_START.elf secondary-outputs
 
 # Tool invocations
-TARAGAY_T1_R4R3_NRF_RX_ONLY_GROUND100HZ.elf TARAGAY_T1_R4R3_NRF_RX_ONLY_GROUND100HZ.map: $(OBJS) $(USER_OBJS) ../STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "TARAGAY_T1_R4R3_NRF_RX_ONLY_GROUND100HZ.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"../STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="TARAGAY_T1_R4R3_NRF_RX_ONLY_GROUND100HZ.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+TARAGAY_T1_R16_STM_PE9_START.elf TARAGAY_T1_R16_STM_PE9_START.map: $(OBJS) $(USER_OBJS) ../STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "TARAGAY_T1_R16_STM_PE9_START.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"../STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="TARAGAY_T1_R16_STM_PE9_START.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -121,19 +121,19 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-TARAGAY_T1_R4R3_NRF_RX_ONLY_GROUND100HZ.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "TARAGAY_T1_R4R3_NRF_RX_ONLY_GROUND100HZ.list"
+TARAGAY_T1_R16_STM_PE9_START.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "TARAGAY_T1_R16_STM_PE9_START.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-TARAGAY_T1_R4R3_NRF_RX_ONLY_GROUND100HZ.hex: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "TARAGAY_T1_R4R3_NRF_RX_ONLY_GROUND100HZ.hex"
+TARAGAY_T1_R16_STM_PE9_START.hex: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "TARAGAY_T1_R16_STM_PE9_START.hex"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) TARAGAY_T1_R4R3_NRF_RX_ONLY_GROUND100HZ.elf TARAGAY_T1_R4R3_NRF_RX_ONLY_GROUND100HZ.hex TARAGAY_T1_R4R3_NRF_RX_ONLY_GROUND100HZ.list TARAGAY_T1_R4R3_NRF_RX_ONLY_GROUND100HZ.map default.size.stdout
+	-$(RM) TARAGAY_T1_R16_STM_PE9_START.elf TARAGAY_T1_R16_STM_PE9_START.hex TARAGAY_T1_R16_STM_PE9_START.list TARAGAY_T1_R16_STM_PE9_START.map default.size.stdout
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_HEX)

@@ -1689,14 +1689,21 @@ static uint8_t rcs_start_event(RCSAxis_t *a, int8_t hazard_sign,
     return 1U;
 }
 
+/* R16e6 Ucus_Bilgisayari model update (v1.214 -> v1.219): the RCS
+ * stopping-distance/prediction angular acceleration, previously one shared
+ * 221.0 dps^2 value for both axes, was split into axis-specific bench-fit
+ * values (pitch identified separately, e.g. the PITCH5 bench run). */
+#define R16_RCS_ALPHA_PITCH_DPS2       365.0f
+#define R16_RCS_ALPHA_YAW_DPS2         215.0f
+
 static uint8_t rcs_select_axis(RCSAxis_t *a, float angle, float rate,
-                               float pred, uint8_t pred_valid)
+                               float pred, uint8_t pred_valid,
+                               float alpha)
 {
     const float no_fire = 0.75f;
     const float limit_deg = 30.0f;
     const float hard_boundary = 29.95f;
     const float safe_target = 27.0f;
-    const float alpha = 221.0f;
     const float brake_margin = 0.3f;
     const float brake_delay_s = 0.080f;
     const float brake_done = 2.0f;
@@ -2314,9 +2321,11 @@ static RCSOutput_t rcs_step(float target_pitch_rad, float target_yaw_rad,
     rcs_age_counters(&s_rcs.yaw, 100U);
 
     event_fault_p = rcs_select_axis(&s_rcs.pitch, pitch_deg, pitch_rate_dps,
-                                    out.pred_pitch_deg, pred_valid);
+                                    out.pred_pitch_deg, pred_valid,
+                                    R16_RCS_ALPHA_PITCH_DPS2);
     event_fault_y = rcs_select_axis(&s_rcs.yaw, yaw_deg, yaw_rate_dps,
-                                    out.pred_yaw_deg, pred_valid);
+                                    out.pred_yaw_deg, pred_valid,
+                                    R16_RCS_ALPHA_YAW_DPS2);
     if ((event_fault_p != 0U) || (event_fault_y != 0U))
     {
         s_rcs.hard_fault = 1U;

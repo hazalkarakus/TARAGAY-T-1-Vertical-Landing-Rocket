@@ -5,6 +5,9 @@ Debug/**/*.elf
 Debug/**/*.bin
 Debug/**/*.map
 Debug/**/*.list
+Debug/**/*.hex
+Debug/**/*.cyclo
+Debug/**/*.su
 
 # IDE / OS
 .metadata/
