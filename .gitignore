@@ -9,6 +9,10 @@ Debug/**/*.hex
 Debug/**/*.cyclo
 Debug/**/*.su
 
+# Python
+__pycache__/
+*.pyc
+
 # IDE / OS
 .metadata/
 *.log
