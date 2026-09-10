@@ -4,16 +4,29 @@
 #include <stdint.h>
 
 /*
- * Valve names describe the attitude-error sign corrected by each channel.
- * This keeps the software independent of the mechanical nozzle direction.
+ * Valve names are the physical relay-harness channel (X/Y, matching the
+ * IN1..IN4 connector labels in solenoid_output.c), NOT an attitude axis.
+ * Earlier revisions named these ROLL_POS_ERROR/PITCH_POS_ERROR etc, which
+ * silently disagreed with TaragayFlightLogic's own PITCH/YAW axis naming for
+ * these same bits (its "pitch" axis drives the X channel here; its "yaw"
+ * axis drives the Y channel) -- see the mapping note in
+ * App/Modules/Control/TaragayFlightLogic/taragay_flight_logic.c near
+ * rcs_step(). That three-way naming mismatch (ROLL/PITCH here vs X/Y in the
+ * .c file vs PITCH/YAW in flight logic, all for the same 4 wires) is an easy
+ * way to wire or reason about the wrong axis during hardware integration,
+ * so the names below were changed to the neutral X/Y channel label instead
+ * of guessing which attitude axis they actually correct. Whether the X
+ * channel is physically mounted along the vehicle's real pitch or yaw axis
+ * is a mechanical-layout fact this file cannot see -- confirm it against the
+ * actual nozzle/harness build, not against a name.
  */
 typedef enum
 {
-    SOLENOID_VALVE_NONE             = 0x00U,
-    SOLENOID_VALVE_ROLL_POS_ERROR   = 0x01U, /* IN1 / PB15 / X+ */
-    SOLENOID_VALVE_ROLL_NEG_ERROR   = 0x02U, /* IN2 / PE15 / X- */
-    SOLENOID_VALVE_PITCH_POS_ERROR  = 0x04U, /* IN3 / PE11 / Y+ */
-    SOLENOID_VALVE_PITCH_NEG_ERROR  = 0x08U  /* IN4 / PE7  / Y- */
+    SOLENOID_VALVE_NONE   = 0x00U,
+    SOLENOID_VALVE_X_POS_ERROR = 0x01U, /* IN1 / PB15 / X+ */
+    SOLENOID_VALVE_X_NEG_ERROR = 0x02U, /* IN2 / PE15 / X- */
+    SOLENOID_VALVE_Y_POS_ERROR = 0x04U, /* IN3 / PE11 / Y+ */
+    SOLENOID_VALVE_Y_NEG_ERROR = 0x08U  /* IN4 / PE7  / Y- */
 } SolenoidValveMask_t;
 
 typedef struct
@@ -43,7 +56,7 @@ void SolenoidOutput_SetMask(uint8_t valve_mask);
  * remain isolated; the dedicated ground-vent path below has its own interlocks. */
 void SolenoidOutput_SetAxisBenchMask(uint8_t valve_mask, uint8_t bench_authorized);
 
-/* Legacy single-channel API: maps to ROLL_POS_ERROR / IN1 / PB15 / X+. */
+/* Legacy single-channel API: maps to X_POS_ERROR / IN1 / PB15 / X+. */
 void SolenoidOutput_SetDemand(uint8_t open_demand);
 
 void SolenoidOutput_ForceSafe(void);

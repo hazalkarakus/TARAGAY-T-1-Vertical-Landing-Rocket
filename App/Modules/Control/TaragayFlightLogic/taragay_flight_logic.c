@@ -2352,6 +2352,12 @@ static RCSOutput_t rcs_step(float target_pitch_rad, float target_yaw_rad,
         rcs_force_safe_axis(&s_rcs.yaw);
     }
 
+    /* v1/v3/v5/v7 -> SolenoidOutput_SetMask() bits 0x01/0x02/0x04/0x08.
+     * Per solenoid_output.h those bits are the physical X+/X-/Y+/Y- relay
+     * channels (IN1..IN4), not an attitude axis -- so this "pitch" axis
+     * physically fires the X channel solenoids, and "yaw" physically fires
+     * the Y channel. Confirm that pairing against the actual nozzle/harness
+     * build before assuming it matches the vehicle's real pitch/yaw axes. */
     out.v1 = (s_rcs.pitch.applied == -1) ? 1U : 0U;
     out.v3 = (s_rcs.pitch.applied == 1) ? 1U : 0U;
     out.v5 = (s_rcs.yaw.applied == -1) ? 1U : 0U;

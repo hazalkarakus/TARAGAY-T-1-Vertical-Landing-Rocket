@@ -20,10 +20,10 @@
 #define SOLENOID_IN4_Y_NEG_PIN      GPIO_PIN_7
 
 #define SOLENOID_ALL_MASK ((uint8_t)( \
-    SOLENOID_VALVE_ROLL_POS_ERROR  | \
-    SOLENOID_VALVE_ROLL_NEG_ERROR  | \
-    SOLENOID_VALVE_PITCH_POS_ERROR | \
-    SOLENOID_VALVE_PITCH_NEG_ERROR))
+    SOLENOID_VALVE_X_POS_ERROR  | \
+    SOLENOID_VALVE_X_NEG_ERROR  | \
+    SOLENOID_VALVE_Y_POS_ERROR | \
+    SOLENOID_VALVE_Y_NEG_ERROR))
 
 static SolenoidOutputStatus_t solenoid_status;
 /* R8R35: start time of the currently applied nonzero physical mask. */
@@ -47,7 +47,7 @@ volatile uint32_t relay_bench_test_abort_count=0UL;
 #if (APP_RELAY_SEQUENCE_TEST_MODE != 0U)
 static uint32_t relay_step_start_ms, relay_candidate_since_ms, relay_last_accept_ms;
 static uint8_t relay_raw_last, relay_debounced;
-static uint8_t BenchMask(uint8_t c){ switch(c){case 1U:return SOLENOID_VALVE_ROLL_POS_ERROR;case 2U:return SOLENOID_VALVE_ROLL_NEG_ERROR;case 3U:return SOLENOID_VALVE_PITCH_POS_ERROR;case 4U:return SOLENOID_VALVE_PITCH_NEG_ERROR;default:return SOLENOID_VALVE_NONE;} }
+static uint8_t BenchMask(uint8_t c){ switch(c){case 1U:return SOLENOID_VALVE_X_POS_ERROR;case 2U:return SOLENOID_VALVE_X_NEG_ERROR;case 3U:return SOLENOID_VALVE_Y_POS_ERROR;case 4U:return SOLENOID_VALVE_Y_NEG_ERROR;default:return SOLENOID_VALVE_NONE;} }
 static uint8_t BenchButton(void){return (HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0)==GPIO_PIN_SET)?1U:0U;}
 static void BenchButtonInit(void){GPIO_InitTypeDef g={0};__HAL_RCC_GPIOA_CLK_ENABLE();g.Pin=GPIO_PIN_0;g.Mode=GPIO_MODE_INPUT;g.Pull=GPIO_PULLDOWN;g.Speed=GPIO_SPEED_FREQ_LOW;HAL_GPIO_Init(GPIOA,&g);}
 static void BenchApply(uint8_t mask){uint8_t m=SolenoidOutput_SanitizeMask(mask);solenoid_status.requested_mask=m;solenoid_status.requested_open=(m!=0U);solenoid_status.update_count++;solenoid_status.safety_inhibited=0U;
@@ -65,23 +65,23 @@ static uint8_t SolenoidOutput_SanitizeMask(uint8_t requested_mask)
     uint8_t interlock_fault = 0U;
 
     /* Opposing valves on one axis are never permitted simultaneously. */
-    if ((sanitized & (uint8_t)(SOLENOID_VALVE_ROLL_POS_ERROR |
-                               SOLENOID_VALVE_ROLL_NEG_ERROR)) ==
-        (uint8_t)(SOLENOID_VALVE_ROLL_POS_ERROR |
-                  SOLENOID_VALVE_ROLL_NEG_ERROR))
+    if ((sanitized & (uint8_t)(SOLENOID_VALVE_X_POS_ERROR |
+                               SOLENOID_VALVE_X_NEG_ERROR)) ==
+        (uint8_t)(SOLENOID_VALVE_X_POS_ERROR |
+                  SOLENOID_VALVE_X_NEG_ERROR))
     {
-        sanitized &= (uint8_t)~(uint8_t)(SOLENOID_VALVE_ROLL_POS_ERROR |
-                                         SOLENOID_VALVE_ROLL_NEG_ERROR);
+        sanitized &= (uint8_t)~(uint8_t)(SOLENOID_VALVE_X_POS_ERROR |
+                                         SOLENOID_VALVE_X_NEG_ERROR);
         interlock_fault = 1U;
     }
 
-    if ((sanitized & (uint8_t)(SOLENOID_VALVE_PITCH_POS_ERROR |
-                               SOLENOID_VALVE_PITCH_NEG_ERROR)) ==
-        (uint8_t)(SOLENOID_VALVE_PITCH_POS_ERROR |
-                  SOLENOID_VALVE_PITCH_NEG_ERROR))
+    if ((sanitized & (uint8_t)(SOLENOID_VALVE_Y_POS_ERROR |
+                               SOLENOID_VALVE_Y_NEG_ERROR)) ==
+        (uint8_t)(SOLENOID_VALVE_Y_POS_ERROR |
+                  SOLENOID_VALVE_Y_NEG_ERROR))
     {
-        sanitized &= (uint8_t)~(uint8_t)(SOLENOID_VALVE_PITCH_POS_ERROR |
-                                         SOLENOID_VALVE_PITCH_NEG_ERROR);
+        sanitized &= (uint8_t)~(uint8_t)(SOLENOID_VALVE_Y_POS_ERROR |
+                                         SOLENOID_VALVE_Y_NEG_ERROR);
         interlock_fault = 1U;
     }
 
@@ -108,22 +108,22 @@ static void SolenoidOutput_WritePhysical(uint8_t valve_mask)
     SolenoidOutput_WritePin(
         SOLENOID_IN1_X_POS_PORT,
         SOLENOID_IN1_X_POS_PIN,
-        (uint8_t)(valve_mask & SOLENOID_VALVE_ROLL_POS_ERROR)
+        (uint8_t)(valve_mask & SOLENOID_VALVE_X_POS_ERROR)
     );
     SolenoidOutput_WritePin(
         SOLENOID_IN2_X_NEG_PORT,
         SOLENOID_IN2_X_NEG_PIN,
-        (uint8_t)(valve_mask & SOLENOID_VALVE_ROLL_NEG_ERROR)
+        (uint8_t)(valve_mask & SOLENOID_VALVE_X_NEG_ERROR)
     );
     SolenoidOutput_WritePin(
         SOLENOID_IN3_Y_POS_PORT,
         SOLENOID_IN3_Y_POS_PIN,
-        (uint8_t)(valve_mask & SOLENOID_VALVE_PITCH_POS_ERROR)
+        (uint8_t)(valve_mask & SOLENOID_VALVE_Y_POS_ERROR)
     );
     SolenoidOutput_WritePin(
         SOLENOID_IN4_Y_NEG_PORT,
         SOLENOID_IN4_Y_NEG_PIN,
-        (uint8_t)(valve_mask & SOLENOID_VALVE_PITCH_NEG_ERROR)
+        (uint8_t)(valve_mask & SOLENOID_VALVE_Y_NEG_ERROR)
     );
 }
 
@@ -313,7 +313,7 @@ void SolenoidOutput_SetDemand(uint8_t open_demand)
 {
     SolenoidOutput_SetMask(
         (open_demand != 0U)
-            ? SOLENOID_VALVE_ROLL_POS_ERROR
+            ? SOLENOID_VALVE_X_POS_ERROR
             : SOLENOID_VALVE_NONE
     );
 }
@@ -329,9 +329,9 @@ uint8_t SolenoidOutput_SetGroundVentMask(
 )
 {
     const uint8_t roll_pair = (uint8_t)(
-        SOLENOID_VALVE_ROLL_POS_ERROR | SOLENOID_VALVE_ROLL_NEG_ERROR);
+        SOLENOID_VALVE_X_POS_ERROR | SOLENOID_VALVE_X_NEG_ERROR);
     const uint8_t pitch_pair = (uint8_t)(
-        SOLENOID_VALVE_PITCH_POS_ERROR | SOLENOID_VALVE_PITCH_NEG_ERROR);
+        SOLENOID_VALVE_Y_POS_ERROR | SOLENOID_VALVE_Y_NEG_ERROR);
     uint8_t sanitized_mask = (uint8_t)(valve_mask & SOLENOID_ALL_MASK);
 
 #if (APP_P112R10R3_GNC_MOTOR_BENCH_MODE != 0U)

@@ -225,8 +225,8 @@ static uint8_t v30_vent_request_qualified = 0U;
 static uint8_t v30_prev_vent_request = 0U;
 
 /* P71 vent-only pairing:
- *   pair 0 = X+ and X- together (ROLL opposing pair)
- *   pair 1 = Y+ and Y- together (PITCH opposing pair)
+ *   pair 0 = X+ and X- together
+ *   pair 1 = Y+ and Y- together
  *
  * The normal attitude-control path still forbids opposing valves.  Only the
  * dedicated manual vent path may request these two balanced pairs. */
@@ -235,11 +235,11 @@ static uint8_t V30_VentMaskForChannel(uint8_t channel)
     switch (channel)
     {
         case 0U:
-            return (uint8_t)(SOLENOID_VALVE_ROLL_POS_ERROR |
-                             SOLENOID_VALVE_ROLL_NEG_ERROR);
+            return (uint8_t)(SOLENOID_VALVE_X_POS_ERROR |
+                             SOLENOID_VALVE_X_NEG_ERROR);
         case 1U:
-            return (uint8_t)(SOLENOID_VALVE_PITCH_POS_ERROR |
-                             SOLENOID_VALVE_PITCH_NEG_ERROR);
+            return (uint8_t)(SOLENOID_VALVE_Y_POS_ERROR |
+                             SOLENOID_VALVE_Y_NEG_ERROR);
         default:
             return SOLENOID_VALVE_NONE;
     }

@@ -180,11 +180,11 @@ static uint8_t AttitudeControl_BuildValveMask(void)
     {
         if (roll_axis.active_error_sign > 0)
         {
-            mask |= SOLENOID_VALVE_ROLL_POS_ERROR;
+            mask |= SOLENOID_VALVE_X_POS_ERROR;
         }
         else if (roll_axis.active_error_sign < 0)
         {
-            mask |= SOLENOID_VALVE_ROLL_NEG_ERROR;
+            mask |= SOLENOID_VALVE_X_NEG_ERROR;
         }
     }
 
@@ -192,11 +192,11 @@ static uint8_t AttitudeControl_BuildValveMask(void)
     {
         if (pitch_axis.active_error_sign > 0)
         {
-            mask |= SOLENOID_VALVE_PITCH_POS_ERROR;
+            mask |= SOLENOID_VALVE_Y_POS_ERROR;
         }
         else if (pitch_axis.active_error_sign < 0)
         {
-            mask |= SOLENOID_VALVE_PITCH_NEG_ERROR;
+            mask |= SOLENOID_VALVE_Y_NEG_ERROR;
         }
     }
 
